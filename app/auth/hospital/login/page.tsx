@@ -13,13 +13,29 @@ import { useRouter } from "next/navigation"
 
 export default function HospitalLogin() {
   const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
   const router = useRouter()
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Basic validation
+    if (username.length < 3) {
+      alert("Username must be at least 3 characters long")
+      return
+    }
+    
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long")
+      return
+    }
+    
+    // Here you would typically make an API call to authenticate
+    console.log("Hospital login with:", { username, password, keepLoggedIn })
+    
+    // Redirect to hospital dashboard
     router.push("/hospital/dashboard")
   }
 
@@ -102,21 +118,21 @@ export default function HospitalLogin() {
           <Card className="border-0 shadow-none">
             <CardContent className="p-0">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Provider Sign in</h2>
-                <p className="text-gray-600">Access your healthcare provider dashboard.</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Provider Sign In</h2>
+                <p className="text-gray-600">Enter your hospital username and password to access the provider dashboard.</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email
+                  <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                    Username
                   </Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="provider@hospital.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="username"
+                    type="text"
+                    placeholder="hospital_admin"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
                     required
                   />
