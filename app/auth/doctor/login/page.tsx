@@ -7,57 +7,23 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Heart, ArrowLeft, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export default function PatientLogin() {
+export default function DoctorLogin() {
   const [showPassword, setShowPassword] = useState(false)
-  const [healthPassportId, setHealthPassportId] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
-  const [isValidId, setIsValidId] = useState<boolean | null>(null)
   const router = useRouter()
-
-  // Format Health Passport ID as user types
-  const handleHealthPassportIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.toUpperCase().replace(/[^0-9A-Z-]/g, '')
-    
-    // Auto-format to HP-XXXXX-XXXXX pattern
-    if (value.length <= 2) {
-      value = value
-    } else if (value.length <= 8) {
-      if (!value.startsWith('HP-')) {
-        value = 'HP-' + value.replace('HP', '')
-      }
-    } else if (value.length <= 13) {
-      if (!value.startsWith('HP-')) {
-        value = 'HP-' + value.replace('HP', '')
-      }
-      const parts = value.split('-')
-      if (parts.length >= 2 && parts[1].length > 5) {
-        value = `${parts[0]}-${parts[1].slice(0, 5)}-${parts[1].slice(5)}`
-      }
-    }
-    
-    setHealthPassportId(value)
-    
-    // Validate format in real-time
-    const healthPassportIdRegex = /^HP-[A-Z0-9]{5}-[A-Z0-9]{5}$/
-    if (value.length === 0) {
-      setIsValidId(null)
-    } else {
-      setIsValidId(healthPassportIdRegex.test(value))
-    }
-  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Basic validation for Health Passport ID format
-    const healthPassportIdRegex = /^HP-[A-Z0-9]{5}-[A-Z0-9]{5}$/
-    if (!healthPassportIdRegex.test(healthPassportId)) {
-      alert("Please enter a valid Health Passport ID (format: HP-XXXXX-XXXXX)")
+    // Basic validation
+    if (username.length < 3) {
+      alert("Username must be at least 3 characters long")
       return
     }
     
@@ -67,16 +33,16 @@ export default function PatientLogin() {
     }
     
     // Here you would typically make an API call to authenticate
-    console.log("Logging in with:", { healthPassportId, password, keepLoggedIn })
+    console.log("Doctor login with:", { username, password, keepLoggedIn })
     
-    // Redirect to patient dashboard
-    router.push("/patient/dashboard")
+    // Redirect to hospital dashboard (doctors use hospital portal)
+    router.push("/hospital/dashboard")
   }
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Features */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 to-blue-800 text-white p-12 flex-col justify-between">
         <div>
           <Link href="/" className="inline-flex items-center text-white hover:text-gray-300 mb-8">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -85,34 +51,39 @@ export default function PatientLogin() {
 
           <div className="mb-12">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6">
-              <div className="w-8 h-8 bg-red-500 rounded-full"></div>
-              <div className="w-6 h-6 bg-blue-500 rounded-full -ml-2"></div>
-              <div className="w-4 h-4 bg-green-500 rounded-full -ml-1"></div>
+              <Stethoscope className="w-8 h-8 text-blue-600" />
             </div>
 
             <h1 className="text-4xl font-bold mb-8">
-              Patient Portal<br />
+              Doctor Portal
+              <br />
               Access
             </h1>
 
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">✓</span>
                 </div>
-                <span className="text-lg">Secure Health Passport Login</span>
+                <span className="text-lg">Access Patient Records</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">✓</span>
                 </div>
-                <span className="text-lg">Instant Access to Records</span>
+                <span className="text-lg">Manage Appointments</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">✓</span>
                 </div>
-                <span className="text-lg">HIPAA Compliant Security</span>
+                <span className="text-lg">Update Medical Records</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <span className="text-lg">Prescribe Medications</span>
               </div>
             </div>
           </div>
@@ -121,11 +92,11 @@ export default function PatientLogin() {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-            <div className="w-8 h-8 bg-pink-500 rounded-full"></div>
+            <div className="w-8 h-8 bg-cyan-500 rounded-full"></div>
           </div>
           <div>
-            <p className="text-sm">@healthpassport</p>
-            <p className="text-sm text-gray-400">hello@healthpassport.com</p>
+            <p className="text-sm">@healthpassport_doctor</p>
+            <p className="text-sm text-gray-400">doctor@healthpassport.com</p>
           </div>
         </div>
       </div>
@@ -144,7 +115,7 @@ export default function PatientLogin() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white" />
+                <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">HealthPassport</span>
             </div>
@@ -153,54 +124,24 @@ export default function PatientLogin() {
           <Card className="border-0 shadow-none">
             <CardContent className="p-0">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Patient Sign In</h2>
-                <p className="text-gray-600">Please enter your Health Passport ID and password to access your health records.</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Doctor Sign In</h2>
+                <p className="text-gray-600">Enter your Doctor ID and password to access the medical portal.</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="healthPassportId" className="text-sm font-medium text-gray-700">
-                    Health Passport ID
+                  <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                    Username
                   </Label>
-                  <div className="relative">
-                    <Input
-                      id="healthPassportId"
-                      type="text"
-                      placeholder="HP-A28B3-T9I1L"
-                      value={healthPassportId}
-                      onChange={handleHealthPassportIdChange}
-                      className={`h-12 border-2 rounded-lg focus:border-blue-500 pr-10 ${
-                        isValidId === null 
-                          ? 'border-gray-200' 
-                          : isValidId 
-                            ? 'border-green-500' 
-                            : 'border-red-500'
-                      }`}
-                      maxLength={14}
-                      required
-                    />
-                    {isValidId !== null && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        {isValidId ? (
-                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
-                          </div>
-                        ) : (
-                          <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✗</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <p className={`text-xs ${
-                    isValidId === false ? 'text-red-500' : 'text-gray-500'
-                  }`}>
-                    {isValidId === false 
-                      ? 'Invalid format. Use: HP-XXXXX-XXXXX (e.g., HP-A28B3-T9I1L)'
-                      : 'Enter your unique Health Passport ID (e.g., HP-A28B3-T9I1L)'
-                    }
-                  </p>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="doctor_username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500"
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -249,9 +190,9 @@ export default function PatientLogin() {
 
                 <div className="text-center">
                   <p className="text-sm text-gray-600">
-                    Need an account?{" "}
-                    <Link href="/auth/patient/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-                      Create one
+                    Need to register as a doctor?{" "}
+                    <Link href="/auth/doctor/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+                      Register here
                     </Link>
                   </p>
                 </div>

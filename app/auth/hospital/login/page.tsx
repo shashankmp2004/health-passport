@@ -7,18 +7,20 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Eye, EyeOff, Hospital } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, Eye, EyeOff, Hospital, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export default function HospitalLogin() {
+export default function HealthcareProviderLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
+  const [doctorUsername, setDoctorUsername] = useState("")
   const [password, setPassword] = useState("")
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleHospitalLogin = (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation
@@ -36,6 +38,27 @@ export default function HospitalLogin() {
     console.log("Hospital login with:", { username, password, keepLoggedIn })
     
     // Redirect to hospital dashboard
+    router.push("/hospital/dashboard")
+  }
+
+  const handleDoctorLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Basic validation
+    if (doctorUsername.length < 3) {
+      alert("Username must be at least 3 characters long")
+      return
+    }
+    
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long")
+      return
+    }
+    
+    // Here you would typically make an API call to authenticate
+    console.log("Doctor login with:", { doctorUsername, password, keepLoggedIn })
+    
+    // Redirect to hospital dashboard (doctors use hospital portal)
     router.push("/hospital/dashboard")
   }
 
@@ -118,79 +141,166 @@ export default function HospitalLogin() {
           <Card className="border-0 shadow-none">
             <CardContent className="p-0">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Provider Sign In</h2>
-                <p className="text-gray-600">Enter your hospital username and password to access the provider dashboard.</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Healthcare Provider Sign In</h2>
+                <p className="text-gray-600">Choose your login type and enter your credentials to access the provider dashboard.</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm font-medium text-gray-700">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="hospital_admin"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
-                    required
-                  />
-                </div>
+              <Tabs defaultValue="hospital" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="hospital" className="flex items-center space-x-2">
+                    <Hospital className="w-4 h-4" />
+                    <span>Hospital</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="doctor" className="flex items-center space-x-2">
+                    <Stethoscope className="w-4 h-4" />
+                    <span>Doctor</span>
+                  </TabsTrigger>
+                </TabsList>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500 pr-12"
-                      required
-                    />
+                <TabsContent value="hospital">
+                  <form onSubmit={handleHospitalLogin} className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                        Hospital Username
+                      </Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="hospital_admin"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="hospital-password" className="text-sm font-medium text-gray-700">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="hospital-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500 pr-12"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="hospital-keepLoggedIn"
+                        checked={keepLoggedIn}
+                        onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+                      />
+                      <Label htmlFor="hospital-keepLoggedIn" className="text-sm text-gray-600">
+                        Keep me logged in
+                      </Label>
+                    </div>
+
                     <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                      onClick={() => setShowPassword(!showPassword)}
+                      type="submit"
+                      className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      Sign In as Hospital
                     </Button>
-                  </div>
-                </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="keepLoggedIn"
-                    checked={keepLoggedIn}
-                    onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
-                  />
-                  <Label htmlFor="keepLoggedIn" className="text-sm text-gray-600">
-                    Keep me logged in
-                  </Label>
-                </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">
+                        Need to register your facility?{" "}
+                        <Link href="/auth/hospital/signup" className="text-green-600 hover:text-green-700 font-medium">
+                          Register here
+                        </Link>
+                      </p>
+                    </div>
+                  </form>
+                </TabsContent>
 
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"
-                >
-                  Sign In
-                </Button>
+                <TabsContent value="doctor">
+                  <form onSubmit={handleDoctorLogin} className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="doctorUsername" className="text-sm font-medium text-gray-700">
+                        Doctor Username
+                      </Label>
+                      <Input
+                        id="doctorUsername"
+                        type="text"
+                        placeholder="doctor_username"
+                        value={doctorUsername}
+                        onChange={(e) => setDoctorUsername(e.target.value)}
+                        className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500"
+                        required
+                      />
+                    </div>
 
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    Need to register your facility?{" "}
-                    <Link href="/auth/hospital/signup" className="text-green-600 hover:text-green-700 font-medium">
-                      Register here
-                    </Link>
-                  </p>
-                </div>
-              </form>
+                    <div className="space-y-2">
+                      <Label htmlFor="doctor-password" className="text-sm font-medium text-gray-700">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="doctor-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500 pr-12"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="doctor-keepLoggedIn"
+                        checked={keepLoggedIn}
+                        onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+                      />
+                      <Label htmlFor="doctor-keepLoggedIn" className="text-sm text-gray-600">
+                        Keep me logged in
+                      </Label>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                    >
+                      Sign In as Doctor
+                    </Button>
+
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">
+                        Need to register as a doctor?{" "}
+                        <Link href="/auth/doctor/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+                          Register here
+                        </Link>
+                      </p>
+                    </div>
+                  </form>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
