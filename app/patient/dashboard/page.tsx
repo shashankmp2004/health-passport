@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Heart, Calendar, FileText, Activity, AlertTriangle, CheckCircle, QrCode } from "lucide-react"
 import { useState } from "react"
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 export default function PatientDashboard() {
@@ -38,6 +38,7 @@ export default function PatientDashboard() {
           </div>
         </DialogTrigger>
         <DialogContent className="max-w-lg p-0 bg-transparent border-0 shadow-none flex items-center justify-center">
+          <DialogTitle className="sr-only">Health Passport Card</DialogTitle>
           <style>{`
             .flip-card {
               perspective: 1200px;
