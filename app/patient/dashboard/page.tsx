@@ -64,8 +64,8 @@ export default function PatientDashboard() {
 
   const patientName = patientData ? 
     patientData.name : 
-    'Patient'
-  const healthPassportId = session?.user?.healthPassportId || 'HP-XXXXX-XXXXX'
+    'Patient';
+  const healthPassportId = session?.user?.healthPassportId || 'HP-XXXXX-XXXXX';
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -94,70 +94,64 @@ export default function PatientDashboard() {
         </DialogTrigger>
         <DialogContent className="max-w-lg p-0 bg-transparent border-0 shadow-none flex items-center justify-center">
           <DialogTitle className="sr-only">Health Passport Card</DialogTitle>
-          <style>{`
-            .flip-card {
-              perspective: 1200px;
-            }
-            .flip-inner {
-              transition: transform 0.5s cubic-bezier(0.4,0.2,0.2,1);
-              transform-style: preserve-3d;
-              position: relative;
-              width: 100%;
-              height: 220px;
-            }
-            .flip-inner.flipped {
-              transform: rotateY(180deg);
-            }
-            .flip-front, .flip-back {
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              top: 0;
-              left: 0;
-              backface-visibility: hidden;
-              border-radius: 1rem;
-            }
-            .flip-back {
-              transform: rotateY(180deg);
-              z-index: 2;
-            }
-          `}</style>
           <div className="rounded-2xl overflow-hidden w-full bg-white" style={{boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)'}}>
             <div className="bg-blue-700 text-white text-center py-5 text-2xl font-extrabold tracking-wide uppercase" style={{letterSpacing: '0.04em'}}>HEALTH PASSPORT</div>
             <div className="flip-card w-full h-[220px] flex items-center justify-center">
-              <div className={`flip-inner ${isFlipped ? 'flipped' : ''}`}>
+              <div className={`transition-transform duration-500 transform-gpu preserve-3d relative w-full h-full ${isFlipped ? 'rotate-y-180' : ''}`}>
                 {/* Front Side */}
-                <div className="flip-front flex flex-row items-center px-8 py-8 w-full h-full bg-white rounded-2xl">
-                  {/* Avatar with gray circle background */}
-                  <div className="flex flex-col items-center flex-shrink-0">
-                    <div className="w-28 h-28 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Avatar className="w-24 h-24">
-                        <AvatarImage src="/placeholder-user.jpg" alt="Ramesh" />
-                        <AvatarFallback>R</AvatarFallback>
-                      </Avatar>
+                <div className={`absolute w-full h-full top-0 left-0 backface-hidden rounded-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
+                  <div className="flex flex-row items-center px-8 py-8 w-full h-full bg-white rounded-2xl">
+                    {/* Avatar with gray circle background */}
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="w-28 h-28 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Avatar className="w-24 h-24">
+                          <AvatarImage 
+                            src={patientData?.profilePicture || "/placeholder-user.jpg"} 
+                            alt={patientData?.name || "Patient"} 
+                          />
+                          <AvatarFallback>
+                            {patientData?.name ? patientData.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
                     </div>
-                  </div>
-                  {/* Details */}
-                  <div className="flex-1 min-w-0 pl-8">
-                    <div className="font-bold text-xl text-blue-800 mb-2">Ramesh</div>
-                    <div className="text-base text-black mb-1"><span className="font-semibold">ABHA Number:</span> XXXXX</div>
-                    <div className="text-base text-black mb-1"><span className="font-semibold">Date of Birth:</span> XX/XX/XXX</div>
-                    <div className="text-base text-black"><span className="font-semibold">Gender:</span> MALE</div>
-                  </div>
-                  {/* QR Code */}
-                  <div className="flex flex-col items-center flex-shrink-0 pl-8 cursor-pointer" onClick={() => setIsFlipped(true)}>
-                    <div className="bg-gray-100 rounded-md flex items-center justify-center" style={{width: '110px', height: '110px'}}>
-                      <QrCode className="w-24 h-24 text-black" />
+                    {/* Details */}
+                    <div className="flex-1 min-w-0 pl-8">
+                      <div className="font-bold text-xl text-blue-800 mb-2">
+                        {patientData ? `${patientData.name}` : 'Loading...'}
+                      </div>
+                      <div className="text-base text-black mb-1">
+                        <span className="font-semibold">Health Passport ID:</span> {healthPassportId}
+                      </div>
+                      <div className="text-base text-black mb-1">
+                        <span className="font-semibold">Date of Birth:</span>{' '}
+                        {patientData?.dateOfBirth 
+                          ? new Date(patientData.dateOfBirth).toLocaleDateString() 
+                          : 'Not provided'
+                        }
+                      </div>
+                      <div className="text-base text-black">
+                        <span className="font-semibold">Email:</span>{' '}
+                        {patientData?.email || 'Not provided'}
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-500 mt-2">Click to enlarge</span>
+                    {/* QR Code */}
+                    <div className="flex flex-col items-center flex-shrink-0 pl-8 cursor-pointer" onClick={() => setIsFlipped(true)}>
+                      <div className="bg-gray-100 rounded-md flex items-center justify-center" style={{width: '110px', height: '110px'}}>
+                        <QrCode className="w-24 h-24 text-black" />
+                      </div>
+                      <span className="text-xs text-gray-500 mt-2">Click to enlarge</span>
+                    </div>
                   </div>
                 </div>
                 {/* Back Side (Enlarged QR) */}
-                <div className="flip-back flex flex-col items-center justify-center bg-white rounded-2xl cursor-pointer" onClick={() => setIsFlipped(false)}>
-                  <div className="bg-gray-100 rounded-lg flex items-center justify-center" style={{width: '180px', height: '180px'}}>
-                    <QrCode className="w-40 h-40 text-black" />
+                <div className={`absolute w-full h-full top-0 left-0 backface-hidden rounded-2xl cursor-pointer rotate-y-180 ${isFlipped ? '' : 'rotate-y-180'}`} onClick={() => setIsFlipped(false)}>
+                  <div className="flex flex-col items-center justify-center bg-white rounded-2xl h-full">
+                    <div className="bg-gray-100 rounded-lg flex items-center justify-center" style={{width: '180px', height: '180px'}}>
+                      <QrCode className="w-40 h-40 text-black" />
+                    </div>
+                    <span className="text-sm text-gray-500 mt-4">Click to go back</span>
                   </div>
-                  <span className="text-sm text-gray-500 mt-4">Click to go back</span>
                 </div>
               </div>
             </div>
@@ -230,104 +224,128 @@ export default function PatientDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="font-medium">Blood pressure reading recorded</p>
-                    <p className="text-sm text-gray-600">120/80 mmHg - Normal range</p>
-                  </div>
-                  <span className="text-sm text-gray-500">2 hours ago</span>
+              {dashboardData?.recentVisits?.length > 0 ? (
+                <div className="space-y-4">
+                  {dashboardData.recentVisits.map((visit: any, index: number) => (
+                    <div key={visit.id || index} className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="font-medium">Hospital Visit</p>
+                        <p className="text-sm text-gray-600">{visit.diagnosis}</p>
+                        <p className="text-xs text-gray-500">Treatment: {visit.treatment}</p>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {new Date(visit.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="font-medium">Medication reminder completed</p>
-                    <p className="text-sm text-gray-600">Metformin 500mg taken</p>
-                  </div>
-                  <span className="text-sm text-gray-500">8 hours ago</span>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No recent activity</p>
+                  <p className="text-sm">Your medical visits and updates will appear here</p>
                 </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="font-medium">Lab results available</p>
-                    <p className="text-sm text-gray-600">HbA1c test results ready for review</p>
-                  </div>
-                  <span className="text-sm text-gray-500">1 day ago</span>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Health Alerts */}
+        {/* Health Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <AlertTriangle className="w-5 h-5 text-orange-600" />
-              <span>Health Alerts</span>
+              <Heart className="w-5 h-5 text-red-600" />
+              <span>Health Info</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="font-medium text-orange-800">Medication Reminder</p>
-                <p className="text-sm text-orange-600">Take evening medication in 2 hours</p>
-              </div>
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="font-medium text-red-800">Blood Sugar Check</p>
-                <p className="text-sm text-red-600">Overdue by 3 hours</p>
-              </div>
+              {patientData?.bloodType && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="font-medium text-red-800">Blood Type</p>
+                  <p className="text-sm text-red-600">{patientData.bloodType}</p>
+                </div>
+              )}
+              {dashboardData?.statistics?.totalVisits > 0 && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="font-medium text-blue-800">Total Visits</p>
+                  <p className="text-sm text-blue-600">{dashboardData.statistics.totalVisits}</p>
+                </div>
+              )}
+              {dashboardData?.statistics?.totalDocuments > 0 && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="font-medium text-green-800">Documents</p>
+                  <p className="text-sm text-green-600">{dashboardData.statistics.totalDocuments}</p>
+                </div>
+              )}
+              {(!patientData?.bloodType && !dashboardData?.statistics?.totalVisits && !dashboardData?.statistics?.totalDocuments) && (
+                <div className="text-center py-4 text-gray-500">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">No health information yet</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Current Conditions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Health Conditions</CardTitle>
-          <CardDescription>Your active medical conditions and management status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">Hypertension</h3>
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                  Monitoring
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">Last reading: 125/82 mmHg</p>
-              <p className="text-xs text-gray-500">Managed with Lisinopril 10mg daily</p>
+      {/* Current Medications */}
+      {dashboardData?.currentMedications?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Current Medications</CardTitle>
+            <CardDescription>Medications prescribed by your doctors</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {dashboardData.currentMedications.map((medication: any, index: number) => (
+                <div key={medication.id || index} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">{medication.name}</h3>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Active
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{medication.dosage}</p>
+                  <p className="text-xs text-gray-500">Frequency: {medication.frequency}</p>
+                  <p className="text-xs text-gray-500">
+                    Started: {new Date(medication.startDate).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
 
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">Type 2 Diabetes</h3>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  Controlled
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">Last HbA1c: 6.8%</p>
-              <p className="text-xs text-gray-500">Managed with Metformin 500mg twice daily</p>
+      {/* Recent Documents */}
+      {dashboardData?.recentDocuments?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Documents</CardTitle>
+            <CardDescription>Latest medical documents uploaded by healthcare providers</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {dashboardData.recentDocuments.map((document: any, index: number) => (
+                <div key={document.id || index} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-8 h-8 text-blue-600" />
+                    <div className="flex-1">
+                      <h3 className="font-medium">{document.fileName}</h3>
+                      <p className="text-sm text-gray-600">{document.fileType}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(document.uploadDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">High Cholesterol</h3>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  Improving
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">Last LDL: 145 mg/dL</p>
-              <p className="text-xs text-gray-500">Managed with Atorvastatin 20mg daily</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <Card>

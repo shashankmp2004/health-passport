@@ -1,83 +1,64 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Pill, Clock, AlertCircle, CheckCircle, Plus, Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientMedications() {
-  const currentMedications = [
-    {
-      name: "Lisinopril",
-      dosage: "10mg",
-      frequency: "Once daily",
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2020-03-15",
-      indication: "Hypertension",
-      nextDose: "8:00 AM",
-      adherence: 95,
-    },
-    {
-      name: "Metformin",
-      dosage: "500mg",
-      frequency: "Twice daily",
-      prescribedBy: "Dr. Sarah Martinez",
-      startDate: "2019-08-22",
-      indication: "Type 2 Diabetes",
-      nextDose: "6:00 PM",
-      adherence: 98,
-    },
-    {
-      name: "Atorvastatin",
-      dosage: "20mg",
-      frequency: "Once daily (evening)",
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2021-01-10",
-      indication: "High Cholesterol",
-      nextDose: "9:00 PM",
-      adherence: 92,
-    },
-  ]
+  const [loading, setLoading] = useState(true)
+  const [medicationData, setMedicationData] = useState<any>(null)
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const medicationHistory = [
-    {
-      name: "Hydrochlorothiazide",
-      dosage: "25mg",
-      frequency: "Once daily",
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2020-01-15",
-      endDate: "2020-03-15",
-      reason: "Switched to Lisinopril for better BP control",
-    },
-    {
-      name: "Glipizide",
-      dosage: "5mg",
-      frequency: "Twice daily",
-      prescribedBy: "Dr. Sarah Martinez",
-      startDate: "2019-06-10",
-      endDate: "2019-08-22",
-      reason: "Switched to Metformin due to hypoglycemia episodes",
-    },
-  ]
+  useEffect(() => {
+    if (status === 'loading') return
 
-  const upcomingRefills = [
-    {
-      medication: "Lisinopril 10mg",
-      daysLeft: 5,
-      pharmacy: "CVS Pharmacy",
-      refillsRemaining: 2,
-    },
-    {
-      medication: "Metformin 500mg",
-      daysLeft: 12,
-      pharmacy: "Walgreens",
-      refillsRemaining: 1,
-    },
-    {
-      medication: "Atorvastatin 20mg",
-      daysLeft: 8,
-      pharmacy: "CVS Pharmacy",
-      refillsRemaining: 3,
-    },
-  ]
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchMedications()
+  }, [session, status, router])
+
+  const fetchMedications = async () => {
+    try {
+      const response = await fetch('/api/patients/medications')
+      if (response.ok) {
+        const result = await response.json()
+        setMedicationData(result.data)
+      } else {
+        console.error('Failed to fetch medications')
+      }
+    } catch (error) {
+      console.error('Error fetching medications:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const currentMedications = medicationData?.currentMedications || []
+  const medicationHistory = medicationData?.medicationHistory || []
+  const upcomingRefills = medicationData?.upcomingRefills || []
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -104,61 +85,75 @@ export default function PatientMedications() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {currentMedications.map((medication, index) => (
-              <div key={index} className="p-4 border rounded-lg bg-white">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-lg">{medication.name}</h3>
-                    <p className="text-gray-600">
-                      {medication.dosage} - {medication.frequency}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Badge className="bg-green-100 text-green-800">Active</Badge>
-                    <Badge variant="outline">{medication.adherence}% adherence</Badge>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Prescribed by:</span>
-                    <p className="text-gray-600">{medication.prescribedBy}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Started:</span>
-                    <p className="text-gray-600">{new Date(medication.startDate).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Indication:</span>
-                    <p className="text-gray-600">{medication.indication}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Next dose:</span>
-                    <p className="text-blue-600 font-medium">{medication.nextDose}</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2 max-w-xs">
-                      <div
-                        className="bg-green-600 h-2 rounded-full"
-                        style={{ width: `${medication.adherence}%` }}
-                      ></div>
+            {currentMedications.length > 0 ? (
+              currentMedications.map((medication: any, index: number) => (
+                <div key={index} className="p-4 border rounded-lg bg-white">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-lg">{medication.name}</h3>
+                      <p className="text-gray-600">
+                        {medication.dosage} - {medication.frequency}
+                      </p>
                     </div>
-                    <span className="text-sm text-gray-600">Adherence</span>
+                    <div className="flex space-x-2">
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                      {medication.adherence && (
+                        <Badge variant="outline">{medication.adherence}% adherence</Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      Mark Taken
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      Details
-                    </Button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Prescribed by:</span>
+                      <p className="text-gray-600">{medication.prescribedBy}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Started:</span>
+                      <p className="text-gray-600">{new Date(medication.startDate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Indication:</span>
+                      <p className="text-gray-600">{medication.indication}</p>
+                    </div>
+                    {medication.nextDose && (
+                      <div>
+                        <span className="font-medium text-gray-700">Next dose:</span>
+                        <p className="text-blue-600 font-medium">{medication.nextDose}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    {medication.adherence && (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2 max-w-xs">
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{ width: `${medication.adherence}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-600">Adherence</span>
+                      </div>
+                    )}
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">
+                        Mark Taken
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        Details
+                      </Button>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Pill className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No medications prescribed</p>
+                <p className="text-sm">Your medications will be added by healthcare providers</p>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>

@@ -41,8 +41,8 @@ const menuItems = [
     icon: Search,
   },
   {
-    title: "QR Scanner",
-    url: "/hospital/qr-scanner",
+    title: "Add Patient",
+    url: "/hospital/add-patient",
     icon: QrCode,
   },
   {

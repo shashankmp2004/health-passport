@@ -13,17 +13,24 @@ interface HealthPassportCardProps {
   lastVisit?: string
   location?: string
   avatar?: string
+  vitals?: {
+    bloodPressure?: string
+    heartRate?: string
+    temperature?: string
+    weight?: string
+  }
   className?: string
 }
 
 export function HealthPassportCard({
-  patientName = "Sarah Johnson",
-  patientId = "HP-2024-001234",
-  bloodType = "O+",
-  emergencyContact = "+1 (555) 123-4567",
-  lastVisit = "Dec 15, 2024",
-  location = "City General Hospital",
+  patientName,
+  patientId,
+  bloodType,
+  emergencyContact,
+  lastVisit,
+  location,
   avatar = "/placeholder-user.jpg",
+  vitals,
   className = ""
 }: HealthPassportCardProps) {
   return (
@@ -55,14 +62,18 @@ export function HealthPassportCard({
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">{patientName}</h3>
-              <p className="text-blue-100 text-sm font-medium">{patientId}</p>
+              <h3 className="text-xl font-bold text-white">{patientName || 'Patient Name'}</h3>
+              <p className="text-blue-100 text-sm font-medium">{patientId || 'Patient ID'}</p>
               <div className="flex items-center space-x-3 text-sm">
-                <Badge variant="secondary" className="bg-white/20 text-white border-0 hover:bg-white/20">
-                  <Heart className="w-3 h-3 mr-1" />
-                  {bloodType}
-                </Badge>
-                <span className="text-blue-100">{emergencyContact}</span>
+                {bloodType && (
+                  <Badge variant="secondary" className="bg-white/20 text-white border-0 hover:bg-white/20">
+                    <Heart className="w-3 h-3 mr-1" />
+                    {bloodType}
+                  </Badge>
+                )}
+                {emergencyContact && (
+                  <span className="text-blue-100">{emergencyContact}</span>
+                )}
               </div>
             </div>
           </div>
@@ -70,15 +81,26 @@ export function HealthPassportCard({
           {/* Center Section - Health Status */}
           <div className="px-6 text-center">
             <div className="space-y-2">
-              <div className="flex items-center justify-center space-x-2">
-                <Calendar className="w-4 h-4 text-blue-200" />
-                <span className="text-sm text-blue-100">Last Visit</span>
-              </div>
-              <p className="text-white font-semibold">{lastVisit}</p>
-              <div className="flex items-center justify-center space-x-2 mt-2">
-                <MapPin className="w-4 h-4 text-blue-200" />
-                <span className="text-sm text-blue-100">{location}</span>
-              </div>
+              {lastVisit && (
+                <>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Calendar className="w-4 h-4 text-blue-200" />
+                    <span className="text-sm text-blue-100">Last Visit</span>
+                  </div>
+                  <p className="text-white font-semibold">{lastVisit}</p>
+                </>
+              )}
+              {location && (
+                <div className="flex items-center justify-center space-x-2 mt-2">
+                  <MapPin className="w-4 h-4 text-blue-200" />
+                  <span className="text-sm text-blue-100">{location}</span>
+                </div>
+              )}
+              {!lastVisit && !location && (
+                <div className="text-center">
+                  <p className="text-sm text-blue-100">No recent visits</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -92,26 +114,36 @@ export function HealthPassportCard({
         </div>
 
         {/* Bottom Section - Health Metrics */}
-        <div className="mt-6 pt-4 border-t border-white/20">
-          <div className="flex justify-between items-center text-sm">
-            <div className="text-center">
-              <p className="text-blue-100">Blood Pressure</p>
-              <p className="text-white font-semibold">120/80</p>
-            </div>
-            <div className="text-center">
-              <p className="text-blue-100">Heart Rate</p>
-              <p className="text-white font-semibold">72 BPM</p>
-            </div>
-            <div className="text-center">
-              <p className="text-blue-100">Temperature</p>
-              <p className="text-white font-semibold">98.6°F</p>
-            </div>
-            <div className="text-center">
-              <p className="text-blue-100">Weight</p>
-              <p className="text-white font-semibold">140 lbs</p>
+        {vitals && Object.values(vitals).some(value => value) && (
+          <div className="mt-6 pt-4 border-t border-white/20">
+            <div className="flex justify-between items-center text-sm">
+              {vitals.bloodPressure && (
+                <div className="text-center">
+                  <p className="text-blue-100">Blood Pressure</p>
+                  <p className="text-white font-semibold">{vitals.bloodPressure}</p>
+                </div>
+              )}
+              {vitals.heartRate && (
+                <div className="text-center">
+                  <p className="text-blue-100">Heart Rate</p>
+                  <p className="text-white font-semibold">{vitals.heartRate}</p>
+                </div>
+              )}
+              {vitals.temperature && (
+                <div className="text-center">
+                  <p className="text-blue-100">Temperature</p>
+                  <p className="text-white font-semibold">{vitals.temperature}</p>
+                </div>
+              )}
+              {vitals.weight && (
+                <div className="text-center">
+                  <p className="text-blue-100">Weight</p>
+                  <p className="text-white font-semibold">{vitals.weight}</p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Health Passport Branding */}
         <div className="absolute top-4 right-4">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,8 +10,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Heart, Activity, Thermometer, Weight, Plus, TrendingUp, TrendingDown, Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientVitals() {
+  const [loading, setLoading] = useState(true)
+  const [vitalsData, setVitalsData] = useState<any>(null)
   const [newVital, setNewVital] = useState({
     type: "",
     value: "",
@@ -19,95 +23,92 @@ export default function PatientVitals() {
     date: new Date().toISOString().split("T")[0],
     time: new Date().toTimeString().split(" ")[0].slice(0, 5),
   })
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const vitalsHistory = [
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchVitals()
+  }, [session, status, router])
+
+  const fetchVitals = async () => {
+    try {
+      const response = await fetch('/api/patients/vitals')
+      if (response.ok) {
+        const result = await response.json()
+        setVitalsData(result.data)
+      } else {
+        console.error('Failed to fetch vitals')
+      }
+    } catch (error) {
+      console.error('Error fetching vitals:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const vitalsHistory = vitalsData?.vitalsHistory || []
+  const currentVitals = vitalsData?.currentVitals || [
     {
       type: "Blood Pressure",
-      value: "120/80",
+      value: "No data",
       unit: "mmHg",
-      date: "2024-12-30",
-      time: "08:00",
-      status: "Normal",
-      trend: "stable",
-    },
-    {
-      type: "Heart Rate",
-      value: "72",
-      unit: "bpm",
-      date: "2024-12-30",
-      time: "08:00",
-      status: "Normal",
-      trend: "stable",
-    },
-    {
-      type: "Weight",
-      value: "165",
-      unit: "lbs",
-      date: "2024-12-29",
-      time: "07:30",
-      status: "Normal",
-      trend: "down",
-    },
-    {
-      type: "Temperature",
-      value: "98.6",
-      unit: "°F",
-      date: "2024-12-28",
-      time: "09:15",
-      status: "Normal",
-      trend: "stable",
-    },
-    {
-      type: "Blood Sugar",
-      value: "95",
-      unit: "mg/dL",
-      date: "2024-12-28",
-      time: "07:00",
-      status: "Normal",
-      trend: "stable",
-    },
-  ]
-
-  const currentVitals = [
-    {
-      type: "Blood Pressure",
-      value: "120/80",
-      unit: "mmHg",
-      status: "Normal",
+      status: "No data",
       range: "< 130/80",
       icon: Activity,
-      color: "blue",
-      lastReading: "Today, 8:00 AM",
+      color: "gray",
+      lastReading: "No readings",
     },
     {
       type: "Heart Rate",
-      value: "72",
+      value: "No data",
       unit: "bpm",
-      status: "Normal",
+      status: "No data",
       range: "60-100",
       icon: Heart,
-      color: "red",
-      lastReading: "Today, 8:00 AM",
+      color: "gray",
+      lastReading: "No readings",
     },
     {
       type: "Weight",
-      value: "165",
+      value: "No data",
       unit: "lbs",
-      status: "Normal",
-      range: "150-180",
+      status: "No data",
+      range: "Varies",
       icon: Weight,
-      color: "green",
-      lastReading: "Yesterday, 7:30 AM",
+      color: "gray",
+      lastReading: "No readings",
     },
     {
       type: "Temperature",
-      value: "98.6",
+      value: "No data",
       unit: "°F",
-      status: "Normal",
+      status: "No data",
       range: "97.0-99.0",
       icon: Thermometer,
-      color: "orange",
-      lastReading: "2 days ago, 9:15 AM",
+      color: "gray",
+      lastReading: "No readings",
     },
   ]
 
@@ -254,46 +255,54 @@ export default function PatientVitals() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {vitalsHistory.map((vital, index) => (
-                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Activity className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{vital.type}</h3>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <span>{new Date(vital.date).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span>{vital.time}</span>
+                {vitalsHistory.length > 0 ? (
+                  vitalsHistory.map((vital: any, index: number) => (
+                    <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{vital.type}</h3>
+                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                              <span>{new Date(vital.date).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>{vital.time}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="font-semibold">
-                            {vital.value} {vital.unit}
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <div className="font-semibold">
+                              {vital.value} {vital.unit}
+                            </div>
+                            <Badge
+                              className={
+                                vital.status === "Normal" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              }
+                            >
+                              {vital.status}
+                            </Badge>
                           </div>
-                          <Badge
-                            className={
-                              vital.status === "Normal" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                            }
-                          >
-                            {vital.status}
-                          </Badge>
-                        </div>
 
-                        <div className="w-6 h-6 flex items-center justify-center">
-                          {vital.trend === "up" && <TrendingUp className="w-4 h-4 text-green-600" />}
-                          {vital.trend === "down" && <TrendingDown className="w-4 h-4 text-red-600" />}
-                          {vital.trend === "stable" && <div className="w-4 h-0.5 bg-gray-400"></div>}
+                          <div className="w-6 h-6 flex items-center justify-center">
+                            {vital.trend === "up" && <TrendingUp className="w-4 h-4 text-green-600" />}
+                            {vital.trend === "down" && <TrendingDown className="w-4 h-4 text-red-600" />}
+                            {vital.trend === "stable" && <div className="w-4 h-0.5 bg-gray-400"></div>}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No vital signs recorded</p>
+                    <p className="text-sm">Your vital signs will be added by healthcare providers or you can log them yourself</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>

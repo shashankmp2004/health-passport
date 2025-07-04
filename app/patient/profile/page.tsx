@@ -31,25 +31,111 @@ export default function PatientProfile() {
     zipCode: "",
     emergencyContact: "",
     emergencyPhone: "",
-    emergencyRelation: "Spouse",
-    bloodType: "O+",
-    allergies: "Penicillin, Shellfish",
-    medicalConditions: "Hypertension, Type 2 Diabetes",
-    currentMedications: "Metformin 500mg, Lisinopril 10mg",
-    insuranceProvider: "Blue Cross Blue Shield",
-    insuranceId: "BC123456789",
-    primaryPhysician: "Dr. Michael Chen",
-    physicianPhone: "+1 (555) 234-5678",
+    emergencyRelation: "",
+    bloodType: "",
+    allergies: "",
+    medicalConditions: "",
+    currentMedications: "",
+    insuranceProvider: "",
+    insuranceId: "",
+    primaryPhysician: "",
+    physicianPhone: "",
   })
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const handleSave = () => {
-    setIsEditing(false)
-    // Here you would typically save to backend
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchProfileData()
+  }, [session, status, router])
+
+  const fetchProfileData = async () => {
+    try {
+      const response = await fetch('/api/patients/profile')
+      if (response.ok) {
+        const result = await response.json()
+        const patient = result.data.patient
+        setProfileData({
+          firstName: patient.personalInfo?.firstName || "",
+          lastName: patient.personalInfo?.lastName || "",
+          email: patient.personalInfo?.email || "",
+          phone: patient.personalInfo?.phone || "",
+          dateOfBirth: patient.personalInfo?.dateOfBirth || "",
+          gender: patient.personalInfo?.gender || "",
+          address: patient.personalInfo?.address || "",
+          city: patient.personalInfo?.city || "",
+          state: patient.personalInfo?.state || "",
+          zipCode: patient.personalInfo?.zipCode || "",
+          emergencyContact: patient.personalInfo?.emergencyContact || "",
+          emergencyPhone: patient.personalInfo?.emergencyPhone || "",
+          emergencyRelation: patient.personalInfo?.emergencyRelation || "",
+          bloodType: patient.personalInfo?.bloodType || "",
+          allergies: patient.medicalHistory?.allergies?.join(', ') || "",
+          medicalConditions: patient.medicalHistory?.conditions?.map((c: any) => c.name).join(', ') || "",
+          currentMedications: patient.medications?.filter((m: any) => !m.endDate || new Date(m.endDate) > new Date())
+            .map((m: any) => `${m.name} ${m.dosage}`).join(', ') || "",
+          insuranceProvider: patient.insurance?.provider || "",
+          insuranceId: patient.insurance?.policyNumber || "",
+          primaryPhysician: patient.primaryPhysician?.name || "",
+          physicianPhone: patient.primaryPhysician?.phone || "",
+        })
+      } else {
+        console.error('Failed to fetch profile data')
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/patients/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      })
+      
+      if (response.ok) {
+        setIsEditing(false)
+        // Optionally show success message
+      } else {
+        console.error('Failed to save profile data')
+        // Optionally show error message
+      }
+    } catch (error) {
+      console.error('Error saving profile data:', error)
+      // Optionally show error message
+    }
   }
 
   const handleCancel = () => {
     setIsEditing(false)
     // Reset form data if needed
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-48"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

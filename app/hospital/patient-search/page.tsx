@@ -14,63 +14,33 @@ export default function PatientSearch() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [error, setError] = useState("")
 
-  const mockPatients = [
-    {
-      id: "HP-2024-789123",
-      name: "Sarah Johnson",
-      age: 39,
-      gender: "Female",
-      phone: "+1 (555) 123-4567",
-      email: "sarah.johnson@email.com",
-      address: "123 Main St, City, State 12345",
-      lastVisit: "2024-12-15",
-      conditions: ["Hypertension", "Type 2 Diabetes"],
-      riskLevel: "Moderate",
-    },
-    {
-      id: "HP-2024-654789",
-      name: "Michael Chen",
-      age: 45,
-      gender: "Male",
-      phone: "+1 (555) 987-6543",
-      email: "michael.chen@email.com",
-      address: "456 Oak Ave, City, State 12345",
-      lastVisit: "2024-12-20",
-      conditions: ["Asthma"],
-      riskLevel: "Low",
-    },
-    {
-      id: "HP-2024-321456",
-      name: "Emma Williams",
-      age: 28,
-      gender: "Female",
-      phone: "+1 (555) 456-7890",
-      email: "emma.williams@email.com",
-      address: "789 Pine St, City, State 12345",
-      lastVisit: "2024-12-18",
-      conditions: ["Migraine"],
-      riskLevel: "Low",
-    },
-  ]
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
 
-  const handleSearch = () => {
     setIsSearching(true)
-    // Simulate search delay
-    setTimeout(() => {
-      if (searchQuery.trim()) {
-        const results = mockPatients.filter(
-          (patient) =>
-            patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            patient.email.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-        setSearchResults(results)
+    setError("")
+    
+    try {
+      const response = await fetch(`/api/patients/search?q=${encodeURIComponent(searchQuery)}`)
+      if (response.ok) {
+        const result = await response.json()
+        setSearchResults(result.data || [])
       } else {
+        setError('Failed to search patients')
         setSearchResults([])
       }
+    } catch (error) {
+      console.error('Search error:', error)
+      setError('Error occurred while searching')
+      setSearchResults([])
+    } finally {
       setIsSearching(false)
-    }, 1000)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -87,9 +57,12 @@ export default function PatientSearch() {
           <h1 className="text-2xl font-bold">Patient Search</h1>
           <p className="text-gray-600">Search for patients by ID, name, or contact information</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => window.location.href = '/hospital/add-patient'}
+        >
           <QrCode className="w-4 h-4 mr-2" />
-          Scan QR Code
+          Add Patient
         </Button>
       </div>
 
@@ -160,7 +133,19 @@ export default function PatientSearch() {
       </Card>
 
       {/* Search Results */}
-      {searchResults.length > 0 && (
+      {error && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center py-4">
+              <Search className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-600 font-medium">{error}</p>
+              <p className="text-sm text-gray-500 mt-2">Please try again or contact support if the issue persists</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {searchResults.length > 0 && !error && (
         <Card>
           <CardHeader>
             <CardTitle>Search Results</CardTitle>
@@ -256,23 +241,11 @@ export default function PatientSearch() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {mockPatients.slice(0, 3).map((patient) => (
-              <div
-                key={patient.id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{patient.name}</p>
-                    <p className="text-sm text-gray-600">{patient.id}</p>
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500">{new Date(patient.lastVisit).toLocaleDateString()}</div>
-              </div>
-            ))}
+            <div className="text-center py-8">
+              <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">No recent searches</p>
+              <p className="text-sm text-gray-500">Your recently accessed patients will appear here</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -284,9 +257,13 @@ export default function PatientSearch() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col space-y-2 bg-transparent"
+              onClick={() => window.location.href = '/hospital/add-patient'}
+            >
               <QrCode className="w-6 h-6" />
-              <span className="text-sm">Scan QR Code</span>
+              <span className="text-sm">Add Patient</span>
             </Button>
             <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
               <User className="w-6 h-6" />
