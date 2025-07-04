@@ -13,17 +13,17 @@ import { useRouter } from "next/navigation"
 
 export default function DoctorLogin() {
   const [showPassword, setShowPassword] = useState(false)
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation
-    if (username.length < 3) {
-      alert("Username must be at least 3 characters long")
+    if (email.length < 3) {
+      alert("Email must be at least 3 characters long")
       return
     }
     
@@ -31,12 +31,30 @@ export default function DoctorLogin() {
       alert("Password must be at least 6 characters long")
       return
     }
-    
-    // Here you would typically make an API call to authenticate
-    console.log("Doctor login with:", { username, password, keepLoggedIn })
-    
-    // Redirect to hospital dashboard (doctors use hospital portal)
-    router.push("/hospital/dashboard")
+
+    try {
+      const { signIn } = await import('next-auth/react')
+      
+      const result = await signIn('doctor', {
+        email: email,
+        password,
+        redirect: false
+      })
+      
+      if (result?.error) {
+        alert('Invalid credentials. Please check your email and password.')
+        return
+      }
+      
+      if (result?.ok) {
+        console.log("Doctor login successful, redirecting to hospital dashboard")
+        // Redirect to hospital dashboard (doctors use hospital portal)
+        router.push("/hospital/dashboard")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      alert('An error occurred during login. Please try again.')
+    }
   }
 
   return (
@@ -130,15 +148,15 @@ export default function DoctorLogin() {
 
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm font-medium text-gray-700">
-                    Username
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    Email Address
                   </Label>
                   <Input
-                    id="username"
-                    type="text"
-                    placeholder="doctor_username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="doctor@hospital.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500"
                     required
                   />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,23 +9,28 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, MapPin, Heart, AlertTriangle, Users, Camera, Edit3, Save, X } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { User, MapPin, Heart, AlertTriangle, Users, Camera, Edit3, Save, X, QrCode, Download, Share2 } from "lucide-react"
+import QRGenerator from "@/components/qr-generator"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientProfile() {
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [profileData, setProfileData] = useState({
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@email.com",
-    phone: "+1 (555) 123-4567",
-    dateOfBirth: "1985-03-15",
-    gender: "Female",
-    address: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    emergencyContact: "John Johnson",
-    emergencyPhone: "+1 (555) 987-6543",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    emergencyContact: "",
+    emergencyPhone: "",
     emergencyRelation: "Spouse",
     bloodType: "O+",
     allergies: "Penicillin, Shellfish",
@@ -77,11 +82,12 @@ export default function PatientProfile() {
       </div>
 
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="personal">Personal Info</TabsTrigger>
           <TabsTrigger value="medical">Medical Info</TabsTrigger>
           <TabsTrigger value="emergency">Emergency Contacts</TabsTrigger>
           <TabsTrigger value="insurance">Insurance</TabsTrigger>
+          <TabsTrigger value="qr-codes">QR Codes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
@@ -413,6 +419,130 @@ export default function PatientProfile() {
                   Upload Insurance Card
                 </Button>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="qr-codes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <QrCode className="w-5 h-5 text-blue-600" />
+                <span>My QR Codes</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="font-medium text-blue-800 mb-2">Health Passport QR Code</h3>
+                  <p className="text-sm text-blue-600 mb-4">
+                    Generate secure QR codes for easy access to your medical information during appointments and emergencies.
+                  </p>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <QrCode className="w-4 h-4 mr-2" />
+                        Generate QR Code
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>Generate QR Code</DialogTitle>
+                      </DialogHeader>
+                      <QRGenerator 
+                        patientId="patient-123" // This would be dynamic in real app
+                        patientName={`${profileData.firstName} ${profileData.lastName}`}
+                        onQRGenerated={(qrData) => {
+                          console.log('QR Generated:', qrData)
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* QR Code Types Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Full Access QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Complete medical records access for healthcare providers
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Medical history</li>
+                        <li>• Current medications</li>
+                        <li>• Allergies & conditions</li>
+                        <li>• Test results</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Emergency QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Critical information for emergency situations
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Blood type</li>
+                        <li>• Critical allergies</li>
+                        <li>• Emergency contacts</li>
+                        <li>• Medical alerts</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Limited Access QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Specific information for appointments
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Basic demographics</li>
+                        <li>• Relevant conditions</li>
+                        <li>• Current visit data</li>
+                        <li>• Insurance info</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Temporary QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Time-limited access codes
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• 24-hour expiration</li>
+                        <li>• Single-use codes</li>
+                        <li>• Event-specific data</li>
+                        <li>• Audit trail</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Security Notice */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="font-medium text-green-800 mb-2">Security & Privacy</h4>
+                  <div className="text-sm text-green-600 space-y-1">
+                    <p>• All QR codes are encrypted and secure</p>
+                    <p>• Access is logged for security auditing</p>
+                    <p>• You can revoke QR codes at any time</p>
+                    <p>• Data sharing requires your explicit consent</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

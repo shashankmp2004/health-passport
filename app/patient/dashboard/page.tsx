@@ -4,13 +4,68 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Heart, Calendar, FileText, Activity, AlertTriangle, CheckCircle, QrCode } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientDashboard() {
   const [open, setOpen] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
+  const [patientData, setPatientData] = useState<any>(null)
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchDashboardData()
+  }, [session, status, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('/api/patients/dashboard')
+      if (response.ok) {
+        const result = await response.json()
+        setDashboardData(result.data)
+        setPatientData(result.data.patient)
+      } else {
+        console.error('Failed to fetch dashboard data')
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-24 bg-gray-300 rounded-2xl mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-gray-300 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const patientName = patientData ? 
+    patientData.name : 
+    'Patient'
+  const healthPassportId = session?.user?.healthPassportId || 'HP-XXXXX-XXXXX'
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -25,7 +80,7 @@ export default function PatientDashboard() {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div className="absolute -bottom-16 right-0 w-64 h-32 bg-white opacity-10 rounded-full blur-3xl"></div>
             <div className="z-10 flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, Sarah!</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, {patientName}!</h1>
               <p className="text-blue-100 text-base md:text-lg">Your health summary for today</p>
             </div>
             <div className="z-10 flex flex-col items-center ml-8">
@@ -33,7 +88,7 @@ export default function PatientDashboard() {
                 <QrCode className="w-10 h-10 md:w-12 md:h-12 text-gray-800" />
               </div>
               <p className="text-xs text-blue-100">Your Health ID</p>
-              <p className="text-xs font-mono tracking-wide">HP-2024-789123</p>
+              <p className="text-xs font-mono tracking-wide">{healthPassportId}</p>
             </div>
           </div>
         </DialogTrigger>
@@ -120,7 +175,9 @@ export default function PatientDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Health Score</p>
-                <p className="text-xl font-bold text-green-600">85/100</p>
+                <p className="text-xl font-bold text-green-600">
+                  {dashboardData?.statistics?.healthScore || 85}/100
+                </p>
               </div>
             </div>
           </CardContent>
@@ -134,7 +191,12 @@ export default function PatientDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Last Checkup</p>
-                <p className="text-sm font-semibold">Dec 15, 2024</p>
+                <p className="text-sm font-semibold">
+                  {dashboardData?.recentVisits?.[0]?.date ? 
+                    new Date(dashboardData.recentVisits[0].date).toLocaleDateString() : 
+                    'No visits yet'
+                  }
+                </p>
               </div>
             </div>
           </CardContent>
@@ -147,8 +209,10 @@ export default function PatientDashboard() {
                 <AlertTriangle className="w-4 h-4 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Alerts</p>
-                <p className="text-xl font-bold text-orange-600">2</p>
+                <p className="text-sm text-gray-600">Active Medications</p>
+                <p className="text-xl font-bold text-orange-600">
+                  {dashboardData?.statistics?.activeMedications || 0}
+                </p>
               </div>
             </div>
           </CardContent>

@@ -59,11 +59,11 @@ export default function DoctorSignup() {
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData({ ...formData, [field]: value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Validation
@@ -112,12 +112,43 @@ export default function DoctorSignup() {
       alert("Please agree to the terms and conditions")
       return
     }
-    
-    // Here you would typically make an API call to register
-    console.log("Doctor registration:", formData)
-    
-    // Redirect to login page
-    router.push("/auth/doctor/login")
+
+    try {
+      const response = await fetch('/api/doctors/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          licenseNumber: formData.licenseNumber,
+          specialty: formData.specialty,
+          hospitalAffiliation: formData.hospitalAffiliation,
+          password: formData.password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error || 'Registration failed')
+        return
+      }
+
+      // Registration successful
+      console.log("Doctor registration successful:", data)
+      alert(`Registration successful! Your Doctor ID is: ${data.doctor.doctorId}. Please wait for admin verification.`)
+      
+      // Redirect to login page
+      router.push("/auth/doctor/login")
+      
+    } catch (error) {
+      console.error("Registration error:", error)
+      alert('An error occurred during registration. Please try again.')
+    }
   }
 
   const specialties = [

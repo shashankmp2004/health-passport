@@ -19,6 +19,7 @@ export default function PatientSignup() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
     dateOfBirth: "",
     bloodType: "",
     aadharNumber: "",
@@ -51,7 +52,7 @@ export default function PatientSignup() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Validate Aadhar number
@@ -72,20 +73,48 @@ export default function PatientSignup() {
       alert("Please enter a valid phone number")
       return
     }
-    
-    // Generate Health Passport ID (in real app, this would come from backend)
-    const healthPassportId = `HP-${new Date().getFullYear()}-${Math.random().toString().slice(2, 10)}`
-    
-    console.log("Creating account with:", { ...formData, healthPassportId })
-    
-    // Store form data temporarily for verification page
-    localStorage.setItem('pendingRegistration', JSON.stringify({
-      ...formData,
-      healthPassportId
-    }))
-    
-    // Redirect to OTP verification page
-    router.push("/auth/patient/verify-otp")
+
+    if (!agreeToTerms) {
+      alert("Please agree to the terms and conditions")
+      return
+    }
+
+    try {
+      const response = await fetch('/api/patients/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phoneNumber,
+          dateOfBirth: formData.dateOfBirth,
+          bloodType: formData.bloodType,
+          aadharNumber: formData.aadharNumber,
+          password: formData.password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error || 'Registration failed')
+        return
+      }
+
+      // Registration successful
+      console.log("Registration successful:", data)
+      alert(`Registration successful! Your Health Passport ID is: ${data.patient.healthPassportId}`)
+      
+      // Redirect to login page
+      router.push("/auth/patient/login")
+      
+    } catch (error) {
+      console.error("Registration error:", error)
+      alert('An error occurred during registration. Please try again.')
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -206,6 +235,21 @@ export default function PatientSignup() {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john.doe@example.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="h-10 border-2 border-gray-200 rounded-lg focus:border-blue-500"
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">

@@ -32,34 +32,54 @@ export default function QRScanner() {
 
   const handleStartScan = () => {
     setIsScanning(true)
-    // Simulate scanning process
+    // Simulate scanning process - in real app, this would use camera API
     setTimeout(() => {
-      // Mock successful scan
-      const mockPatient = {
-        id: "HP-2024-789123",
-        name: "Sarah Johnson",
-        age: 39,
-        bloodType: "O+",
-        emergencyContact: "+1 (555) 987-6543",
-        conditions: ["Hypertension", "Type 2 Diabetes"],
-        allergies: ["Penicillin", "Shellfish"],
-        lastVisit: "2024-12-15",
-        riskLevel: "Moderate",
-      }
-      setScannedPatient(mockPatient)
-      setIsScanning(false)
+      // Mock scan of a Health Passport ID
+      const scannedId = "HP-A28B3-T9I1L" // This would come from QR code
+      fetchPatientData(scannedId)
+    }, 2000)
+  }
 
-      // Add to scan history
-      setScanHistory((prev) => [
-        {
-          id: mockPatient.id,
-          name: mockPatient.name,
-          scanTime: new Date().toLocaleString(),
-          status: "success",
-        },
-        ...prev,
-      ])
-    }, 3000)
+  const fetchPatientData = async (healthPassportId: string) => {
+    try {
+      const response = await fetch(`/api/patients/search?healthPassportId=${healthPassportId}`)
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.patient) {
+          setScannedPatient({
+            id: data.patient.healthPassportId,
+            name: `${data.patient.personalInfo.firstName} ${data.patient.personalInfo.lastName}`,
+            age: data.patient.personalInfo.age || 'N/A',
+            bloodType: data.patient.personalInfo.bloodType,
+            emergencyContact: data.patient.personalInfo.phone,
+            conditions: data.patient.medicalHistory?.map((h: any) => h.condition) || [],
+            allergies: data.patient.allergies || [],
+            lastVisit: data.patient.visits?.[0]?.date || 'No visits',
+            riskLevel: data.patient.riskLevel || 'Low',
+          })
+          
+          // Add to scan history
+          const newScan = {
+            id: healthPassportId,
+            name: `${data.patient.personalInfo.firstName} ${data.patient.personalInfo.lastName}`,
+            scanTime: new Date().toLocaleString(),
+            status: "success",
+          }
+          setScanHistory([newScan, ...scanHistory.slice(0, 4)])
+        } else {
+          alert('Patient not found')
+        }
+      } else {
+        console.error('Failed to fetch patient data')
+        alert('Patient not found or access denied')
+      }
+    } catch (error) {
+      console.error('Error scanning QR code:', error)
+      alert('Error scanning QR code')
+    } finally {
+      setIsScanning(false)
+    }
   }
 
   const handleStopScan = () => {

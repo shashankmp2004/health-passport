@@ -1,0 +1,10 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@email.com",
+  "phone": "9876543210",
+  "dateOfBirth": "1990-01-01",
+  "bloodType": "O+",
+  "aadharNumber": "123456789012",
+  "password": "password123"
+}

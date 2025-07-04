@@ -20,7 +20,7 @@ export default function HealthcareProviderLogin() {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
   const router = useRouter()
 
-  const handleHospitalLogin = (e: React.FormEvent) => {
+  const handleHospitalLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation
@@ -33,15 +33,33 @@ export default function HealthcareProviderLogin() {
       alert("Password must be at least 6 characters long")
       return
     }
-    
-    // Here you would typically make an API call to authenticate
-    console.log("Hospital login with:", { username, password, keepLoggedIn })
-    
-    // Redirect to hospital dashboard
-    router.push("/hospital/dashboard")
+
+    try {
+      const { signIn } = await import('next-auth/react')
+      
+      const result = await signIn('hospital', {
+        email: username, // Using username as email for hospital login
+        password,
+        redirect: false
+      })
+      
+      if (result?.error) {
+        alert('Invalid credentials. Please check your email and password.')
+        return
+      }
+      
+      if (result?.ok) {
+        console.log("Hospital login successful, redirecting to dashboard")
+        // Redirect to hospital dashboard
+        router.push("/hospital/dashboard")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      alert('An error occurred during login. Please try again.')
+    }
   }
 
-  const handleDoctorLogin = (e: React.FormEvent) => {
+  const handleDoctorLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation
@@ -54,12 +72,30 @@ export default function HealthcareProviderLogin() {
       alert("Password must be at least 6 characters long")
       return
     }
-    
-    // Here you would typically make an API call to authenticate
-    console.log("Doctor login with:", { doctorUsername, password, keepLoggedIn })
-    
-    // Redirect to hospital dashboard (doctors use hospital portal)
-    router.push("/hospital/dashboard")
+
+    try {
+      const { signIn } = await import('next-auth/react')
+      
+      const result = await signIn('doctor', {
+        email: doctorUsername, // Using username as email for doctor login
+        password,
+        redirect: false
+      })
+      
+      if (result?.error) {
+        alert('Invalid credentials. Please check your email and password.')
+        return
+      }
+      
+      if (result?.ok) {
+        console.log("Doctor login successful, redirecting to hospital dashboard")
+        // Redirect to hospital dashboard (doctors use hospital portal)
+        router.push("/hospital/dashboard")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      alert('An error occurred during login. Please try again.')
+    }
   }
 
   return (
@@ -160,13 +196,13 @@ export default function HealthcareProviderLogin() {
                 <TabsContent value="hospital">
                   <form onSubmit={handleHospitalLogin} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="username" className="text-sm font-medium text-gray-700">
-                        Hospital Username
+                      <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                        Hospital Email
                       </Label>
                       <Input
-                        id="username"
-                        type="text"
-                        placeholder="hospital_admin"
+                        id="email"
+                        type="email"
+                        placeholder="admin@hospital.com"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
@@ -232,13 +268,13 @@ export default function HealthcareProviderLogin() {
                 <TabsContent value="doctor">
                   <form onSubmit={handleDoctorLogin} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="doctorUsername" className="text-sm font-medium text-gray-700">
-                        Doctor Username
+                      <Label htmlFor="doctorEmail" className="text-sm font-medium text-gray-700">
+                        Doctor Email
                       </Label>
                       <Input
-                        id="doctorUsername"
-                        type="text"
-                        placeholder="doctor_username"
+                        id="doctorEmail"
+                        type="email"
+                        placeholder="doctor@hospital.com"
                         value={doctorUsername}
                         onChange={(e) => setDoctorUsername(e.target.value)}
                         className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500"

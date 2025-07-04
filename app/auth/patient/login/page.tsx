@@ -51,7 +51,7 @@ export default function PatientLogin() {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation for Health Passport ID format
@@ -66,11 +66,28 @@ export default function PatientLogin() {
       return
     }
     
-    // Here you would typically make an API call to authenticate
-    console.log("Logging in with:", { healthPassportId, password, keepLoggedIn })
-    
-    // Redirect to patient dashboard
-    router.push("/patient/dashboard")
+    try {
+      const { signIn } = await import('next-auth/react')
+      
+      const result = await signIn('patient', {
+        healthPassportId,
+        password,
+        redirect: false
+      })
+      
+      if (result?.error) {
+        alert('Invalid credentials. Please check your Health Passport ID and password.')
+        return
+      }
+      
+      if (result?.ok) {
+        console.log("Login successful, redirecting to patient dashboard")
+        router.push("/patient/dashboard")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      alert('An error occurred during login. Please try again.')
+    }
   }
 
   return (

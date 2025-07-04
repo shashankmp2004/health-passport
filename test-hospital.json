@@ -1,0 +1,11 @@
+{
+  "facilityName": "City General Hospital",
+  "facilityType": "hospital",
+  "adminFirstName": "Admin",
+  "adminLastName": "User",
+  "email": "admin@cityhospital.com",
+  "phone": "9876543210",
+  "address": "123 Medical Center Blvd, City, State 12345",
+  "licenseNumber": "HL-2024-12345",
+  "password": "adminpass123"
+}
