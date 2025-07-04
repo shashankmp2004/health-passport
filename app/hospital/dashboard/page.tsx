@@ -322,7 +322,7 @@ export default function HospitalDashboard() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
               <QrCode className="w-6 h-6" />
               <span className="text-sm">Scan QR Code</span>
@@ -330,10 +330,6 @@ export default function HospitalDashboard() {
             <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
               <FileText className="w-6 h-6" />
               <span className="text-sm">New Record</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
-              <Calendar className="w-6 h-6" />
-              <span className="text-sm">Schedule Visit</span>
             </Button>
             <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
               <Heart className="w-6 h-6" />

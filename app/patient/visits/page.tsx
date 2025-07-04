@@ -4,29 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Clock, MapPin, FileText, Plus } from "lucide-react"
 
 export default function PatientVisits() {
-  const upcomingVisits = [
-    {
-      id: 1,
-      doctor: "Dr. James Wilson",
-      specialty: "Cardiology",
-      date: "2025-01-20",
-      time: "2:00 PM",
-      location: "Heart Center, Room 205",
-      type: "Follow-up",
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      doctor: "Dr. Sarah Martinez",
-      specialty: "Endocrinology",
-      date: "2025-01-25",
-      time: "9:00 AM",
-      location: "Diabetes Clinic, Room 102",
-      type: "Lab Review",
-      status: "confirmed",
-    },
-  ]
-
   const pastVisits = [
     {
       id: 3,
@@ -76,61 +53,6 @@ export default function PatientVisits() {
           Schedule Visit
         </Button>
       </div>
-
-      {/* Upcoming Visits */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span>Upcoming Visits</span>
-          </CardTitle>
-          <CardDescription>Your scheduled appointments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {upcomingVisits.map((visit) => (
-              <div key={visit.id} className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="font-semibold text-lg">{visit.doctor}</h3>
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                        {visit.specialty}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span>{new Date(visit.date).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <span>{visit.time}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span>{visit.location}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-2">
-                      <Badge className="bg-green-100 text-green-800">{visit.type}</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col space-y-2">
-                    <Badge className="bg-green-600 text-white">{visit.status.toUpperCase()}</Badge>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Past Visits */}
       <Card>

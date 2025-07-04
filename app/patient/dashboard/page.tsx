@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Heart, Calendar, FileText, Activity, AlertTriangle, CheckCircle, Clock, QrCode } from "lucide-react"
+import { Heart, Calendar, FileText, Activity, AlertTriangle, CheckCircle, QrCode } from "lucide-react"
 
 export default function PatientDashboard() {
   return (
@@ -24,7 +24,7 @@ export default function PatientDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
@@ -66,25 +66,11 @@ export default function PatientDashboard() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Next Visit</p>
-                <p className="text-sm font-semibold">Jan 20, 2025</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Recent Activity */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -125,65 +111,27 @@ export default function PatientDashboard() {
           </Card>
         </div>
 
-        {/* Health Alerts & Upcoming */}
-        <div className="space-y-6">
-          {/* Health Alerts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
-                <span>Health Alerts</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="font-medium text-orange-800">Medication Reminder</p>
-                  <p className="text-sm text-orange-600">Take evening medication in 2 hours</p>
-                </div>
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="font-medium text-red-800">Blood Sugar Check</p>
-                  <p className="text-sm text-red-600">Overdue by 3 hours</p>
-                </div>
+        {/* Health Alerts */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+              <span>Health Alerts</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="font-medium text-orange-800">Medication Reminder</p>
+                <p className="text-sm text-orange-600">Take evening medication in 2 hours</p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Appointments */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="w-5 h-5" />
-                <span>Upcoming</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">Dr. James Wilson</p>
-                    <p className="text-sm text-gray-600">Cardiology Checkup</p>
-                    <p className="text-sm text-gray-500">Jan 20, 2025 at 2:00 PM</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">Lab Work</p>
-                    <p className="text-sm text-gray-600">Quarterly blood panel</p>
-                    <p className="text-sm text-gray-500">Jan 25, 2025 at 9:00 AM</p>
-                  </div>
-                </div>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="font-medium text-red-800">Blood Sugar Check</p>
+                <p className="text-sm text-red-600">Overdue by 3 hours</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Current Conditions */}

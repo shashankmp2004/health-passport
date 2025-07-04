@@ -273,30 +273,6 @@ export default function HealthOverview() {
           </Card>
         </div>
       </div>
-
-      {/* Upcoming Appointment */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5" />
-            <span>Upcoming Appointment</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                14
-              </div>
-              <div>
-                <p className="font-semibold">Consultation with Dr. James</p>
-                <p className="text-sm text-gray-600">August 14, 2021</p>
-              </div>
-            </div>
-            <Button className="bg-blue-600 hover:bg-blue-700">View Details</Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

@@ -55,16 +55,6 @@ const menuItems = [
     url: "/hospital/analytics",
     icon: BarChart3,
   },
-  {
-    title: "Appointments",
-    url: "/hospital/appointments",
-    icon: Calendar,
-  },
-  {
-    title: "Alerts",
-    url: "/hospital/alerts",
-    icon: AlertTriangle,
-  },
 ]
 
 const managementItems = [
