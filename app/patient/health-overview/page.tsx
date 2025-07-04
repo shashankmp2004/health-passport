@@ -262,9 +262,12 @@ export default function HealthOverview() {
                 <div className="ml-4">
                   <div className="w-24 h-32 bg-gray-700 rounded-lg flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-8 h-16 bg-orange-300 rounded-full mx-auto mb-2"></div>
-                      <div className="w-6 h-8 bg-orange-300 rounded mx-auto mb-1"></div>
-                      <div className="w-4 h-6 bg-orange-300 rounded mx-auto"></div>
+                      {/* Human Body PNG Image */}
+                      <img
+                        src="https://img.pristyncare.com/static_pages/gpPages/fitguy.png"
+                        alt="Human Body Measurements"
+                        className="w-30 h-35 object-contain"
+                      />
                     </div>
                   </div>
                 </div>
