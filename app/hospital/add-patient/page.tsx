@@ -130,7 +130,7 @@ export default function AddPatient() {
         // Show success message briefly, then redirect to patient records
         setTimeout(() => {
           router.push('/hospital/patient-records?justAdded=true')
-        }, 2000)
+        }, 2500)
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to add patient to records')
@@ -154,6 +154,24 @@ export default function AddPatient() {
         <div className="flex items-center space-x-2">
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           <span className="text-sm text-gray-600">System Ready</span>
+        </div>
+      </div>
+
+      {/* 24-Hour Access Warning */}
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center">
+              <span className="text-amber-600 text-sm font-bold">!</span>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-amber-800">24-Hour Access Policy</h3>
+            <p className="text-sm text-amber-700 mt-1">
+              When you add a patient to your hospital records, you will only have access to their information for <strong>24 hours</strong>. 
+              After this period expires, the patient will be automatically removed from your accessible records for privacy protection.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -415,12 +433,22 @@ export default function AddPatient() {
                   {/* Action Buttons */}
                   <div className="flex flex-col space-y-3 pt-4 border-t">
                     {addedToRecords && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-800">
-                            Patient added to records successfully! Redirecting to patient records...
-                          </span>
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                          <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-green-800 mb-1">
+                              ✅ Patient Added Successfully!
+                            </h4>
+                            <div className="text-sm text-green-700 space-y-1">
+                              <p>The patient has been added to your hospital records.</p>
+                              <div className="p-2 bg-amber-50 border border-amber-200 rounded text-amber-800">
+                                <p className="font-medium">⏰ 24-Hour Access Policy:</p>
+                                <p className="text-xs">You now have 24 hours to access this patient's complete medical records, including conditions, procedures, lab results, allergies, immunizations, and medications. After this period, access will expire automatically for privacy protection.</p>
+                              </div>
+                              <p className="text-xs italic">Redirecting to Patient Records...</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
