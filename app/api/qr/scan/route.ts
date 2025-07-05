@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import { 
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
 
     // Add limited data context if applicable
     if (decodedData.type === QRCodeType.LIMITED && decodedData.limitedData) {
-      response.data.qr.limitedContext = decodedData.limitedData;
+      (response.data.qr as any).limitedContext = decodedData.limitedData;
     }
 
     return NextResponse.json(response);
