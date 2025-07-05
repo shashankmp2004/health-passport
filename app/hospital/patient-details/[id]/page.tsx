@@ -284,14 +284,13 @@ export default function PatientDetails() {
 
           {/* Detailed Information Tabs */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="medical">Medical History</TabsTrigger>
               <TabsTrigger value="procedures">Procedures</TabsTrigger>
               <TabsTrigger value="labs">Lab Results</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
               <TabsTrigger value="vitals">Vitals</TabsTrigger>
-              <TabsTrigger value="contact">Contact</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
@@ -851,55 +850,6 @@ export default function PatientDetails() {
                   ) : (
                     <p className="text-gray-500">No vital signs recorded</p>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="contact" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Phone className="w-5 h-5" />
-                    <span>Contact Information</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-3">Personal Contact</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Phone:</span>
-                          <span>{patient.personalInfo.phone || 'Not provided'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Email:</span>
-                          <span>{patient.personalInfo.email || 'Not provided'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Address:</span>
-                          <span>{patient.personalInfo.address || 'Not provided'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-3">Emergency Contact</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Name:</span>
-                          <span>{patient.personalInfo.emergencyContact?.name || 'Not provided'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Phone:</span>
-                          <span>{patient.personalInfo.emergencyContact?.phone || 'Not provided'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Relationship:</span>
-                          <span>{patient.personalInfo.emergencyContact?.relationship || 'Not provided'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

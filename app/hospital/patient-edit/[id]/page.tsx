@@ -320,77 +320,12 @@ export default function PatientEdit() {
           </Card>
 
           {/* Edit Form Tabs */}
-          <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="personal">Personal Info</TabsTrigger>
+          <Tabs defaultValue="medical" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="medical">Medical History</TabsTrigger>
               <TabsTrigger value="procedures">Procedures</TabsTrigger>
               <TabsTrigger value="labs">Lab Results</TabsTrigger>
-              <TabsTrigger value="contact">Contact Info</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="personal" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>Update basic personal details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={editedPatient.personalInfo.firstName || ''}
-                        onChange={(e) => updatePersonalInfo('firstName', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={editedPatient.personalInfo.lastName || ''}
-                        onChange={(e) => updatePersonalInfo('lastName', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={editedPatient.personalInfo.age || ''}
-                        onChange={(e) => updatePersonalInfo('age', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bloodType">Blood Type</Label>
-                      <Input
-                        id="bloodType"
-                        value={editedPatient.personalInfo.bloodType || ''}
-                        onChange={(e) => updatePersonalInfo('bloodType', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="gender">Gender</Label>
-                      <Input
-                        id="gender"
-                        value={editedPatient.personalInfo.gender || ''}
-                        onChange={(e) => updatePersonalInfo('gender', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                      <Input
-                        id="dateOfBirth"
-                        type="date"
-                        value={editedPatient.personalInfo.dateOfBirth || ''}
-                        onChange={(e) => updatePersonalInfo('dateOfBirth', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent value="medical" className="space-y-4">
               <Card>
@@ -681,89 +616,6 @@ export default function PatientEdit() {
                         )}
                       </div>
                     )) || <p className="text-gray-500">No lab results recorded</p>}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="contact" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
-                  <CardDescription>Update contact details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        value={editedPatient.personalInfo.phone || ''}
-                        onChange={(e) => updatePersonalInfo('phone', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={editedPatient.personalInfo.email || ''}
-                        onChange={(e) => updatePersonalInfo('email', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="address">Address</Label>
-                      <Textarea
-                        id="address"
-                        value={editedPatient.personalInfo.address || ''}
-                        onChange={(e) => updatePersonalInfo('address', e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Emergency Contact</CardTitle>
-                  <CardDescription>Emergency contact information</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="emergencyName">Emergency Contact Name</Label>
-                      <Input
-                        id="emergencyName"
-                        value={editedPatient.personalInfo.emergencyContact?.name || ''}
-                        onChange={(e) => updatePersonalInfo('emergencyContact', {
-                          ...editedPatient.personalInfo.emergencyContact,
-                          name: e.target.value
-                        })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
-                      <Input
-                        id="emergencyPhone"
-                        value={editedPatient.personalInfo.emergencyContact?.phone || ''}
-                        onChange={(e) => updatePersonalInfo('emergencyContact', {
-                          ...editedPatient.personalInfo.emergencyContact,
-                          phone: e.target.value
-                        })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="emergencyRelationship">Relationship</Label>
-                      <Input
-                        id="emergencyRelationship"
-                        value={editedPatient.personalInfo.emergencyContact?.relationship || ''}
-                        onChange={(e) => updatePersonalInfo('emergencyContact', {
-                          ...editedPatient.personalInfo.emergencyContact,
-                          relationship: e.target.value
-                        })}
-                      />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
