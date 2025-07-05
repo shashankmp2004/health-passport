@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db/mongodb'
 import Patient from '@/lib/models/Patient'
 import { patientRegistrationSchema } from '@/lib/utils/validation'
 import { hashPassword, generateHealthPassportId, formatAadharNumber } from '@/lib/utils/helpers'
+import { generatePatientQRCode } from '@/lib/utils/qrcode'
 
 export async function POST(request: NextRequest) {
   try {
@@ -88,6 +89,29 @@ export async function POST(request: NextRequest) {
     })
     
     await newPatient.save()
+
+    // Generate QR code for the patient
+    let qrCodeData = null;
+    try {
+      const qrResult = await generatePatientQRCode({
+        healthPassportId: healthPassportId!,
+        firstName,
+        lastName,
+        dateOfBirth,
+        bloodType,
+        patientId: newPatient._id.toString()
+      });
+
+      qrCodeData = {
+        qrImageUrl: qrResult.qrImageUrl,
+        qrId: qrResult.qrData.metadata.qrId
+      };
+
+      console.log('QR code generated successfully for patient:', newPatient.healthPassportId);
+    } catch (qrError) {
+      console.error('QR code generation failed:', qrError);
+      // Don't fail the registration if QR generation fails
+    }
     
     // Return success response (don't include password)
     const { password: _, ...patientData } = newPatient.toObject()
@@ -99,7 +123,8 @@ export async function POST(request: NextRequest) {
           healthPassportId: patientData.healthPassportId,
           personalInfo: patientData.personalInfo,
           createdAt: patientData.createdAt
-        }
+        },
+        qrCode: qrCodeData
       },
       { status: 201 }
     )

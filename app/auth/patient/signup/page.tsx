@@ -106,7 +106,19 @@ export default function PatientSignup() {
 
       // Registration successful
       console.log("Registration successful:", data)
-      alert(`Registration successful! Your Health Passport ID is: ${data.patient.healthPassportId}`)
+      
+      // Show registration success with QR code info
+      const successMessage = `Registration successful! Your Health Passport ID is: ${data.patient.healthPassportId}`;
+      const qrMessage = data.qrCode 
+        ? "\n\nYour health QR code has been generated and will be available in your dashboard."
+        : "\n\nNote: QR code generation is pending and will be available shortly in your dashboard.";
+      
+      alert(successMessage + qrMessage);
+      
+      // Store QR code info in localStorage for dashboard access
+      if (data.qrCode) {
+        localStorage.setItem('patientQRCode', JSON.stringify(data.qrCode));
+      }
       
       // Redirect to login page
       router.push("/auth/patient/login")

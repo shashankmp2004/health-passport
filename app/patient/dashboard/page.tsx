@@ -15,6 +15,8 @@ export default function PatientDashboard() {
   const [isFlipped, setIsFlipped] = useState(false)
   const [patientData, setPatientData] = useState<any>(null)
   const [dashboardData, setDashboardData] = useState<any>(null)
+  const [qrCodeData, setQrCodeData] = useState<any>(null)
+  const [qrLoading, setQrLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -28,6 +30,7 @@ export default function PatientDashboard() {
     }
 
     fetchDashboardData()
+    fetchQRCode()
   }, [session, status, router])
 
   const fetchDashboardData = async () => {
@@ -44,6 +47,23 @@ export default function PatientDashboard() {
       console.error('Error fetching dashboard data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchQRCode = async () => {
+    setQrLoading(true)
+    try {
+      const response = await fetch('/api/patients/qr-code')
+      if (response.ok) {
+        const result = await response.json()
+        setQrCodeData(result.qrCode)
+      } else {
+        console.error('Failed to fetch QR code')
+      }
+    } catch (error) {
+      console.error('Error fetching QR code:', error)
+    } finally {
+      setQrLoading(false)
     }
   }
 
@@ -85,7 +105,17 @@ export default function PatientDashboard() {
             </div>
             <div className="z-10 flex flex-col items-center ml-8">
               <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-xl flex items-center justify-center shadow-lg mb-2">
-                <QrCode className="w-10 h-10 md:w-12 md:h-12 text-gray-800" />
+                {qrCodeData && !qrLoading ? (
+                  <img 
+                    src={qrCodeData.qrImageUrl} 
+                    alt="Patient QR Code" 
+                    className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                  />
+                ) : qrLoading ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-800"></div>
+                ) : (
+                  <QrCode className="w-10 h-10 md:w-12 md:h-12 text-gray-800" />
+                )}
               </div>
               <p className="text-xs text-blue-100">Your Health ID</p>
               <p className="text-xs font-mono tracking-wide">{healthPassportId}</p>
@@ -138,7 +168,17 @@ export default function PatientDashboard() {
                     {/* QR Code */}
                     <div className="flex flex-col items-center flex-shrink-0 pl-8 cursor-pointer" onClick={() => setIsFlipped(true)}>
                       <div className="bg-gray-100 rounded-md flex items-center justify-center" style={{width: '110px', height: '110px'}}>
-                        <QrCode className="w-24 h-24 text-black" />
+                        {qrCodeData && !qrLoading ? (
+                          <img 
+                            src={qrCodeData.qrImageUrl} 
+                            alt="Patient QR Code" 
+                            className="w-24 h-24 object-contain"
+                          />
+                        ) : qrLoading ? (
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                        ) : (
+                          <QrCode className="w-24 h-24 text-black" />
+                        )}
                       </div>
                       <span className="text-xs text-gray-500 mt-2">Click to enlarge</span>
                     </div>
@@ -148,9 +188,25 @@ export default function PatientDashboard() {
                 <div className={`absolute w-full h-full top-0 left-0 backface-hidden rounded-2xl cursor-pointer rotate-y-180 ${isFlipped ? '' : 'rotate-y-180'}`} onClick={() => setIsFlipped(false)}>
                   <div className="flex flex-col items-center justify-center bg-white rounded-2xl h-full">
                     <div className="bg-gray-100 rounded-lg flex items-center justify-center" style={{width: '180px', height: '180px'}}>
-                      <QrCode className="w-40 h-40 text-black" />
+                      {qrCodeData && !qrLoading ? (
+                        <img 
+                          src={qrCodeData.qrImageUrl} 
+                          alt="Patient QR Code" 
+                          className="w-40 h-40 object-contain"
+                        />
+                      ) : qrLoading ? (
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+                      ) : (
+                        <QrCode className="w-40 h-40 text-black" />
+                      )}
                     </div>
                     <span className="text-sm text-gray-500 mt-4">Click to go back</span>
+                    {qrCodeData && (
+                      <div className="text-center mt-2">
+                        <p className="text-xs text-gray-400">Generated: {new Date(qrCodeData.generatedAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-400">QR ID: {qrCodeData.qrId}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

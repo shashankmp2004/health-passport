@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QrCode, Camera, User, FileText, CheckCircle, Scan, Search, History } from "lucide-react"
+import { QrCode, Camera, User, FileText, CheckCircle, Scan, Search, History, Plus } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -18,6 +18,8 @@ export default function AddPatient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [scanHistory, setScanHistory] = useState<any[]>([])
+  const [addingToRecords, setAddingToRecords] = useState(false)
+  const [addedToRecords, setAddedToRecords] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -100,6 +102,44 @@ export default function AddPatient() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleManualSearch()
+    }
+  }
+
+  const handleAddToRecords = async () => {
+    if (!scannedPatient) return
+    
+    setAddingToRecords(true)
+    setError("")
+    
+    try {
+      const response = await fetch('/api/hospitals/add-patient-record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          healthPassportId: scannedPatient.id,
+          patientData: scannedPatient
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setAddedToRecords(true)
+        
+        // Show success message briefly, then redirect to patient records
+        setTimeout(() => {
+          router.push('/hospital/patient-records?justAdded=true')
+        }, 2000)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to add patient to records')
+      }
+    } catch (error) {
+      console.error('Error adding patient to records:', error)
+      setError('Error adding patient to records. Please try again.')
+    } finally {
+      setAddingToRecords(false)
     }
   }
 
@@ -373,18 +413,56 @@ export default function AddPatient() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex space-x-3 pt-4 border-t">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <FileText className="w-4 h-4 mr-2" />
-                      View Full Records
-                    </Button>
-                    <Button variant="outline">
-                      <User className="w-4 h-4 mr-2" />
-                      Update Information
-                    </Button>
-                    <Button variant="outline">
-                      Add New Visit
-                    </Button>
+                  <div className="flex flex-col space-y-3 pt-4 border-t">
+                    {addedToRecords && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-800">
+                            Patient added to records successfully! Redirecting to patient records...
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-3">
+                      <Button 
+                        onClick={handleAddToRecords}
+                        disabled={addingToRecords || addedToRecords}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {addingToRecords ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Adding...
+                          </>
+                        ) : addedToRecords ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Added to Records
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add to Records
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <FileText className="w-4 h-4 mr-2" />
+                        View Full Records
+                      </Button>
+                      
+                      <Button variant="outline">
+                        <User className="w-4 h-4 mr-2" />
+                        Update Information
+                      </Button>
+                      
+                      <Button variant="outline">
+                        Add New Visit
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (

@@ -370,3 +370,89 @@ export function verifyQRHash(data: QRCodeData, hash: string): boolean {
   const calculatedHash = generateQRHash(data);
   return calculatedHash === hash;
 }
+
+// Generate QR code using GoQR API
+export async function generateQRCodeImage(qrData: string, size: number = 200): Promise<string> {
+  try {
+    const encodedData = encodeURIComponent(qrData);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}&format=png&ecc=M`;
+    
+    return qrUrl;
+  } catch (error) {
+    console.error('QR code generation error:', error);
+    throw new Error('Failed to generate QR code image');
+  }
+}
+
+// Create patient QR code data for registration
+export function createPatientRegistrationQR(patientData: {
+  healthPassportId: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  bloodType?: string;
+  patientId: string;
+}): QRCodeData {
+  const qrId = generateQRId();
+  
+  return {
+    version: '2.0',
+    type: QRCodeType.FULL,
+    patientId: patientData.patientId,
+    permissions: [
+      QRPermission.VIEW_BASIC_INFO,
+      QRPermission.VIEW_MEDICAL_HISTORY,
+      QRPermission.VIEW_MEDICATIONS,
+      QRPermission.VIEW_VITALS,
+      QRPermission.VIEW_EMERGENCY_INFO,
+      QRPermission.VIEW_CONTACT_INFO
+    ],
+    emergencyInfo: {
+      bloodType: patientData.bloodType || 'Unknown',
+      allergies: [],
+      criticalConditions: [],
+      emergencyContacts: [],
+      medicalAlerts: []
+    },
+    metadata: {
+      generatedBy: 'system',
+      generatedAt: new Date(),
+      purpose: 'Patient Registration QR',
+      qrId: qrId
+    }
+  };
+}
+
+// Generate complete QR code for patient registration
+export async function generatePatientQRCode(patientData: {
+  healthPassportId: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  bloodType?: string;
+  patientId: string;
+}, size: number = 300): Promise<{
+  qrData: QRCodeData;
+  encryptedData: string;
+  qrImageUrl: string;
+}> {
+  try {
+    // Create QR data structure
+    const qrData = createPatientRegistrationQR(patientData);
+    
+    // Encrypt the data
+    const encryptedData = encryptQRData(qrData);
+    
+    // Generate QR code image URL
+    const qrImageUrl = await generateQRCodeImage(encryptedData, size);
+    
+    return {
+      qrData,
+      encryptedData,
+      qrImageUrl
+    };
+  } catch (error) {
+    console.error('Patient QR code generation error:', error);
+    throw new Error('Failed to generate patient QR code');
+  }
+}

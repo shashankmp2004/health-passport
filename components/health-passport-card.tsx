@@ -50,7 +50,7 @@ export function HealthPassportCard({
               <div className="w-20 h-20 rounded-xl overflow-hidden border-3 border-white/30 shadow-lg">
                 <Image
                   src={avatar}
-                  alt={patientName}
+                  alt={patientName || 'Patient'}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"

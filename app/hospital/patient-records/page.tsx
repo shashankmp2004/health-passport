@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Search, Filter, Download, Eye, Edit, Calendar, User, Activity } from "lucide-react"
+import { FileText, Search, Filter, Download, Eye, Edit, Calendar, User, Activity, Plus, RefreshCw, CheckCircle } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -15,6 +15,7 @@ export default function PatientRecords() {
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const { data: session, status } = useSession()
   const router = useRouter()
 
@@ -27,7 +28,39 @@ export default function PatientRecords() {
     }
 
     fetchPatientRecords()
+    
+    // Check if redirected from add patient page
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('justAdded') === 'true') {
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 5000)
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/hospital/patient-records')
+    }
   }, [session, status, router])
+
+  // Refresh data when the page becomes visible (e.g., after navigating back from add patient)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session) {
+        fetchPatientRecords()
+      }
+    }
+
+    const handleFocus = () => {
+      if (session) {
+        fetchPatientRecords()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [session])
 
   const fetchPatientRecords = async () => {
     try {
@@ -71,16 +104,41 @@ export default function PatientRecords() {
           <p className="text-gray-600">Comprehensive patient record management and access</p>
         </div>
         <div className="flex space-x-2">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              setLoading(true)
+              fetchPatientRecords()
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Export Records
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <FileText className="w-4 h-4 mr-2" />
-            New Record
+          <Button 
+            onClick={() => router.push('/hospital/add-patient')}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Patient
           </Button>
         </div>
       </div>
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="font-medium text-green-800">Patient successfully added to hospital records!</span>
+            <span className="text-green-600">The patient should now appear in your records below.</span>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filter */}
       <Card>
@@ -204,8 +262,15 @@ export default function PatientRecords() {
                 ) : (
                   <div className="text-center py-12">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No patient records found</p>
-                    <p className="text-sm text-gray-500">Patient records will appear here once they are added</p>
+                    <p className="text-gray-600 mb-2">No patient records found</p>
+                    <p className="text-sm text-gray-500 mb-6">Patient records will appear here once they are added</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
                   </div>
                 )}
               </div>
@@ -283,8 +348,15 @@ export default function PatientRecords() {
                 ) : (
                   <div className="text-center py-12">
                     <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No active patients found</p>
-                    <p className="text-sm text-gray-500">Active patients will appear here</p>
+                    <p className="text-gray-600 mb-2">No active patients found</p>
+                    <p className="text-sm text-gray-500 mb-6">Active patients will appear here</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
                   </div>
                 )}
               </div>
@@ -347,8 +419,15 @@ export default function PatientRecords() {
                 ) : (
                   <div className="text-center py-12">
                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No recent activity</p>
-                    <p className="text-sm text-gray-500">Recent patient activity will appear here</p>
+                    <p className="text-gray-600 mb-2">No recent activity</p>
+                    <p className="text-sm text-gray-500 mb-6">Recent patient activity will appear here</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
                   </div>
                 )}
               </div>
@@ -367,60 +446,75 @@ export default function PatientRecords() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {patientRecords
-                  .filter((record) => record.riskLevel === "High")
-                  .map((record) => (
-                    <div key={record.id} className="p-4 border-2 border-red-200 rounded-lg bg-red-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-red-600" />
+                {patientRecords.filter((record) => record.riskLevel === "High").length > 0 ? (
+                  patientRecords
+                    .filter((record) => record.riskLevel === "High")
+                    .map((record) => (
+                      <div key={record.id} className="p-4 border-2 border-red-200 rounded-lg bg-red-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-4 flex-1">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-red-600" />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="font-semibold text-lg">{record.name}</h3>
+                                <Badge className="bg-red-600 text-white">High Risk</Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
+                                <div>
+                                  <span className="font-medium">Patient ID:</span> {record.id}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Last Visit:</span>{" "}
+                                  {new Date(record.lastVisit).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Records:</span> {record.recordsCount} documents
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-700">Conditions:</span>
+                                <div className="flex space-x-1">
+                                  {record.conditions?.map((condition: string, index: number) => (
+                                    <Badge key={index} variant="destructive" className="text-xs">
+                                      {condition}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="font-semibold text-lg">{record.name}</h3>
-                              <Badge className="bg-red-600 text-white">High Risk</Badge>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
-                              <div>
-                                <span className="font-medium">Patient ID:</span> {record.id}
-                              </div>
-                              <div>
-                                <span className="font-medium">Last Visit:</span>{" "}
-                                {new Date(record.lastVisit).toLocaleDateString()}
-                              </div>
-                              <div>
-                                <span className="font-medium">Records:</span> {record.recordsCount} documents
-                              </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-700">Conditions:</span>
-                              <div className="flex space-x-1">
-                                {record.conditions?.map((condition: string, index: number) => (
-                                  <Badge key={index} variant="destructive" className="text-xs">
-                                    {condition}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
+                          <div className="flex flex-col space-y-2 ml-4">
+                            <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Priority View
+                            </Button>
+                            <Button variant="outline" size="sm" className="border-red-300 text-red-700 bg-transparent">
+                              Alert Team
+                            </Button>
                           </div>
-                        </div>
-
-                        <div className="flex flex-col space-y-2 ml-4">
-                          <Button size="sm" className="bg-red-600 hover:bg-red-700">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Priority View
-                          </Button>
-                          <Button variant="outline" size="sm" className="border-red-300 text-red-700 bg-transparent">
-                            Alert Team
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                ) : (
+                  <div className="text-center py-12">
+                    <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No high-risk patients found</p>
+                    <p className="text-sm text-gray-500 mb-6">High-risk patients will be displayed here for priority monitoring</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

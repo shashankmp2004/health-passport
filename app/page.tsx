@@ -89,12 +89,12 @@ export default function HomePage() {
             <div className="relative flex justify-center">
               <div className="relative transform hover:scale-105 transition-transform duration-500">
                 <HealthPassportCard 
-                  patientName="Demo Patient"
-                  patientId="HP-DEMO-001"
+                  patientName="Sample Patient"
+                  patientId="HP-SAMPLE-001"
                   bloodType="O+"
-                  emergencyContact="+1 (555) DEMO"
-                  lastVisit="Demo Visit"
-                  location="Demo Hospital"
+                  emergencyContact="+1 (555) 0123"
+                  lastVisit="Sample Visit"
+                  location="Sample Hospital"
                   vitals={{
                     bloodPressure: "120/80",
                     heartRate: "72 BPM", 

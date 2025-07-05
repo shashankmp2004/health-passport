@@ -72,6 +72,7 @@
     "react-hook-form": "^7.54.1",
     "react-is": "^19.1.0",
     "react-qr-code": "^2.0.17",
+    "react-qr-reader": "^3.0.0-beta-1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
     "sharp": "^0.34.2",

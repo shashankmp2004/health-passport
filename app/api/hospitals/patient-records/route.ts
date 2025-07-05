@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import Doctor from '@/lib/models/Doctor';
 import Hospital from '@/lib/models/Hospital';
+import HospitalPatientRecord from '@/lib/models/HospitalPatientRecord';
 
 // GET - Fetch hospital's patient records and recent activity
 export async function GET(request: NextRequest) {
@@ -29,27 +30,56 @@ export async function GET(request: NextRequest) {
 
     // For hospital users, get patients from their hospital
     // For doctor users, get patients they've treated
-    let query: any = {};
+    let patients: any[] = [];
     
     if (session.user.role === 'hospital') {
-      // Get all patients who have visited this hospital
-      query = { 'visits.hospitalId': session.user.id };
+      // Get patients from hospital records (added via "Add Patient" feature)
+      const hospitalRecords = await HospitalPatientRecord.find({ 
+        hospitalId: session.user.id,
+        status: 'active'
+      }).select('healthPassportId').lean();
+      
+      const hospitalPatientIds = hospitalRecords.map(record => record.healthPassportId);
+      
+      // Get patients who have visited this hospital
+      const visitQuery = { 'visits.hospitalId': session.user.id };
+      
+      // Combine both queries - patients from hospital records OR patients with visits
+      const combinedQuery = hospitalPatientIds.length > 0 
+        ? { $or: [
+            { healthPassportId: { $in: hospitalPatientIds } },
+            visitQuery
+          ]}
+        : visitQuery;
+      
+      patients = await Patient.find(combinedQuery)
+        .select('personalInfo visits medicalHistory healthPassportId')
+        .limit(limit)
+        .lean();
+        
     } else if (session.user.role === 'doctor') {
       // Get all patients this doctor has treated
-      query = { 'visits.doctorId': session.user.id };
+      const query = { 'visits.doctorId': session.user.id };
+      patients = await Patient.find(query)
+        .select('personalInfo visits medicalHistory healthPassportId')
+        .limit(limit)
+        .lean();
     }
-
-    // Get patients with their visit information
-    const patients = await Patient.find(query)
-      .select('personalInfo visits medicalHistory')
-      .limit(limit)
-      .lean();
 
     // Transform patient data for the UI
     const patientRecords = await Promise.all(
       patients.map(async (patient: any) => {
         const visits = patient.visits || [];
         const lastVisit = visits.length > 0 ? visits[visits.length - 1] : null;
+        
+        // Get hospital record if it exists
+        let hospitalRecord: any = null;
+        if (session.user.role === 'hospital') {
+          hospitalRecord = await HospitalPatientRecord.findOne({
+            hospitalId: session.user.id,
+            healthPassportId: patient.healthPassportId
+          }).lean();
+        }
         
         // Get doctor info for last visit
         let doctorInfo = null;
@@ -72,37 +102,52 @@ export async function GET(request: NextRequest) {
           return visitDate >= thirtyDaysAgo;
         });
 
-        // Determine status based on recent activity
-        const isActive = recentVisits.length > 0;
+        // Determine status based on recent activity or hospital record
+        let isActive = recentVisits.length > 0;
+        if (hospitalRecord) {
+          isActive = hospitalRecord.status === 'active';
+        }
         
         // Determine risk level based on conditions and recent visits
         const conditions = patient.medicalHistory?.conditions || [];
         let riskLevel = 'Low';
         
-        const highRiskConditions = ['Heart Disease', 'Diabetes', 'Hypertension', 'Cancer', 'Stroke'];
-        const hasHighRiskCondition = conditions.some((condition: any) => 
-          highRiskConditions.some(risk => condition.name?.toLowerCase().includes(risk.toLowerCase()))
-        );
-        
-        if (hasHighRiskCondition && conditions.length > 2) {
-          riskLevel = 'High';
-        } else if (hasHighRiskCondition || conditions.length > 1) {
-          riskLevel = 'Moderate';
+        // Use hospital record risk level if available, otherwise calculate
+        if (hospitalRecord && hospitalRecord.riskLevel) {
+          riskLevel = hospitalRecord.riskLevel;
+        } else {
+          const highRiskConditions = ['Heart Disease', 'Diabetes', 'Hypertension', 'Cancer', 'Stroke'];
+          const hasHighRiskCondition = conditions.some((condition: any) => 
+            highRiskConditions.some(risk => condition.name?.toLowerCase().includes(risk.toLowerCase()))
+          );
+          
+          if (hasHighRiskCondition && conditions.length > 2) {
+            riskLevel = 'High';
+          } else if (hasHighRiskCondition || conditions.length > 1) {
+            riskLevel = 'Moderate';
+          }
         }
+
+        // Use hospital record data when available, fallback to patient data
+        const patientName = hospitalRecord?.patientName || `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`;
+        const patientAge = hospitalRecord?.patientAge || (patient.personalInfo.dateOfBirth ? 
+          new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear() : 
+          null);
 
         return {
           id: patient._id,
-          name: `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`,
-          age: patient.personalInfo.dateOfBirth ? 
-            new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear() : 
-            null,
-          lastVisit: lastVisit?.date || null,
+          healthPassportId: patient.healthPassportId,
+          name: patientName,
+          age: patientAge,
+          lastVisit: lastVisit?.date || hospitalRecord?.addedDate || null,
           recordsCount,
           status: isActive ? 'Active' : 'Inactive',
           riskLevel,
-          conditions: conditions.map((c: any) => c.name).slice(0, 3), // Show max 3 conditions
-          lastUpdate: lastVisit?.date || patient.updatedAt,
-          doctor: doctorInfo
+          conditions: (hospitalRecord?.conditions || conditions.map((c: any) => c.name)).slice(0, 3), // Show max 3 conditions
+          lastUpdate: lastVisit?.date || hospitalRecord?.lastUpdated || patient.updatedAt,
+          doctor: doctorInfo,
+          addedToHospital: !!hospitalRecord,
+          hospitalRecordId: hospitalRecord?._id
         };
       })
     );
