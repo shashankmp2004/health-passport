@@ -25,6 +25,7 @@ import {
   QrCode,
   BarChart3,
   AlertTriangle,
+  Bell,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -49,6 +50,11 @@ const menuItems = [
     title: "Patient Records",
     url: "/hospital/patient-records",
     icon: FileText,
+  },
+  {
+    title: "Access Requests",
+    url: "/hospital/access-requests",
+    icon: Bell,
   },
   {
     title: "Analytics",

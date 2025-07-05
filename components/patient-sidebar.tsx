@@ -23,6 +23,7 @@ import {
   Settings,
   LogOut,
   Shield,
+  Bell,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -66,6 +67,11 @@ const menuItems = [
 ]
 
 const accountItems = [
+  {
+    title: "Access Requests",
+    url: "/patient/notifications",
+    icon: Bell,
+  },
   {
     title: "Profile",
     url: "/patient/profile",

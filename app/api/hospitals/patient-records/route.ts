@@ -46,6 +46,12 @@ export async function GET(request: NextRequest) {
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
+      console.log('Querying hospital records with:', {
+        hospitalId: session.user.id,
+        status: 'active',
+        twentyFourHoursAgo: twentyFourHoursAgo.toISOString()
+      });
+      
       hospitalRecords = await HospitalPatientRecord.find({ 
         hospitalId: session.user.id,
         status: 'active',
@@ -55,6 +61,21 @@ export async function GET(request: NextRequest) {
       console.log(`Found ${hospitalRecords.length} hospital records within 24 hours for hospital ${session.user.id}`);
       console.log('24 hours ago timestamp:', twentyFourHoursAgo.toISOString());
       console.log('Hospital records:', hospitalRecords.map(r => ({
+        id: r._id,
+        healthPassportId: r.healthPassportId,
+        patientName: r.patientName,
+        status: r.status,
+        addedDate: r.addedDate,
+        hoursAgo: Math.round((new Date().getTime() - new Date(r.addedDate).getTime()) / (1000 * 60 * 60))
+      })));
+      
+      // Also try to get ALL records for this hospital to debug
+      const allHospitalRecords = await HospitalPatientRecord.find({ 
+        hospitalId: session.user.id 
+      }).lean();
+      
+      console.log(`Total hospital records for hospital ${session.user.id}: ${allHospitalRecords.length}`);
+      console.log('All hospital records:', allHospitalRecords.map(r => ({
         id: r._id,
         healthPassportId: r.healthPassportId,
         patientName: r.patientName,

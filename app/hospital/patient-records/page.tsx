@@ -115,6 +115,14 @@ export default function PatientRecords() {
       // Clean up URL parameter
       window.history.replaceState({}, '', '/hospital/patient-records')
     }
+    
+    // Check if redirected after sending access request
+    if (urlParams.get('requestSent') === 'true') {
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 5000)
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/hospital/patient-records')
+    }
   }, [session, status, router])
 
   // Refresh data when the page becomes visible (e.g., after navigating back from add patient)
@@ -226,8 +234,18 @@ export default function PatientRecords() {
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
-            <span className="font-medium text-green-800">Patient successfully added to hospital records!</span>
-            <span className="text-green-600">The patient should now appear in your records below.</span>
+            <span className="font-medium text-green-800">
+              {window.location.search.includes('requestSent') ? 
+                'Access request sent successfully!' : 
+                'Patient successfully added to hospital records!'
+              }
+            </span>
+            <span className="text-green-600">
+              {window.location.search.includes('requestSent') ? 
+                'The patient will receive a notification and can approve your request.' : 
+                'The patient should now appear in your records below.'
+              }
+            </span>
           </div>
         </div>
       )}
@@ -383,15 +401,24 @@ export default function PatientRecords() {
                   <div className="text-center py-12">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No patient records found</p>
-                    <p className="text-sm text-gray-500 mb-2">Patient records will appear here once they are added</p>
+                    <p className="text-sm text-gray-500 mb-2">Patient records will appear here once access is approved</p>
                     <p className="text-xs text-amber-600 mb-6">Note: Access to patient records expires after 24 hours</p>
-                    <Button 
-                      onClick={() => router.push('/hospital/add-patient')}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Patient
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button 
+                        onClick={() => router.push('/hospital/add-patient')}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Request Patient Access
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => router.push('/hospital/access-requests')}
+                      >
+                        <Clock className="w-4 h-4 mr-2" />
+                        View Access Requests
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QrCode, Camera, User, FileText, CheckCircle, Scan, Search, History, Plus } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import CameraQRScanner from '@/components/camera-qr-scanner'
 
 export default function AddPatient() {
   const [isScanning, setIsScanning] = useState(false)
@@ -20,18 +21,25 @@ export default function AddPatient() {
   const [scanHistory, setScanHistory] = useState<any[]>([])
   const [addingToRecords, setAddingToRecords] = useState(false)
   const [addedToRecords, setAddedToRecords] = useState(false)
+  const [requestSent, setRequestSent] = useState(false)
+  const [requestId, setRequestId] = useState("")
   const { data: session } = useSession()
   const router = useRouter()
+  const [showCameraScanner, setShowCameraScanner] = useState(false)
 
   const handleStartScan = () => {
-    setIsScanning(true)
+    setShowCameraScanner(true)
     setError("")
-    // Simulate scanning process - in real app, this would use camera API
-    setTimeout(() => {
-      // Mock scan of a Health Passport ID
-      const scannedId = "HP-A28B3-T9I1L" // This would come from QR code
-      fetchPatientData(scannedId, "QR Scan")
-    }, 2000)
+  }
+
+  const handleScanSuccess = (scannedValue: string) => {
+    setShowCameraScanner(false)
+    fetchPatientData(scannedValue, "QR Scan")
+  }
+
+  const handleScanError = (err: string) => {
+    setShowCameraScanner(false)
+    setError(err)
   }
 
   const handleManualSearch = () => {
@@ -96,7 +104,7 @@ export default function AddPatient() {
   }
 
   const handleStopScan = () => {
-    setIsScanning(false)
+    setShowCameraScanner(false)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -112,32 +120,33 @@ export default function AddPatient() {
     setError("")
     
     try {
-      const response = await fetch('/api/hospitals/add-patient-record', {
+      const response = await fetch('/api/hospitals/request-patient-access', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           healthPassportId: scannedPatient.id,
-          patientData: scannedPatient
+          requestReason: 'Medical consultation and record access for hospital treatment'
         }),
       })
 
       if (response.ok) {
         const result = await response.json()
-        setAddedToRecords(true)
+        setRequestSent(true)
+        setRequestId(result.data.requestId)
         
-        // Show success message briefly, then redirect to patient records
+        // Show success message and redirect after a delay
         setTimeout(() => {
-          router.push('/hospital/patient-records?justAdded=true')
-        }, 2500)
+          router.push('/hospital/patient-records?requestSent=true')
+        }, 3000)
       } else {
         const errorData = await response.json()
-        setError(errorData.error || 'Failed to add patient to records')
+        setError(errorData.error || 'Failed to send access request')
       }
     } catch (error) {
-      console.error('Error adding patient to records:', error)
-      setError('Error adding patient to records. Please try again.')
+      console.error('Error sending access request:', error)
+      setError('Error sending access request. Please try again.')
     } finally {
       setAddingToRecords(false)
     }
@@ -157,7 +166,7 @@ export default function AddPatient() {
         </div>
       </div>
 
-      {/* 24-Hour Access Warning */}
+      {/* Patient Consent and Access Policy */}
       <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
@@ -166,9 +175,10 @@ export default function AddPatient() {
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-amber-800">24-Hour Access Policy</h3>
+            <h3 className="text-sm font-semibold text-amber-800">Patient Consent & 24-Hour Access Policy</h3>
             <p className="text-sm text-amber-700 mt-1">
-              When you add a patient to your hospital records, you will only have access to their information for <strong>24 hours</strong>. 
+              When you request access to a patient's records, the patient will receive a notification and must <strong>approve your request</strong> before you can access their information. 
+              Once approved, you will have access to their medical records for <strong>24 hours</strong> only. 
               After this period expires, the patient will be automatically removed from your accessible records for privacy protection.
             </p>
           </div>
@@ -243,7 +253,14 @@ export default function AddPatient() {
                   <CardDescription>Scan the patient's QR code for instant access</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {!isScanning ? (
+                  {showCameraScanner ? (
+                    <CameraQRScanner
+                      isActive={showCameraScanner}
+                      onScan={handleScanSuccess}
+                      onError={handleScanError}
+                      onClose={handleStopScan}
+                    />
+                  ) : (
                     <div className="space-y-4">
                       <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
                         <div className="text-center">
@@ -254,28 +271,6 @@ export default function AddPatient() {
                       <Button onClick={handleStartScan} className="w-full bg-green-600 hover:bg-green-700">
                         <Scan className="w-4 h-4 mr-2" />
                         Start QR Scanner
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="aspect-square bg-blue-600 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700"></div>
-                        <div className="relative z-10 text-center text-white">
-                          <div className="w-24 h-24 border-4 border-white rounded-lg mx-auto mb-4 animate-pulse"></div>
-                          <p className="text-sm">Scanning QR Code...</p>
-                          <div className="mt-2 flex items-center justify-center space-x-1">
-                            <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                          </div>
-                        </div>
-                      </div>
-                      <Button 
-                        onClick={handleStopScan} 
-                        variant="outline" 
-                        className="w-full border-red-300 text-red-700 hover:bg-red-50"
-                      >
-                        Stop Scanning
                       </Button>
                     </div>
                   )}
@@ -432,6 +427,30 @@ export default function AddPatient() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col space-y-3 pt-4 border-t">
+                    {requestSent && (
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center mt-0.5">
+                            <span className="text-white text-xs font-bold">!</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-blue-800 mb-1">
+                              📨 Access Request Sent!
+                            </h4>
+                            <div className="text-sm text-blue-700 space-y-1">
+                              <p>An access request has been sent to the patient.</p>
+                              <div className="p-2 bg-amber-50 border border-amber-200 rounded text-amber-800">
+                                <p className="font-medium">⏳ Waiting for Patient Approval:</p>
+                                <p className="text-xs">The patient will receive a notification and can approve or deny your request to access their medical records. You will be notified once they respond.</p>
+                              </div>
+                              <p className="text-xs text-blue-600">Request ID: {requestId}</p>
+                              <p className="text-xs italic">Redirecting to Patient Records...</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {addedToRecords && (
                       <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-start space-x-3">
@@ -456,13 +475,18 @@ export default function AddPatient() {
                     <div className="flex flex-wrap gap-3">
                       <Button 
                         onClick={handleAddToRecords}
-                        disabled={addingToRecords || addedToRecords}
+                        disabled={addingToRecords || addedToRecords || requestSent}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         {addingToRecords ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Adding...
+                            Sending Request...
+                          </>
+                        ) : requestSent ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Request Sent
                           </>
                         ) : addedToRecords ? (
                           <>
@@ -472,7 +496,7 @@ export default function AddPatient() {
                         ) : (
                           <>
                             <Plus className="w-4 h-4 mr-2" />
-                            Add to Records
+                            Request Access
                           </>
                         )}
                       </Button>
