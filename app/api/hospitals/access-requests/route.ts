@@ -57,21 +57,32 @@ export async function GET(request: NextRequest) {
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
 
-    const counts = statusCounts.reduce((acc, item) => {
+    const counts: Record<string, number> = statusCounts.reduce((acc, item) => {
       acc[item._id] = item.count;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
+
+    // Calculate total from all status counts
+    const totalCount = statusCounts.reduce((sum, item) => sum + item.count, 0);
+
+    console.log('Access requests debug:', {
+      hospitalId: session.user.id,
+      statusCounts,
+      calculatedCounts: counts,
+      totalCount,
+      transformedRequestsLength: transformedRequests.length
+    });
 
     return NextResponse.json({
       success: true,
       data: {
         requests: transformedRequests,
         counts: {
-          total: transformedRequests.length,
-          pending: counts.pending || 0,
-          approved: counts.approved || 0,
-          denied: counts.denied || 0,
-          expired: counts.expired || 0
+          total: totalCount, // Use actual total from database
+          pending: counts['pending'] || 0,
+          approved: counts['approved'] || 0,
+          denied: counts['denied'] || 0,
+          expired: counts['expired'] || 0
         }
       }
     });

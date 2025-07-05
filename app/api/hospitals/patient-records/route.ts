@@ -42,24 +42,23 @@ export async function GET(request: NextRequest) {
     let hospitalRecords: any[] = [];
     
     if (session.user.role === 'hospital') {
-      // Get hospital patient records that are within 24 hours of being added
+      // Get hospital patient records that are active (temporarily removing 24-hour restriction for debugging)
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       console.log('Querying hospital records with:', {
         hospitalId: session.user.id,
-        status: 'active',
-        twentyFourHoursAgo: twentyFourHoursAgo.toISOString()
+        status: 'active'
       });
       
+      // First, get ALL active records for debugging
       hospitalRecords = await HospitalPatientRecord.find({ 
         hospitalId: session.user.id,
-        status: 'active',
-        addedDate: { $gte: twentyFourHoursAgo } // Only records added within last 24 hours
+        status: 'active'
+        // 24-hour restriction completely removed for debugging
       }).lean();
       
-      console.log(`Found ${hospitalRecords.length} hospital records within 24 hours for hospital ${session.user.id}`);
-      console.log('24 hours ago timestamp:', twentyFourHoursAgo.toISOString());
+      console.log(`Found ${hospitalRecords.length} active hospital records for hospital ${session.user.id}`);
       console.log('Hospital records:', hospitalRecords.map(r => ({
         id: r._id,
         healthPassportId: r.healthPassportId,
@@ -69,20 +68,16 @@ export async function GET(request: NextRequest) {
         hoursAgo: Math.round((new Date().getTime() - new Date(r.addedDate).getTime()) / (1000 * 60 * 60))
       })));
       
-      // Also try to get ALL records for this hospital to debug
-      const allHospitalRecords = await HospitalPatientRecord.find({ 
-        hospitalId: session.user.id 
-      }).lean();
+      // Show which records would be filtered by 24-hour rule
+      const recentRecords = hospitalRecords.filter(record => 
+        new Date(record.addedDate) >= twentyFourHoursAgo
+      );
       
-      console.log(`Total hospital records for hospital ${session.user.id}: ${allHospitalRecords.length}`);
-      console.log('All hospital records:', allHospitalRecords.map(r => ({
-        id: r._id,
-        healthPassportId: r.healthPassportId,
-        patientName: r.patientName,
-        status: r.status,
-        addedDate: r.addedDate,
-        hoursAgo: Math.round((new Date().getTime() - new Date(r.addedDate).getTime()) / (1000 * 60 * 60))
-      })));
+      console.log(`${recentRecords.length} of ${hospitalRecords.length} records are within 24 hours`);
+      console.log('24 hours ago timestamp:', twentyFourHoursAgo.toISOString());
+      
+      // Use ALL active records (ignoring 24-hour restriction for now)
+      // hospitalRecords = recentRecords;
       
       const hospitalPatientIds = hospitalRecords.map(record => record.healthPassportId);
       

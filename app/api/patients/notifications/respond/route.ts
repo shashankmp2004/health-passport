@@ -127,22 +127,37 @@ export async function POST(request: NextRequest) {
             }
           });
 
-          await hospitalRecord.save();
+          const newRecord = await hospitalRecord.save();
           
           console.log('Hospital patient record created successfully:', {
-            recordId: hospitalRecord._id,
+            recordId: newRecord._id,
             hospitalId: notification.hospitalId,
             patientId: patient.healthPassportId,
-            patientName: hospitalRecord.patientName,
-            addedDate: hospitalRecord.addedDate,
-            status: hospitalRecord.status
+            patientName: newRecord.patientName,
+            addedDate: newRecord.addedDate,
+            status: newRecord.status,
+            savedAt: new Date().toISOString()
           });
+          
+          // Verify the record was actually saved
+          const verificationRecord = await HospitalPatientRecord.findById(newRecord._id);
+          console.log('Verification - Record exists in DB:', !!verificationRecord);
+          
         } else {
           console.log('Hospital record already exists:', {
             existingRecordId: existingRecord._id,
             status: existingRecord.status,
             addedDate: existingRecord.addedDate
           });
+          
+          // Update the existing record to be active and refresh the date
+          await HospitalPatientRecord.findByIdAndUpdate(existingRecord._id, {
+            status: 'active',
+            lastUpdated: now,
+            addedDate: now // Refresh the added date for 24-hour access window
+          });
+          
+          console.log('Updated existing hospital record to active with new addedDate');
         }
 
         // Create a confirmation notification

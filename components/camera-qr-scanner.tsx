@@ -58,6 +58,8 @@ export default function CameraQRScanner({ onScan, onError, isActive, onClose }: 
 
     if (code && code.data) {
       console.log('QR Code detected:', code.data)
+      console.log('QR Code length:', code.data.length)
+      console.log('QR Code starts with:', code.data.substring(0, 20))
       setScanResult(code.data)
       setIsScanning(false)
       
@@ -69,6 +71,7 @@ export default function CameraQRScanner({ onScan, onError, isActive, onClose }: 
       
       // Call the onScan callback after a brief delay to show success
       setTimeout(() => {
+        console.log('Calling onScan with data:', code.data)
         onScan(code.data)
       }, 1000)
       

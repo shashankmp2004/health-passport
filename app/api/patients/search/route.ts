@@ -23,10 +23,11 @@ export async function GET(request: NextRequest) {
     const healthPassportId = searchParams.get('healthPassportId')
     const name = searchParams.get('name')
     const phone = searchParams.get('phone')
+    const email = searchParams.get('email')
 
-    if (!healthPassportId && !name && !phone) {
+    if (!healthPassportId && !name && !phone && !email) {
       return NextResponse.json(
-        { error: 'Search parameter required (healthPassportId, name, or phone)' },
+        { error: 'Search parameter required (healthPassportId, name, phone, or email)' },
         { status: 400 }
       )
     }
@@ -51,6 +52,8 @@ export async function GET(request: NextRequest) {
       }
     } else if (phone) {
       query['personalInfo.phone'] = { $regex: phone }
+    } else if (email) {
+      query['personalInfo.email'] = { $regex: email, $options: 'i' }
     }
 
     // Find patient

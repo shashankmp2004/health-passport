@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation"
 export default function AccessRequests() {
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState({ total: 0, pending: 0, approved: 0, denied: 0, expired: 0 })
   const [debugInfo, setDebugInfo] = useState<any>(null)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -33,8 +32,11 @@ export default function AccessRequests() {
       const response = await fetch('/api/hospitals/access-requests')
       if (response.ok) {
         const result = await response.json()
+        console.log('Access requests API response:', result)
+        console.log('Counts received:', result.data.counts)
+        console.log('Requests received:', result.data.requests?.length)
+        
         setRequests(result.data.requests || [])
-        setCounts(result.data.counts || { total: 0, pending: 0, approved: 0, denied: 0, expired: 0 })
       } else {
         console.error('Failed to fetch access requests')
       }
@@ -140,9 +142,6 @@ Check console for detailed info`)
           <p className="text-gray-600">Monitor patient record access requests and their status</p>
         </div>
         <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            {counts.pending} Pending
-          </Badge>
           <Button 
             variant="outline"
             onClick={() => {
@@ -181,16 +180,16 @@ Check console for detailed info`)
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending">
-            Pending ({counts.pending})
+            Pending
           </TabsTrigger>
           <TabsTrigger value="all">
-            All Requests ({counts.total})
+            All Requests
           </TabsTrigger>
           <TabsTrigger value="approved">
-            Approved ({counts.approved})
+            Approved
           </TabsTrigger>
           <TabsTrigger value="denied">
-            Denied ({counts.denied})
+            Denied
           </TabsTrigger>
         </TabsList>
 

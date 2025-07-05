@@ -23,6 +23,7 @@ export default function AddPatient() {
   const [addedToRecords, setAddedToRecords] = useState(false)
   const [requestSent, setRequestSent] = useState(false)
   const [requestId, setRequestId] = useState("")
+  const [existsInRecords, setExistsInRecords] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
   const [showCameraScanner, setShowCameraScanner] = useState(false)
@@ -53,8 +54,21 @@ export default function AddPatient() {
   const fetchPatientData = async (healthPassportId: string, method: string) => {
     setLoading(true)
     setError("")
+    setExistsInRecords(false)
 
     try {
+      // First, check if patient exists in our records
+      const recordsResponse = await fetch('/api/hospitals/patient-records')
+      let existsInHospitalRecords = false
+      
+      if (recordsResponse.ok) {
+        const recordsData = await recordsResponse.json()
+        existsInHospitalRecords = recordsData.data.patientRecords.some(
+          (record: any) => record.healthPassportId === healthPassportId
+        )
+      }
+
+      // Then fetch patient data
       const response = await fetch(`/api/patients/search?healthPassportId=${healthPassportId}`)
 
       if (response.ok) {
@@ -75,13 +89,14 @@ export default function AddPatient() {
           }
           
           setScannedPatient(patientData)
+          setExistsInRecords(existsInHospitalRecords)
           
           // Add to scan history
           const newScan = {
             id: healthPassportId,
             name: patientData.name,
             scanTime: new Date().toLocaleString(),
-            status: "success",
+            status: existsInHospitalRecords ? "already_in_records" : "success",
             method: method
           }
           setScanHistory([newScan, ...scanHistory.slice(0, 4)])
@@ -473,37 +488,48 @@ export default function AddPatient() {
                     )}
                     
                     <div className="flex flex-wrap gap-3">
-                      <Button 
-                        onClick={handleAddToRecords}
-                        disabled={addingToRecords || addedToRecords || requestSent}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        {addingToRecords ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Sending Request...
-                          </>
-                        ) : requestSent ? (
-                          <>
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Request Sent
-                          </>
-                        ) : addedToRecords ? (
-                          <>
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Added to Records
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="w-4 h-4 mr-2" />
-                            Request Access
-                          </>
-                        )}
-                      </Button>
+                      {existsInRecords ? (
+                        <div className="flex items-center justify-center bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Already Present in Records
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={handleAddToRecords}
+                          disabled={addingToRecords || addedToRecords || requestSent}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {addingToRecords ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Sending Request...
+                            </>
+                          ) : requestSent ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Request Sent
+                            </>
+                          ) : addedToRecords ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Added to Records
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4 mr-2" />
+                              Request Access
+                            </>
+                          )}
+                        </Button>
+                      )}
                       
-                      <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => router.push(`/hospital/patient-details/${scannedPatient.id}`)}
+                        disabled={!existsInRecords}
+                      >
                         <FileText className="w-4 h-4 mr-2" />
-                        View Full Records
+                        {existsInRecords ? 'View Full Records' : 'View Full Records (Access Required)'}
                       </Button>
                       
                       <Button variant="outline">

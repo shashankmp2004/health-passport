@@ -38,6 +38,8 @@ export default function QRScanner() {
     
     try {
       console.log('QR Data received:', qrData)
+      console.log('QR Data length:', qrData.length)
+      console.log('QR Data starts with:', qrData.substring(0, 50))
       
       // First, try to scan the QR code to get patient data
       const scanResponse = await fetch('/api/qr/scan', {
@@ -55,6 +57,7 @@ export default function QRScanner() {
 
       if (!scanResponse.ok) {
         const errorData = await scanResponse.json()
+        console.log('Scan error data:', errorData)
         throw new Error(errorData.error || 'Failed to scan QR code')
       }
 

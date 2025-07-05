@@ -168,6 +168,9 @@ export async function GET(
       case 'data_url':
         qrCodeResult = await QRCode.toDataURL(encryptedData, qrOptions);
         break;
+      case 'text':
+        qrCodeResult = encryptedData; // Return the raw encrypted data
+        break;
       case 'png':
       default:
         const buffer = await QRCode.toBuffer(encryptedData, qrOptions);
