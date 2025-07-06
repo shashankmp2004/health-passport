@@ -3,17 +3,111 @@ import type { Patient } from '@/types/patient'
 
 export interface IPatient extends Omit<Patient, '_id'>, Document {}
 
-const MedicalHistorySchema = new Schema({
-  condition: { type: String, required: true },
-  diagnosedDate: { type: Date, required: true },
+const MedicalConditionSchema = new Schema({
+  name: { type: String, required: true },
+  diagnosedDate: { type: Date },
+  severity: { 
+    type: String, 
+    enum: ['Mild', 'Moderate', 'Severe'], 
+    default: 'Moderate' 
+  },
   status: { 
     type: String, 
-    enum: ['active', 'resolved', 'chronic'], 
-    default: 'active' 
+    enum: ['Active', 'Inactive', 'Resolved'], 
+    default: 'Active' 
   },
-  doctorId: { type: String, required: true },
   notes: { type: String }
 }, { _id: true })
+
+const AllergySchema = new Schema({
+  name: { type: String, required: true },
+  severity: { 
+    type: String, 
+    enum: ['Mild', 'Moderate', 'Severe'], 
+    default: 'Moderate' 
+  },
+  reaction: { type: String },
+  discoveredDate: { type: Date }
+}, { _id: true })
+
+const MedicationHistorySchema = new Schema({
+  name: { type: String, required: true },
+  dosage: { type: String },
+  frequency: { type: String },
+  prescribedBy: { type: String },
+  startDate: { type: Date },
+  endDate: { type: Date },
+  status: { 
+    type: String, 
+    enum: ['Active', 'Discontinued'], 
+    default: 'Active' 
+  }
+}, { _id: true })
+
+const ImmunizationSchema = new Schema({
+  name: { type: String, required: true },
+  dateAdministered: { type: Date },
+  manufacturer: { type: String },
+  lotNumber: { type: String },
+  administeredBy: { type: String },
+  status: { type: String, default: 'Complete' }
+}, { _id: true })
+
+const ProcedureSchema = new Schema({
+  name: { type: String, required: true },
+  date: { type: Date },
+  surgeon: { type: String },
+  hospital: { type: String },
+  description: { type: String },
+  outcome: { type: String },
+  status: { 
+    type: String, 
+    enum: ['Completed', 'Scheduled', 'Cancelled'], 
+    default: 'Completed' 
+  }
+}, { _id: true })
+
+const LabResultSchema = new Schema({
+  testName: { type: String, required: true },
+  date: { type: Date },
+  orderedBy: { type: String },
+  results: { type: String },
+  referenceRange: { type: String },
+  status: { 
+    type: String, 
+    enum: ['Normal', 'Abnormal', 'Critical'], 
+    default: 'Normal' 
+  },
+  notes: { type: String },
+  attachments: [{
+    id: { type: String },
+    name: { type: String },
+    url: { type: String },
+    public_id: { type: String },
+    type: { type: String },
+    size: { type: Number }
+  }]
+}, { _id: true })
+
+const VitalSignHistorySchema = new Schema({
+  date: { type: Date },
+  bloodPressure: { type: String },
+  heartRate: { type: String },
+  temperature: { type: String },
+  weight: { type: String },
+  height: { type: String },
+  recordedBy: { type: String }
+}, { _id: true })
+
+const MedicalHistorySchema = new Schema({
+  conditions: [MedicalConditionSchema],
+  allergies: [AllergySchema],
+  medications: [MedicationHistorySchema],
+  immunizations: [ImmunizationSchema],
+  procedures: [ProcedureSchema],
+  labResults: [LabResultSchema],
+  vitalSigns: [VitalSignHistorySchema]
+}, { _id: false })
 
 const MedicationSchema = new Schema({
   name: { type: String, required: true },
@@ -71,22 +165,28 @@ const DocumentSchema = new Schema({
 const PersonalInfoSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  dateOfBirth: { type: Date, required: true },
-  bloodType: { type: String, required: true },
-  aadharNumber: { type: String, required: true }, // Will be encrypted
-  phone: { type: String, required: true },
-  email: { type: String, required: true, unique: true }
+  dateOfBirth: { type: Date },
+  gender: { type: String },
+  bloodType: { type: String },
+  aadharNumber: { type: String }, // Will be encrypted
+  phone: { type: String },
+  email: { type: String },
+  address: { type: String },
+  emergencyContact: {
+    name: { type: String },
+    phone: { type: String },
+    relationship: { type: String }
+  }
 }, { _id: false })
 
 const PatientSchema = new Schema({
   healthPassportId: { 
     type: String, 
     required: true, 
-    unique: true,
-    match: /^HP-[A-Z0-9]{5}-[A-Z0-9]{5}$/
+    unique: true
   },
   personalInfo: { type: PersonalInfoSchema, required: true },
-  medicalHistory: [MedicalHistorySchema],
+  medicalHistory: { type: MedicalHistorySchema, default: {} },
   medications: [MedicationSchema],
   vitals: [VitalSignSchema],
   visits: [VisitSchema],

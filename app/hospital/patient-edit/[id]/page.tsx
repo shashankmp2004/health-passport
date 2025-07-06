@@ -105,7 +105,7 @@ export default function PatientEdit() {
             console.log('Access check result:', hasAccess, 'for healthPassportId:', healthPassportId)
             
             if (!hasAccess) {
-              setError("Access denied. This patient is not in your accessible records or access has expired.")
+              setError("Access denied. This patient is not in your accessible records.")
               return
             }
 
@@ -159,12 +159,42 @@ export default function PatientEdit() {
         body: JSON.stringify(updatePayload)
       })
 
+      console.log('Response status:', response.status);
+      console.log('Response statusText:', response.statusText);
+      console.log('Response headers:', Array.from(response.headers.entries()));
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update patient')
+        let errorMessage = 'Failed to update patient';
+        try {
+          const responseText = await response.text();
+          console.log('Error response text:', responseText);
+          
+          // Try to parse as JSON
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (jsonError) {
+          // If response is not JSON, use status text
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+          console.error('Failed to parse error response as JSON:', jsonError);
+        }
+        throw new Error(errorMessage)
       }
 
-      const result = await response.json()
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log('Success response text:', responseText);
+        console.log('Response text length:', responseText.length);
+        
+        if (!responseText || responseText.trim() === '') {
+          throw new Error('Server returned empty response');
+        }
+        
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error('Failed to parse success response as JSON:', jsonError);
+        throw new Error('Invalid response from server');
+      }
       
       // Update the original patient data
       setPatient(result.patient)

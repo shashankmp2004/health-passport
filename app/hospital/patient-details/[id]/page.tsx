@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, User, Heart, Activity, FileText, Calendar, Phone, AlertTriangle, Edit, Download, Clock } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ArrowLeft, User, Heart, Activity, FileText, Calendar, Phone, AlertTriangle, Edit, Download, Clock, Eye, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 
 export default function PatientDetails() {
@@ -15,7 +17,8 @@ export default function PatientDetails() {
   const [patient, setPatient] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [timeRemaining, setTimeRemaining] = useState("")
+  const [selectedDocument, setSelectedDocument] = useState<any>(null)
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false)
   const { data: session } = useSession()
 
   useEffect(() => {
@@ -23,40 +26,6 @@ export default function PatientDetails() {
       fetchPatientDetails(params.id as string)
     }
   }, [params.id])
-
-  useEffect(() => {
-    // Update time remaining every minute
-    const interval = setInterval(() => {
-      if (patient) {
-        calculateTimeRemaining()
-      }
-    }, 60000)
-
-    return () => clearInterval(interval)
-  }, [patient])
-
-  const calculateTimeRemaining = () => {
-    if (!patient || !patient.addedAt) return
-
-    const addedTime = new Date(patient.addedAt)
-    const expiryTime = new Date(addedTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
-    const now = new Date()
-    const timeLeft = expiryTime.getTime() - now.getTime()
-
-    if (timeLeft <= 0) {
-      setTimeRemaining("Expired")
-      return
-    }
-
-    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
-    const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
-
-    if (hoursLeft > 0) {
-      setTimeRemaining(`${hoursLeft}h ${minutesLeft}m remaining`)
-    } else {
-      setTimeRemaining(`${minutesLeft}m remaining`)
-    }
-  }
 
   const fetchPatientDetails = async (healthPassportId: string) => {
     console.log('fetchPatientDetails called with healthPassportId:', healthPassportId)
@@ -106,7 +75,7 @@ export default function PatientDetails() {
             console.log('Access check result:', hasAccess, 'for healthPassportId:', healthPassportId)
             
             if (!hasAccess) {
-              setError("Access denied. This patient is not in your accessible records or access has expired.")
+              setError("Access denied. This patient is not in your accessible records.")
               return
             }
 
@@ -120,7 +89,6 @@ export default function PatientDetails() {
             }
             
             setPatient(patientData)
-            calculateTimeRemaining()
           } catch (hospitalError) {
             console.error('Error checking hospital access:', hospitalError)
             setError("Error verifying access to patient records. Please try again.")
@@ -166,6 +134,114 @@ export default function PatientDetails() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const openDocumentModal = (document: any) => {
+    setSelectedDocument(document)
+    setIsDocumentModalOpen(true)
+  }
+
+  const closeDocumentModal = () => {
+    setSelectedDocument(null)
+    setIsDocumentModalOpen(false)
+  }
+
+  // Render document preview in modal
+  const renderDocumentPreview = (document: any) => {
+    if (!document || !document.url) {
+      return (
+        <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+          <FileText className="w-12 h-12 mb-4" />
+          <p>Document not available</p>
+        </div>
+      )
+    }
+
+    // Determine file type from URL or name
+    const fileUrl = document.url
+    const fileName = document.name || 'Document'
+    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName) || fileUrl.includes('image')
+    const isPdf = /\.pdf$/i.test(fileName) || fileUrl.includes('pdf')
+
+    if (isImage) {
+      return (
+        <div className="flex justify-center">
+          <img
+            src={fileUrl}
+            alt={fileName}
+            className="max-w-full max-h-[70vh] object-contain rounded-lg"
+            onError={(e) => {
+              console.error('Error loading image:', e)
+              const target = e.currentTarget as HTMLImageElement
+              target.style.display = 'none'
+              const fallback = target.nextElementSibling as HTMLElement
+              if (fallback) {
+                fallback.classList.remove('hidden')
+                fallback.classList.add('flex', 'flex-col')
+              }
+            }}
+          />
+          <div className="hidden items-center justify-center h-96 text-gray-500">
+            <FileText className="w-12 h-12 mb-4" />
+            <p>Unable to load image</p>
+            <Button 
+              onClick={() => window.open(fileUrl, '_blank')}
+              className="mt-4"
+              variant="outline"
+            >
+              Open in New Tab
+            </Button>
+          </div>
+        </div>
+      )
+    }
+    
+    if (isPdf) {
+      return (
+        <div className="w-full">
+          <iframe
+            src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+            className="w-full h-[70vh] border rounded-lg"
+            title={fileName}
+            onError={(e) => {
+              console.error('Error loading PDF:', e)
+            }}
+          />
+        </div>
+      )
+    }
+
+    // For other file types, show download option
+    return (
+      <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+        <FileText className="w-12 h-12 mb-4" />
+        <p className="text-center mb-4">Preview not available for this file type</p>
+        <p className="text-sm text-gray-600 mb-4">{fileName}</p>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => window.open(fileUrl, '_blank')}
+            variant="outline"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Open in New Tab
+          </Button>
+          <Button 
+            onClick={() => {
+              const link = document.createElement('a')
+              link.href = fileUrl
+              link.download = fileName
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+            }}
+            variant="outline"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -236,17 +312,6 @@ export default function PatientDetails() {
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </Button>
-        </div>
-      </div>
-
-      {/* 24-Hour Access Warning */}
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Clock className="w-5 h-5 text-amber-600" />
-          <div>
-            <span className="text-sm font-medium text-amber-800">24-Hour Access: </span>
-            <span className="text-sm text-amber-700">{timeRemaining}</span>
-          </div>
         </div>
       </div>
 
@@ -750,6 +815,45 @@ export default function PatientDetails() {
                               <strong>Notes:</strong> {lab.notes}
                             </p>
                           )}
+                          
+                          {lab.attachments && lab.attachments.length > 0 && (
+                            <div className="mt-3">
+                              <h5 className="font-medium text-sm mb-2">Attached Documents:</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {lab.attachments.map((attachment: any, attachIndex: number) => (
+                                  <div key={attachIndex} className="flex items-center space-x-2 p-2 bg-blue-50 rounded border">
+                                    <FileText className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm text-blue-900">{attachment.name || `Document ${attachIndex + 1}`}</span>
+                                    <div className="flex space-x-1">
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-blue-600 hover:text-blue-800"
+                                        onClick={() => openDocumentModal(attachment)}
+                                      >
+                                        <Eye className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-blue-600 hover:text-blue-800"
+                                        onClick={() => {
+                                          const link = document.createElement('a')
+                                          link.href = attachment.url
+                                          link.download = attachment.name || `lab-result-${attachIndex + 1}`
+                                          document.body.appendChild(link)
+                                          link.click()
+                                          document.body.removeChild(link)
+                                        }}
+                                      >
+                                        <Download className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -854,6 +958,63 @@ export default function PatientDetails() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Document Preview Modal */}
+          <Dialog open={isDocumentModalOpen} onOpenChange={setIsDocumentModalOpen}>
+            <DialogContent className="max-w-5xl max-h-[90vh] p-0">
+              <DialogHeader className="p-6 pb-0">
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-lg font-semibold">
+                    {selectedDocument?.name || 'Document Preview'}
+                  </DialogTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={closeDocumentModal}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </DialogHeader>
+              
+              <div className="px-6 pb-6">
+                <ScrollArea className="max-h-[75vh] w-full">
+                  {selectedDocument ? renderDocumentPreview(selectedDocument) : (
+                    <div className="flex items-center justify-center h-96">
+                      <p className="text-gray-500">No document selected</p>
+                    </div>
+                  )}
+                </ScrollArea>
+                
+                {selectedDocument && (
+                  <div className="flex justify-end space-x-2 mt-4 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(selectedDocument.url, '_blank')}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = selectedDocument.url
+                        link.download = selectedDocument.name || 'document'
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>

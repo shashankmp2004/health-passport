@@ -190,11 +190,10 @@ export default function AddPatient() {
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-amber-800">Patient Consent & 24-Hour Access Policy</h3>
+            <h3 className="text-sm font-semibold text-amber-800">Patient Consent Policy</h3>
             <p className="text-sm text-amber-700 mt-1">
               When you request access to a patient's records, the patient will receive a notification and must <strong>approve your request</strong> before you can access their information. 
-              Once approved, you will have access to their medical records for <strong>24 hours</strong> only. 
-              After this period expires, the patient will be automatically removed from your accessible records for privacy protection.
+              Once approved, you will have persistent access to their medical records until the patient revokes access.
             </p>
           </div>
         </div>
@@ -476,9 +475,9 @@ export default function AddPatient() {
                             </h4>
                             <div className="text-sm text-green-700 space-y-1">
                               <p>The patient has been added to your hospital records.</p>
-                              <div className="p-2 bg-amber-50 border border-amber-200 rounded text-amber-800">
-                                <p className="font-medium">⏰ 24-Hour Access Policy:</p>
-                                <p className="text-xs">You now have 24 hours to access this patient's complete medical records, including conditions, procedures, lab results, allergies, immunizations, and medications. After this period, access will expire automatically for privacy protection.</p>
+                              <div className="p-2 bg-green-50 border border-green-200 rounded text-green-800">
+                                <p className="font-medium">✅ Access Granted:</p>
+                                <p className="text-xs">You now have access to this patient's complete medical records, including conditions, procedures, lab results, allergies, immunizations, and medications.</p>
                               </div>
                               <p className="text-xs italic">Redirecting to Patient Records...</p>
                             </div>

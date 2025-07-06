@@ -150,11 +150,10 @@ export async function POST(request: NextRequest) {
             addedDate: existingRecord.addedDate
           });
           
-          // Update the existing record to be active and refresh the date
+          // Update the existing record to be active
           await HospitalPatientRecord.findByIdAndUpdate(existingRecord._id, {
             status: 'active',
-            lastUpdated: now,
-            addedDate: now // Refresh the added date for 24-hour access window
+            lastUpdated: now
           });
           
           console.log('Updated existing hospital record to active with new addedDate');
@@ -167,7 +166,7 @@ export async function POST(request: NextRequest) {
           hospitalName: notification.hospitalName,
           type: 'access_granted',
           status: 'approved',
-          message: `You have successfully granted ${notification.hospitalName} access to your medical records. This access will expire in 24 hours.`,
+          message: `You have successfully granted ${notification.hospitalName} access to your medical records.`,
           requestedBy: notification.requestedBy,
           metadata: {
             ...notification.metadata,

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       hospitalName: hospitalName,
       type: 'access_request',
       status: 'pending',
-      message: `${hospitalName} is requesting access to your medical records for ${requestReason}. This access will be valid for 24 hours if approved.`,
+      message: `${hospitalName} is requesting access to your medical records for ${requestReason}.`,
       requestedBy: {
         name: session.user.name,
         email: session.user.email,
@@ -86,8 +86,7 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         patientName: `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`,
-        requestReason,
-        accessDuration: 24
+        requestReason
       }
     };
 

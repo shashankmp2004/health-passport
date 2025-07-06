@@ -69,32 +69,9 @@ export default function PatientRecords() {
     }
   }
 
-  // Function to calculate time remaining for 24-hour access
+  // Function to check if records are still accessible (no time limit)
   const calculateTimeRemaining = (records: any[]) => {
-    if (records.length === 0) return ""
-    
-    // Find the earliest record (will expire first)
-    const earliestRecord = records.reduce((earliest, current) => {
-      const currentTime = new Date(current.lastUpdate || current.lastVisit)
-      const earliestTime = new Date(earliest.lastUpdate || earliest.lastVisit)
-      return currentTime < earliestTime ? current : earliest
-    })
-    
-    const addedTime = new Date(earliestRecord.lastUpdate || earliestRecord.lastVisit)
-    const expiryTime = new Date(addedTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
-    const now = new Date()
-    const timeLeft = expiryTime.getTime() - now.getTime()
-    
-    if (timeLeft <= 0) return "Expired"
-    
-    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
-    const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
-    
-    if (hoursLeft > 0) {
-      return `${hoursLeft}h ${minutesLeft}m remaining`
-    } else {
-      return `${minutesLeft}m remaining`
-    }
+    return "Active" // Always active, no time limit
   }
 
   useEffect(() => {
@@ -250,22 +227,6 @@ export default function PatientRecords() {
         </div>
       )}
 
-      {/* 24-Hour Access Warning */}
-      {patientRecords.length > 0 && timeRemaining && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-5 h-5 text-amber-600" />
-            <span className="font-medium text-amber-800">24-Hour Access Period</span>
-            <span className="text-amber-600">
-              {timeRemaining === "Expired" 
-                ? "Access to patient records has expired. Please add patients again to renew access."
-                : `Access to patient records expires in: ${timeRemaining}`
-              }
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Search and Filter */}
       <Card>
         <CardContent className="p-4">
@@ -402,7 +363,7 @@ export default function PatientRecords() {
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No patient records found</p>
                     <p className="text-sm text-gray-500 mb-2">Patient records will appear here once access is approved</p>
-                    <p className="text-xs text-amber-600 mb-6">Note: Access to patient records expires after 24 hours</p>
+
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Button 
                         onClick={() => router.push('/hospital/add-patient')}
@@ -505,8 +466,7 @@ export default function PatientRecords() {
                   <div className="text-center py-12">
                     <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No active patients found</p>
-                    <p className="text-sm text-gray-500 mb-2">Active patients will appear here</p>
-                    <p className="text-xs text-amber-600 mb-6">Records expire after 24 hours</p>
+                    <p className="text-sm text-gray-500 mb-6">Active patients will appear here</p>
                     <Button 
                       onClick={() => router.push('/hospital/add-patient')}
                       className="bg-blue-600 hover:bg-blue-700"
@@ -577,8 +537,7 @@ export default function PatientRecords() {
                   <div className="text-center py-12">
                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No recent activity</p>
-                    <p className="text-sm text-gray-500 mb-2">Recent patient activity will appear here</p>
-                    <p className="text-xs text-amber-600 mb-6">Records expire after 24 hours</p>
+                    <p className="text-sm text-gray-500 mb-6">Recent patient activity will appear here</p>
                     <Button 
                       onClick={() => router.push('/hospital/add-patient')}
                       className="bg-blue-600 hover:bg-blue-700"
@@ -664,7 +623,7 @@ export default function PatientRecords() {
                     <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No high-risk patients found</p>
                     <p className="text-sm text-gray-500 mb-2">High-risk patients will be displayed here for priority monitoring</p>
-                    <p className="text-xs text-amber-600 mb-6">Records expire after 24 hours</p>
+
                     <Button 
                       onClick={() => router.push('/hospital/add-patient')}
                       className="bg-blue-600 hover:bg-blue-700"
