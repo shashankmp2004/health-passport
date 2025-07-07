@@ -88,7 +88,21 @@ export default function HomePage() {
             {/* Health Passport Card Showcase */}
             <div className="relative flex justify-center">
               <div className="relative transform hover:scale-105 transition-transform duration-500">
-                <HealthPassportCard className="shadow-3xl" />
+                <HealthPassportCard 
+                  patientName="Sample Patient"
+                  patientId="HP-SAMPLE-001"
+                  bloodType="O+"
+                  emergencyContact="+1 (555) 0123"
+                  lastVisit="Sample Visit"
+                  location="Sample Hospital"
+                  vitals={{
+                    bloodPressure: "120/80",
+                    heartRate: "72 BPM", 
+                    temperature: "98.6°F",
+                    weight: "140 lbs"
+                  }}
+                  className="shadow-3xl" 
+                />
                 
                 {/* Floating Action Indicators */}
                 <div className="absolute -top-8 -left-8 animate-bounce delay-1000">
@@ -112,110 +126,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Revolutionary Features */}
-      <section id="features" className="relative z-10 py-24 bg-white/60 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
-                Revolutionary Features
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience next-generation healthcare technology designed for the modern world
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-blue-50/30 overflow-hidden">
-              <CardHeader className="pb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Smartphone className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
-                  Quantum-Speed Access
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Lightning-fast access to complete medical records via QR codes, biometric verification, or patient ID. 
-                  Zero waiting times, maximum efficiency.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-green-50/30 overflow-hidden">
-              <CardHeader className="pb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-green-800 bg-clip-text text-transparent">
-                  Unbreakable Security
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Military-grade blockchain encryption with quantum-resistant algorithms. Your medical data is 
-                  mathematically impossible to compromise.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-purple-50/30 overflow-hidden">
-              <CardHeader className="pb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Brain className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-purple-800 bg-clip-text text-transparent">
-                  AI Health Oracle
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Advanced AI provides predictive health analytics, personalized recommendations, and early 
-                  warning systems for optimal health outcomes.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Additional Feature Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center group">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Stethoscope className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Smart Diagnostics</h4>
-              <p className="text-sm text-gray-600">AI-powered health pattern recognition</p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Globe className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Global Standard</h4>
-              <p className="text-sm text-gray-600">Accepted worldwide by healthcare providers</p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Activity className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Real-time Monitoring</h4>
-              <p className="text-sm text-gray-600">Continuous health tracking and alerts</p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Star className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Premium Care</h4>
-              <p className="text-sm text-gray-600">VIP access to top healthcare facilities</p>
             </div>
           </div>
         </div>
@@ -329,6 +239,110 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Revolutionary Features */}
+      <section id="features" className="relative z-10 py-24 bg-white/60 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+                Revolutionary Features
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Experience next-generation healthcare technology designed for the modern world
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-blue-50/30 overflow-hidden">
+              <CardHeader className="pb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Smartphone className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+                  Quantum-Speed Access
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Lightning-fast access to complete medical records via QR codes, biometric verification, or patient ID. 
+                  Zero waiting times, maximum efficiency.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-green-50/30 overflow-hidden">
+              <CardHeader className="pb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-green-800 bg-clip-text text-transparent">
+                  Unbreakable Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Military-grade blockchain encryption with quantum-resistant algorithms. Your medical data is 
+                  mathematically impossible to compromise.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-purple-50/30 overflow-hidden">
+              <CardHeader className="pb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Brain className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl text-center bg-gradient-to-r from-gray-900 to-purple-800 bg-clip-text text-transparent">
+                  AI Health Oracle
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Advanced AI provides predictive health analytics, personalized recommendations, and early 
+                  warning systems for optimal health outcomes.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Additional Feature Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center group">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Stethoscope className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Smart Diagnostics</h4>
+              <p className="text-sm text-gray-600">AI-powered health pattern recognition</p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Globe className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Global Standard</h4>
+              <p className="text-sm text-gray-600">Accepted worldwide by healthcare providers</p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Activity className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Real-time Monitoring</h4>
+              <p className="text-sm text-gray-600">Continuous health tracking and alerts</p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Star className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Premium Care</h4>
+              <p className="text-sm text-gray-600">VIP access to top healthcare facilities</p>
+            </div>
           </div>
         </div>
       </section>

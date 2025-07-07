@@ -1,44 +1,64 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, Clock, MapPin, FileText, Plus } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientVisits() {
-  const pastVisits = [
-    {
-      id: 3,
-      doctor: "Dr. James Wilson",
-      specialty: "Cardiology",
-      date: "2024-12-15",
-      time: "2:30 PM",
-      location: "Heart Center, Room 205",
-      type: "Routine Checkup",
-      status: "completed",
-      notes: "Blood pressure stable, continue current medication",
-    },
-    {
-      id: 4,
-      doctor: "Dr. Sarah Martinez",
-      specialty: "Endocrinology",
-      date: "2024-11-20",
-      time: "10:00 AM",
-      location: "Diabetes Clinic, Room 102",
-      type: "Quarterly Review",
-      status: "completed",
-      notes: "HbA1c improved to 6.8%, excellent progress",
-    },
-    {
-      id: 5,
-      doctor: "Dr. Michael Brown",
-      specialty: "General Practice",
-      date: "2024-10-10",
-      time: "11:30 AM",
-      location: "Main Clinic, Room 301",
-      type: "Annual Physical",
-      status: "completed",
-      notes: "Overall health good, recommended lifestyle modifications",
-    },
-  ]
+  const [loading, setLoading] = useState(true)
+  const [visitsData, setVisitsData] = useState<any>(null)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchVisits()
+  }, [session, status, router])
+
+  const fetchVisits = async () => {
+    try {
+      const response = await fetch('/api/patients/visits')
+      if (response.ok) {
+        const result = await response.json()
+        setVisitsData(result.data)
+      } else {
+        console.error('Failed to fetch visits')
+      }
+    } catch (error) {
+      console.error('Error fetching visits:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-gray-300 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const pastVisits = visitsData?.pastVisits || []
+  const upcomingVisits = visitsData?.upcomingVisits || []
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">

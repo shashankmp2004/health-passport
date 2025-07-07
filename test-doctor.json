@@ -1,0 +1,10 @@
+{
+  "firstName": "Dr. Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@hospital.com",
+  "phone": "9876543210",
+  "licenseNumber": "ML-ABC1234",
+  "specialty": "Cardiology",
+  "hospitalAffiliation": "City General Hospital",
+  "password": "doctorpass123"
+}

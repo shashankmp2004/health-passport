@@ -29,7 +29,7 @@ export default function HospitalSignup() {
   })
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Basic validation
@@ -47,20 +47,44 @@ export default function HospitalSignup() {
       alert("Please enter a valid phone number")
       return
     }
-    
-    // Generate hospital ID (in real app, this would come from backend)
-    const hospitalId = `HOS-${new Date().getFullYear()}-${Math.random().toString().slice(2, 8)}`
-    
-    console.log("Creating hospital account with:", { ...formData, hospitalId })
-    
-    // Store form data temporarily for verification page
-    localStorage.setItem('pendingHospitalRegistration', JSON.stringify({
-      ...formData,
-      hospitalId
-    }))
-    
-    // Redirect to OTP verification page
-    router.push("/auth/hospital/verify-otp")
+
+    try {
+      const response = await fetch('/api/hospitals/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          facilityName: formData.facilityName,
+          facilityType: formData.facilityType,
+          adminFirstName: formData.adminFirstName,
+          adminLastName: formData.adminLastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          licenseNumber: formData.licenseNumber,
+          password: formData.password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error || 'Registration failed')
+        return
+      }
+
+      // Registration successful
+      console.log("Hospital registration successful:", data)
+      alert(`Registration successful! Your Hospital ID is: ${data.hospital.hospitalId}. Please wait for admin verification.`)
+      
+      // Redirect to login page
+      router.push("/auth/hospital/login")
+      
+    } catch (error) {
+      console.error("Registration error:", error)
+      alert('An error occurred during registration. Please try again.')
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {

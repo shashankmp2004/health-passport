@@ -1,75 +1,74 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileText, Upload, Download, Search, Eye, Share, Trash2, Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientDocuments() {
-  const documents = [
-    {
-      id: 1,
-      name: "Blood Test Results - December 2024",
-      type: "Lab Report",
-      date: "2024-12-15",
-      size: "2.4 MB",
-      provider: "City Lab",
-      category: "Laboratory",
-      status: "Recent",
-    },
-    {
-      id: 2,
-      name: "Cardiology Consultation Report",
-      type: "Medical Report",
-      date: "2024-12-10",
-      size: "1.8 MB",
-      provider: "Dr. James Wilson",
-      category: "Consultation",
-      status: "Recent",
-    },
-    {
-      id: 3,
-      name: "Prescription - Lisinopril",
-      type: "Prescription",
-      date: "2024-12-01",
-      size: "0.5 MB",
-      provider: "Dr. James Wilson",
-      category: "Prescription",
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "MRI Scan - Knee",
-      type: "Imaging",
-      date: "2024-11-20",
-      size: "15.2 MB",
-      provider: "Radiology Center",
-      category: "Imaging",
-      status: "Archived",
-    },
-    {
-      id: 5,
-      name: "Annual Physical Exam",
-      type: "Medical Report",
-      date: "2024-10-15",
-      size: "3.1 MB",
-      provider: "Dr. Sarah Martinez",
-      category: "Consultation",
-      status: "Archived",
-    },
-    {
-      id: 6,
-      name: "Vaccination Record - COVID-19",
-      type: "Vaccination",
-      date: "2024-09-15",
-      size: "0.8 MB",
-      provider: "CVS Pharmacy",
-      category: "Immunization",
-      status: "Archived",
-    },
-  ]
+  const [loading, setLoading] = useState(true)
+  const [documentsData, setDocumentsData] = useState<any>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchDocuments()
+  }, [session, status, router])
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch('/api/patients/documents')
+      if (response.ok) {
+        const result = await response.json()
+        setDocumentsData(result.data)
+      } else {
+        console.error('Failed to fetch documents')
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 bg-gray-300 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const documents = documentsData?.documents || []
   const categories = ["All", "Laboratory", "Consultation", "Prescription", "Imaging", "Immunization"]
+
+  // Filter documents based on search term
+  const filteredDocuments = documents.filter((doc: any) =>
+    doc.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.fileType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -91,7 +90,12 @@ export default function PatientDocuments() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search documents..." className="pl-10" />
+              <Input 
+                placeholder="Search documents..." 
+                className="pl-10" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
@@ -126,59 +130,71 @@ export default function PatientDocuments() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {documents.map((doc) => (
-                  <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-blue-600" />
+                {filteredDocuments.length > 0 ? (
+                  filteredDocuments.map((doc: any) => (
+                    <div key={doc.id || doc._id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4 flex-1">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-6 h-6 text-blue-600" />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg truncate">{doc.fileName || doc.name}</h3>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                              <span>{doc.fileType || doc.type}</span>
+                              <span>•</span>
+                              <span>{new Date(doc.uploadDate || doc.date).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>{doc.fileSize || doc.size}</span>
+                              {doc.provider && (
+                                <>
+                                  <span>•</span>
+                                  <span>{doc.provider}</span>
+                                </>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Badge variant="outline">{doc.category}</Badge>
+                              <Badge
+                                className={
+                                  doc.status === "Recent"
+                                    ? "bg-green-100 text-green-800"
+                                    : doc.status === "Active"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-gray-100 text-gray-800"
+                                }
+                              >
+                                {doc.status}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate">{doc.name}</h3>
-                          <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                            <span>{doc.type}</span>
-                            <span>•</span>
-                            <span>{new Date(doc.date).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span>{doc.size}</span>
-                            <span>•</span>
-                            <span>{doc.provider}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Badge variant="outline">{doc.category}</Badge>
-                            <Badge
-                              className={
-                                doc.status === "Recent"
-                                  ? "bg-green-100 text-green-800"
-                                  : doc.status === "Active"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-gray-100 text-gray-800"
-                              }
-                            >
-                              {doc.status}
-                            </Badge>
-                          </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Share className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2 ml-4">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Share className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg">No documents found</p>
+                    <p className="text-sm">Your medical documents will be uploaded by healthcare providers</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,42 +9,133 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, MapPin, Heart, AlertTriangle, Users, Camera, Edit3, Save, X } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { User, MapPin, Heart, AlertTriangle, Users, Camera, Edit3, Save, X, QrCode, Download, Share2 } from "lucide-react"
+import QRGenerator from "@/components/qr-generator"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientProfile() {
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [profileData, setProfileData] = useState({
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@email.com",
-    phone: "+1 (555) 123-4567",
-    dateOfBirth: "1985-03-15",
-    gender: "Female",
-    address: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    emergencyContact: "John Johnson",
-    emergencyPhone: "+1 (555) 987-6543",
-    emergencyRelation: "Spouse",
-    bloodType: "O+",
-    allergies: "Penicillin, Shellfish",
-    medicalConditions: "Hypertension, Type 2 Diabetes",
-    currentMedications: "Metformin 500mg, Lisinopril 10mg",
-    insuranceProvider: "Blue Cross Blue Shield",
-    insuranceId: "BC123456789",
-    primaryPhysician: "Dr. Michael Chen",
-    physicianPhone: "+1 (555) 234-5678",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    emergencyRelation: "",
+    bloodType: "",
+    allergies: "",
+    medicalConditions: "",
+    currentMedications: "",
+    insuranceProvider: "",
+    insuranceId: "",
+    primaryPhysician: "",
+    physicianPhone: "",
   })
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const handleSave = () => {
-    setIsEditing(false)
-    // Here you would typically save to backend
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || session.user.role !== 'patient') {
+      router.push('/auth/patient/login')
+      return
+    }
+
+    fetchProfileData()
+  }, [session, status, router])
+
+  const fetchProfileData = async () => {
+    try {
+      const response = await fetch('/api/patients/profile')
+      if (response.ok) {
+        const result = await response.json()
+        const patient = result.data.patient
+        setProfileData({
+          firstName: patient.personalInfo?.firstName || "",
+          lastName: patient.personalInfo?.lastName || "",
+          email: patient.personalInfo?.email || "",
+          phone: patient.personalInfo?.phone || "",
+          dateOfBirth: patient.personalInfo?.dateOfBirth || "",
+          gender: patient.personalInfo?.gender || "",
+          address: patient.personalInfo?.address || "",
+          city: patient.personalInfo?.city || "",
+          state: patient.personalInfo?.state || "",
+          zipCode: patient.personalInfo?.zipCode || "",
+          emergencyContact: patient.personalInfo?.emergencyContact || "",
+          emergencyPhone: patient.personalInfo?.emergencyPhone || "",
+          emergencyRelation: patient.personalInfo?.emergencyRelation || "",
+          bloodType: patient.personalInfo?.bloodType || "",
+          allergies: patient.medicalHistory?.allergies?.join(', ') || "",
+          medicalConditions: patient.medicalHistory?.conditions?.map((c: any) => c.name).join(', ') || "",
+          currentMedications: patient.medications?.filter((m: any) => !m.endDate || new Date(m.endDate) > new Date())
+            .map((m: any) => `${m.name} ${m.dosage}`).join(', ') || "",
+          insuranceProvider: patient.insurance?.provider || "",
+          insuranceId: patient.insurance?.policyNumber || "",
+          primaryPhysician: patient.primaryPhysician?.name || "",
+          physicianPhone: patient.primaryPhysician?.phone || "",
+        })
+      } else {
+        console.error('Failed to fetch profile data')
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/patients/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      })
+      
+      if (response.ok) {
+        setIsEditing(false)
+        // Optionally show success message
+      } else {
+        console.error('Failed to save profile data')
+        // Optionally show error message
+      }
+    } catch (error) {
+      console.error('Error saving profile data:', error)
+      // Optionally show error message
+    }
   }
 
   const handleCancel = () => {
     setIsEditing(false)
     // Reset form data if needed
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-48"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+            <div className="h-96 bg-gray-300 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -77,11 +168,12 @@ export default function PatientProfile() {
       </div>
 
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="personal">Personal Info</TabsTrigger>
           <TabsTrigger value="medical">Medical Info</TabsTrigger>
           <TabsTrigger value="emergency">Emergency Contacts</TabsTrigger>
           <TabsTrigger value="insurance">Insurance</TabsTrigger>
+          <TabsTrigger value="qr-codes">QR Codes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
@@ -413,6 +505,130 @@ export default function PatientProfile() {
                   Upload Insurance Card
                 </Button>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="qr-codes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <QrCode className="w-5 h-5 text-blue-600" />
+                <span>My QR Codes</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="font-medium text-blue-800 mb-2">Health Passport QR Code</h3>
+                  <p className="text-sm text-blue-600 mb-4">
+                    Generate secure QR codes for easy access to your medical information during appointments and emergencies.
+                  </p>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <QrCode className="w-4 h-4 mr-2" />
+                        Generate QR Code
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>Generate QR Code</DialogTitle>
+                      </DialogHeader>
+                      <QRGenerator 
+                        patientId="patient-123" // This would be dynamic in real app
+                        patientName={`${profileData.firstName} ${profileData.lastName}`}
+                        onQRGenerated={(qrData) => {
+                          console.log('QR Generated:', qrData)
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* QR Code Types Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Full Access QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Complete medical records access for healthcare providers
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Medical history</li>
+                        <li>• Current medications</li>
+                        <li>• Allergies & conditions</li>
+                        <li>• Test results</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Emergency QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Critical information for emergency situations
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Blood type</li>
+                        <li>• Critical allergies</li>
+                        <li>• Emergency contacts</li>
+                        <li>• Medical alerts</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Limited Access QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Specific information for appointments
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• Basic demographics</li>
+                        <li>• Relevant conditions</li>
+                        <li>• Current visit data</li>
+                        <li>• Insurance info</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Temporary QR</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Time-limited access codes
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>• 24-hour expiration</li>
+                        <li>• Single-use codes</li>
+                        <li>• Event-specific data</li>
+                        <li>• Audit trail</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Security Notice */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="font-medium text-green-800 mb-2">Security & Privacy</h4>
+                  <div className="text-sm text-green-600 space-y-1">
+                    <p>• All QR codes are encrypted and secure</p>
+                    <p>• Access is logged for security auditing</p>
+                    <p>• You can revoke QR codes at any time</p>
+                    <p>• Data sharing requires your explicit consent</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

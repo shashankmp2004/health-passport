@@ -1,81 +1,176 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Search, Filter, Download, Eye, Edit, Calendar, User, Activity } from "lucide-react"
+import { FileText, Search, Filter, Download, Eye, Edit, Calendar, User, Activity, Plus, RefreshCw, CheckCircle, Clock } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function PatientRecords() {
-  const patientRecords = [
-    {
-      id: "HP-2024-789123",
-      name: "Sarah Johnson",
-      age: 39,
-      lastVisit: "2024-12-15",
-      recordsCount: 24,
-      status: "Active",
-      riskLevel: "Moderate",
-      conditions: ["Hypertension", "Type 2 Diabetes"],
-      lastUpdate: "2024-12-15 14:30",
-    },
-    {
-      id: "HP-2024-654789",
-      name: "Michael Chen",
-      age: 45,
-      lastVisit: "2024-12-20",
-      recordsCount: 18,
-      status: "Active",
-      riskLevel: "Low",
-      conditions: ["Asthma"],
-      lastUpdate: "2024-12-20 10:15",
-    },
-    {
-      id: "HP-2024-321456",
-      name: "Emma Williams",
-      age: 28,
-      lastVisit: "2024-12-18",
-      recordsCount: 12,
-      status: "Active",
-      riskLevel: "Low",
-      conditions: ["Migraine"],
-      lastUpdate: "2024-12-18 16:45",
-    },
-    {
-      id: "HP-2024-987654",
-      name: "Robert Davis",
-      age: 62,
-      lastVisit: "2024-11-30",
-      recordsCount: 45,
-      status: "Inactive",
-      riskLevel: "High",
-      conditions: ["Heart Disease", "Diabetes", "Hypertension"],
-      lastUpdate: "2024-11-30 09:20",
-    },
-  ]
+  const [patientRecords, setPatientRecords] = useState<any[]>([])
+  const [recentActivity, setRecentActivity] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState("")
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const recentActivity = [
-    {
-      patientId: "HP-2024-789123",
-      patientName: "Sarah Johnson",
-      action: "Lab results uploaded",
-      timestamp: "2024-12-30 14:30",
-      type: "lab",
-    },
-    {
-      patientId: "HP-2024-654789",
-      patientName: "Michael Chen",
-      action: "Prescription updated",
-      timestamp: "2024-12-30 13:15",
-      type: "prescription",
-    },
-    {
-      patientId: "HP-2024-321456",
-      patientName: "Emma Williams",
-      action: "Visit notes added",
-      timestamp: "2024-12-30 12:45",
-      type: "visit",
-    },
-  ]
+  // Handler functions for View and Edit buttons
+  const handleViewPatient = (healthPassportId: string) => {
+    console.log('Attempting to view patient with ID:', healthPassportId)
+    console.log('Available patient records:', patientRecords.map(r => ({ 
+      id: r.healthPassportId, 
+      name: r.name, 
+      addedAt: r.addedAt || r.lastUpdate 
+    })))
+    router.push(`/hospital/patient-details/${healthPassportId}`)
+  }
+
+  const handleEditPatient = (healthPassportId: string) => {
+    console.log('Attempting to edit patient with ID:', healthPassportId)
+    console.log('Available patient records:', patientRecords.map(r => ({ 
+      id: r.healthPassportId, 
+      name: r.name, 
+      addedAt: r.addedAt || r.lastUpdate 
+    })))
+    router.push(`/hospital/patient-edit/${healthPassportId}`)
+  }
+
+  const handleExportPatient = async (patient: any) => {
+    try {
+      const patientData = {
+        healthPassportId: patient.healthPassportId,
+        name: patient.name,
+        personalInfo: patient.personalInfo || {},
+        medicalHistory: patient.medicalHistory || {},
+        visits: patient.visits || [],
+        vitals: patient.vitals || [],
+        exportDate: new Date().toISOString(),
+        exportedBy: session?.user?.email || 'Hospital Staff'
+      }
+      
+      const blob = new Blob([JSON.stringify(patientData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `patient-${patient.healthPassportId}-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error exporting patient data:', error)
+      alert('Error exporting patient data. Please try again.')
+    }
+  }
+
+  // Function to check if records are still accessible (no time limit)
+  const calculateTimeRemaining = (records: any[]) => {
+    return "Active" // Always active, no time limit
+  }
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+      router.push('/auth/hospital/login')
+      return
+    }
+
+    fetchPatientRecords()
+    
+    // Check if redirected from add patient page
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('justAdded') === 'true') {
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 5000)
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/hospital/patient-records')
+    }
+    
+    // Check if redirected after sending access request
+    if (urlParams.get('requestSent') === 'true') {
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 5000)
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/hospital/patient-records')
+    }
+  }, [session, status, router])
+
+  // Refresh data when the page becomes visible (e.g., after navigating back from add patient)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session) {
+        fetchPatientRecords()
+      }
+    }
+
+    const handleFocus = () => {
+      if (session) {
+        fetchPatientRecords()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [session])
+
+  const fetchPatientRecords = async () => {
+    try {
+      const response = await fetch('/api/hospitals/patient-records')
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Patient records API response:', {
+          success: result.success,
+          recordsCount: result.data?.patientRecords?.length || 0,
+          totalPatients: result.data?.statistics?.total || 0
+        })
+        
+        const records = result.data?.patientRecords || []
+        setPatientRecords(records)
+        setRecentActivity(result.data?.recentActivity || [])
+        setTimeRemaining(calculateTimeRemaining(records))
+      } else {
+        console.error('Failed to fetch patient records:', response.status, response.statusText)
+        // Still set empty arrays to show proper empty state
+        setPatientRecords([])
+        setRecentActivity([])
+      }
+    } catch (error) {
+      console.error('Error fetching patient records:', error)
+      // Still set empty arrays to show proper empty state
+      setPatientRecords([])
+      setRecentActivity([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
+          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-gray-300 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -86,16 +181,51 @@ export default function PatientRecords() {
           <p className="text-gray-600">Comprehensive patient record management and access</p>
         </div>
         <div className="flex space-x-2">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              setLoading(true)
+              fetchPatientRecords()
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Export Records
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <FileText className="w-4 h-4 mr-2" />
-            New Record
+          <Button 
+            onClick={() => router.push('/hospital/add-patient')}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Patient
           </Button>
         </div>
       </div>
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="font-medium text-green-800">
+              {window.location.search.includes('requestSent') ? 
+                'Access request sent successfully!' : 
+                'Patient successfully added to hospital records!'
+              }
+            </span>
+            <span className="text-green-600">
+              {window.location.search.includes('requestSent') ? 
+                'The patient will receive a notification and can approve your request.' : 
+                'The patient should now appear in your records below.'
+              }
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filter */}
       <Card>
@@ -138,83 +268,120 @@ export default function PatientRecords() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {patientRecords.map((record) => (
-                  <div key={record.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-blue-600" />
+                {patientRecords.length > 0 ? (
+                  patientRecords.map((record) => (
+                    <div key={record.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4 flex-1">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-blue-600" />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h3 className="font-semibold text-lg">{record.name}</h3>
+                              <Badge variant="outline">{record.age} years</Badge>
+                              <Badge
+                                className={
+                                  record.status === "Active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                }
+                              >
+                                {record.status}
+                              </Badge>
+                              <Badge
+                                className={
+                                  record.riskLevel === "Low"
+                                    ? "bg-green-100 text-green-800"
+                                    : record.riskLevel === "Moderate"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                }
+                              >
+                                {record.riskLevel} Risk
+                              </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
+                              <div>
+                                <span className="font-medium">Patient ID:</span> {record.id}
+                              </div>
+                              <div>
+                                <span className="font-medium">Last Visit:</span>{" "}
+                                {new Date(record.lastVisit).toLocaleDateString()}
+                              </div>
+                              <div>
+                                <span className="font-medium">Records:</span> {record.recordsCount} documents
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="text-sm font-medium text-gray-700">Conditions:</span>
+                              <div className="flex space-x-1">
+                                {record.conditions?.map((condition: string, index: number) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {condition}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-gray-500">Last updated: {record.lastUpdate}</div>
+                          </div>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="font-semibold text-lg">{record.name}</h3>
-                            <Badge variant="outline">{record.age} years</Badge>
-                            <Badge
-                              className={
-                                record.status === "Active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                              }
-                            >
-                              {record.status}
-                            </Badge>
-                            <Badge
-                              className={
-                                record.riskLevel === "Low"
-                                  ? "bg-green-100 text-green-800"
-                                  : record.riskLevel === "Moderate"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                              }
-                            >
-                              {record.riskLevel} Risk
-                            </Badge>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
-                            <div>
-                              <span className="font-medium">Patient ID:</span> {record.id}
-                            </div>
-                            <div>
-                              <span className="font-medium">Last Visit:</span>{" "}
-                              {new Date(record.lastVisit).toLocaleDateString()}
-                            </div>
-                            <div>
-                              <span className="font-medium">Records:</span> {record.recordsCount} documents
-                            </div>
-                          </div>
-
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="text-sm font-medium text-gray-700">Conditions:</span>
-                            <div className="flex space-x-1">
-                              {record.conditions.map((condition, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {condition}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="text-xs text-gray-500">Last updated: {record.lastUpdate}</div>
+                        <div className="flex flex-col space-y-2 ml-4">
+                          <Button 
+                            size="sm" 
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() => handleViewPatient(record.healthPassportId)}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditPatient(record.healthPassportId)}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleExportPatient(record)}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
                         </div>
-                      </div>
-
-                      <div className="flex flex-col space-y-2 ml-4">
-                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Download className="w-4 h-4 mr-2" />
-                          Export
-                        </Button>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No patient records found</p>
+                    <p className="text-sm text-gray-500 mb-2">Patient records will appear here once access is approved</p>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button 
+                        onClick={() => router.push('/hospital/add-patient')}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Request Patient Access
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => router.push('/hospital/access-requests')}
+                      >
+                        <Clock className="w-4 h-4 mr-2" />
+                        View Access Requests
+                      </Button>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -231,61 +398,84 @@ export default function PatientRecords() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {patientRecords
-                  .filter((record) => record.status === "Active")
-                  .map((record) => (
-                    <div key={record.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-green-600" />
+                {patientRecords.filter((record) => record.status === "Active").length > 0 ? (
+                  patientRecords
+                    .filter((record) => record.status === "Active")
+                    .map((record) => (
+                      <div key={record.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-4 flex-1">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-green-600" />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="font-semibold text-lg">{record.name}</h3>
+                                <Badge className="bg-green-100 text-green-800">Active</Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
+                                <div>
+                                  <span className="font-medium">Patient ID:</span> {record.id}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Last Visit:</span>{" "}
+                                  {new Date(record.lastVisit).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Records:</span> {record.recordsCount} documents
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-700">Conditions:</span>
+                                <div className="flex space-x-1">
+                                  {record.conditions?.map((condition: string, index: number) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {condition}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="font-semibold text-lg">{record.name}</h3>
-                              <Badge className="bg-green-100 text-green-800">Active</Badge>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
-                              <div>
-                                <span className="font-medium">Patient ID:</span> {record.id}
-                              </div>
-                              <div>
-                                <span className="font-medium">Last Visit:</span>{" "}
-                                {new Date(record.lastVisit).toLocaleDateString()}
-                              </div>
-                              <div>
-                                <span className="font-medium">Records:</span> {record.recordsCount} documents
-                              </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-700">Conditions:</span>
-                              <div className="flex space-x-1">
-                                {record.conditions.map((condition, index) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">
-                                    {condition}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
+                          <div className="flex flex-col space-y-2 ml-4">
+                            <Button 
+                              size="sm" 
+                              className="bg-blue-600 hover:bg-blue-700"
+                              onClick={() => handleViewPatient(record.healthPassportId)}
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditPatient(record.healthPassportId)}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
                           </div>
-                        </div>
-
-                        <div className="flex flex-col space-y-2 ml-4">
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                ) : (
+                  <div className="text-center py-12">
+                    <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No active patients found</p>
+                    <p className="text-sm text-gray-500 mb-6">Active patients will appear here</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -302,46 +492,61 @@ export default function PatientRecords() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            activity.type === "lab"
-                              ? "bg-blue-100"
-                              : activity.type === "prescription"
-                                ? "bg-green-100"
-                                : "bg-purple-100"
-                          }`}
-                        >
-                          <FileText
-                            className={`w-5 h-5 ${
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4">
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center ${
                               activity.type === "lab"
-                                ? "text-blue-600"
+                                ? "bg-blue-100"
                                 : activity.type === "prescription"
-                                  ? "text-green-600"
-                                  : "text-purple-600"
+                                  ? "bg-green-100"
+                                  : "bg-purple-100"
                             }`}
-                          />
+                          >
+                            <FileText
+                              className={`w-5 h-5 ${
+                                activity.type === "lab"
+                                  ? "text-blue-600"
+                                  : activity.type === "prescription"
+                                    ? "text-green-600"
+                                    : "text-purple-600"
+                              }`}
+                            />
+                          </div>
+
+                          <div>
+                            <h3 className="font-medium">{activity.patientName}</h3>
+                            <p className="text-sm text-gray-600">{activity.action}</p>
+                            <p className="text-xs text-gray-500">{activity.patientId}</p>
+                          </div>
                         </div>
 
-                        <div>
-                          <h3 className="font-medium">{activity.patientName}</h3>
-                          <p className="text-sm text-gray-600">{activity.action}</p>
-                          <p className="text-xs text-gray-500">{activity.patientId}</p>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">{activity.timestamp}</p>
+                          <Button variant="ghost" size="sm">
+                            View Details
+                          </Button>
                         </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{activity.timestamp}</p>
-                        <Button variant="ghost" size="sm">
-                          View Details
-                        </Button>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No recent activity</p>
+                    <p className="text-sm text-gray-500 mb-6">Recent patient activity will appear here</p>
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -358,60 +563,76 @@ export default function PatientRecords() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {patientRecords
-                  .filter((record) => record.riskLevel === "High")
-                  .map((record) => (
-                    <div key={record.id} className="p-4 border-2 border-red-200 rounded-lg bg-red-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-red-600" />
+                {patientRecords.filter((record) => record.riskLevel === "High").length > 0 ? (
+                  patientRecords
+                    .filter((record) => record.riskLevel === "High")
+                    .map((record) => (
+                      <div key={record.id} className="p-4 border-2 border-red-200 rounded-lg bg-red-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-4 flex-1">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-red-600" />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="font-semibold text-lg">{record.name}</h3>
+                                <Badge className="bg-red-600 text-white">High Risk</Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
+                                <div>
+                                  <span className="font-medium">Patient ID:</span> {record.id}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Last Visit:</span>{" "}
+                                  {new Date(record.lastVisit).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Records:</span> {record.recordsCount} documents
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-700">Conditions:</span>
+                                <div className="flex space-x-1">
+                                  {record.conditions?.map((condition: string, index: number) => (
+                                    <Badge key={index} variant="destructive" className="text-xs">
+                                      {condition}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="font-semibold text-lg">{record.name}</h3>
-                              <Badge className="bg-red-600 text-white">High Risk</Badge>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
-                              <div>
-                                <span className="font-medium">Patient ID:</span> {record.id}
-                              </div>
-                              <div>
-                                <span className="font-medium">Last Visit:</span>{" "}
-                                {new Date(record.lastVisit).toLocaleDateString()}
-                              </div>
-                              <div>
-                                <span className="font-medium">Records:</span> {record.recordsCount} documents
-                              </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-700">Conditions:</span>
-                              <div className="flex space-x-1">
-                                {record.conditions.map((condition, index) => (
-                                  <Badge key={index} variant="destructive" className="text-xs">
-                                    {condition}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
+                          <div className="flex flex-col space-y-2 ml-4">
+                            <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Priority View
+                            </Button>
+                            <Button variant="outline" size="sm" className="border-red-300 text-red-700 bg-transparent">
+                              Alert Team
+                            </Button>
                           </div>
-                        </div>
-
-                        <div className="flex flex-col space-y-2 ml-4">
-                          <Button size="sm" className="bg-red-600 hover:bg-red-700">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Priority View
-                          </Button>
-                          <Button variant="outline" size="sm" className="border-red-300 text-red-700 bg-transparent">
-                            Alert Team
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                ) : (
+                  <div className="text-center py-12">
+                    <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No high-risk patients found</p>
+                    <p className="text-sm text-gray-500 mb-2">High-risk patients will be displayed here for priority monitoring</p>
+
+                    <Button 
+                      onClick={() => router.push('/hospital/add-patient')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Patient
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

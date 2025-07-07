@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,62 +18,89 @@ import {
   Heart,
   Calendar,
 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function HospitalDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  const [recentPatients, setRecentPatients] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const recentPatients = [
-    {
-      id: "HP-2024-789123",
-      name: "Sarah Johnson",
-      lastVisit: "2024-06-15",
-      conditions: ["Hypertension", "Type 2 Diabetes"],
-    },
-    {
-      id: "HP-2024-654789",
-      name: "Michael Chen",
-      lastVisit: "2024-06-20",
-      conditions: ["Asthma"],
-    },
-    {
-      id: "HP-2024-321456",
-      name: "Emma Williams",
-      lastVisit: "2024-06-18",
-      conditions: ["Migraine"],
-    },
-  ]
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+      router.push('/auth/hospital/login')
+      return
+    }
+
+    fetchDashboardData()
+  }, [session, status, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('/api/hospitals/dashboard')
+      if (response.ok) {
+        const result = await response.json()
+        setDashboardData(result.data)
+        setRecentPatients(result.data.recentPatients || [])
+      } else {
+        console.error('Failed to fetch dashboard data')
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="animate-pulse">
+          <div className="h-24 bg-gray-300 rounded-lg mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-gray-300 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const handlePatientSelect = (patient: any) => {
     setSelectedPatient(patient)
   }
 
-  const handleSearch = () => {
-    // Simulate search - in real app, this would search the database
-    const mockPatient = {
-      id: "HP-2024-789123",
-      name: "Sarah Johnson",
-      age: 39,
-      bloodType: "O+",
-      phone: "+1 (555) 123-4567",
-      email: "sarah.johnson@email.com",
-      address: "123 Main St, City, State 12345",
-      emergencyContact: "+1 (555) 987-6543",
-      conditions: ["Hypertension", "Type 2 Diabetes"],
-      riskLevel: "Moderate",
-      lastVisit: "2024-06-15",
-      vitals: {
-        bloodPressure: "125/82",
-        heartRate: "72",
-        temperature: "98.6°F",
-        weight: "165 lbs",
-      },
-      medications: ["Lisinopril 10mg daily", "Metformin 500mg twice daily"],
-      allergies: ["Penicillin", "Shellfish"],
-      aiSummary:
-        "39-year-old female with well-controlled Type 2 diabetes and hypertension. Recent HbA1c of 6.8% indicates good glycemic control. Blood pressure readings have been stable on current medication regimen. Patient is compliant with medications and follows up regularly. Recommend continued current treatment plan with routine monitoring.",
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      return
     }
-    setSelectedPatient(mockPatient)
+
+    try {
+      const response = await fetch(`/api/patients/search?query=${encodeURIComponent(searchQuery)}`)
+      if (response.ok) {
+        const result = await response.json()
+        if (result.data && result.data.length > 0) {
+          setSelectedPatient(result.data[0]) // Select the first matching patient
+        } else {
+          // No patient found
+          setSelectedPatient(null)
+          console.log('No patient found with that query')
+        }
+      } else {
+        console.error('Failed to search for patient')
+        setSelectedPatient(null)
+      }
+    } catch (error) {
+      console.error('Error searching for patient:', error)
+      setSelectedPatient(null)
+    }
   }
 
   return (
@@ -271,7 +298,9 @@ export default function HospitalDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-blue-600">127</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {dashboardData?.statistics?.patientsToday || 0}
+                </p>
                 <p className="text-sm text-gray-600">Patients Today</p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
@@ -283,7 +312,9 @@ export default function HospitalDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-red-600">23</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {dashboardData?.statistics?.criticalAlerts || 0}
+                </p>
                 <p className="text-sm text-gray-600">Critical Alerts</p>
               </div>
               <AlertTriangle className="w-8 h-8 text-red-600" />
@@ -295,7 +326,9 @@ export default function HospitalDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-orange-600">89</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {dashboardData?.statistics?.pendingResults || 0}
+                </p>
                 <p className="text-sm text-gray-600">Pending Results</p>
               </div>
               <Clock className="w-8 h-8 text-orange-600" />
@@ -307,7 +340,9 @@ export default function HospitalDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-green-600">98.7%</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {dashboardData?.statistics?.systemUptime || '99.9%'}
+                </p>
                 <p className="text-sm text-gray-600">System Uptime</p>
               </div>
               <TrendingUp className="w-8 h-8 text-green-600" />
@@ -323,9 +358,13 @@ export default function HospitalDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col space-y-2 bg-transparent"
+              onClick={() => router.push('/hospital/add-patient')}
+            >
               <QrCode className="w-6 h-6" />
-              <span className="text-sm">Scan QR Code</span>
+              <span className="text-sm">Add Patient</span>
             </Button>
             <Button variant="outline" className="h-20 flex flex-col space-y-2 bg-transparent">
               <FileText className="w-6 h-6" />
