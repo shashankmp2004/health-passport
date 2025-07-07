@@ -4,6 +4,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import { Patient as PatientType, Medication, VitalSign, Visit, MedicalHistory, Document } from '@/types/patient';
+import { getMockPatient, isMockPatientById } from '@/lib/utils/mock-data';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,9 +20,26 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('-password');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for dashboard...');
+      console.log('Session user ID:', session.user.id);
+      patient = getMockPatient();
+      console.log('Mock patient data loaded:', {
+        id: patient._id,
+        healthPassportId: patient.healthPassportId,
+        medicationsCount: patient.medications?.length || 0,
+        vitalsCount: patient.vitals?.length || 0,
+        visitsCount: patient.visits?.length || 0
+      });
+    } else {
+      console.log('Using real database for patient ID:', session.user.id);
+      patient = await Patient.findById(session.user.id).select('-password');
+    }
+    
     if (!patient) {
+      console.log('Patient not found for ID:', session.user.id);
       return NextResponse.json(
         { error: 'Patient not found' },
         { status: 404 }
@@ -30,13 +48,23 @@ export async function GET(request: NextRequest) {
 
     // Calculate dashboard statistics
     const totalVisits = patient.visits?.length || 0;
-    const activeMedications = patient.medications?.filter((med: any) => 
+    
+    // Handle medications for both mock and real data structures
+    let medications = [];
+    if (patient.medications) {
+      medications = patient.medications;
+    } else if (patient.medicalHistory?.medications) {
+      medications = patient.medicalHistory.medications;
+    }
+    
+    const activeMedications = medications.filter((med: any) => 
       !med.endDate || new Date(med.endDate) > new Date()
     ).length || 0;
+    
     const totalDocuments = patient.documents?.length || 0;
     const recentVitals = patient.vitals?.slice(-5) || [];
     const recentVisits = patient.visits?.slice(-3) || [];
-    const currentMedications = patient.medications?.filter((med: any) => 
+    const currentMedications = medications.filter((med: any) => 
       !med.endDate || new Date(med.endDate) > new Date()
     ).slice(0, 5) || [];
 
@@ -52,9 +80,19 @@ export async function GET(request: NextRequest) {
     const calculateHealthScore = () => {
       let score = 85; // Base score
       
+      // Get conditions from the appropriate structure
+      let conditions = [];
+      if (Array.isArray(patient.medicalHistory)) {
+        conditions = patient.medicalHistory;
+      } else if (patient.medicalHistory?.conditions) {
+        conditions = patient.medicalHistory.conditions;
+      }
+      
       // Deduct for chronic conditions
-      const chronicConditions = patient.medicalHistory?.filter((condition: any) => 
-        condition.status === 'ongoing'
+      const chronicConditions = conditions.filter((condition: any) => 
+        (condition.status || '').toLowerCase() === 'chronic' ||
+        (condition.status || '').toLowerCase() === 'ongoing' ||
+        (condition.status || '').toLowerCase() === 'active'
       ).length || 0;
       score -= chronicConditions * 5;
       

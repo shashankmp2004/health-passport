@@ -21,6 +21,21 @@ export const authOptions: AuthOptions = {
         }
 
         try {
+          // Handle mock patient for testing FIRST - before checking database
+          if (process.env.NODE_ENV === 'development' && credentials.healthPassportId === 'HP12345') {
+            // For testing purposes, allow a simple password for the mock patient
+            if (credentials.password === 'test123' || credentials.password === 'password') {
+              console.log('Mock patient authentication successful');
+              return {
+                id: 'mock_patient_1',
+                email: 'john.doe@email.com',
+                name: 'John Doe',
+                role: 'patient',
+                healthPassportId: 'HP12345'
+              }
+            }
+          }
+
           await dbConnect()
           
           const patient = await Patient.findOne({ 

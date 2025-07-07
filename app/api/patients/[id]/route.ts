@@ -3,42 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
 import dbConnect from '@/lib/db/mongodb'
 import Patient from '@/lib/models/Patient'
-
-// Mock patient data for testing (in memory)
-let mockPatient = {
-  _id: 'mock_patient_1',
-  healthPassportId: 'HP12345',
-  personalInfo: {
-    firstName: 'John',
-    lastName: 'Doe',
-    dateOfBirth: '1985-06-15',
-    gender: 'Male',
-    phone: '+1-555-123-4567',
-    email: 'john.doe@email.com',
-    address: '123 Main St, New York, NY 10001',
-    emergencyContact: {
-      name: 'Jane Doe',
-      phone: '+1-555-987-6543',
-      relationship: 'Spouse'
-    },
-    age: 39
-  },
-  medicalHistory: {
-    conditions: [],
-    allergies: [],
-    medications: [],
-    immunizations: [],
-    procedures: [],
-    labResults: [],
-    vitalSigns: []
-  },
-  medications: [],
-  vitals: [],
-  visits: [],
-  documents: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-}
+import { getMockPatient, updateMockPatient, isMockPatient } from '@/lib/utils/mock-data'
 
 export async function GET(
   request: NextRequest,
@@ -62,8 +27,9 @@ export async function GET(
     
     if (!patient) {
       // Return mock data for testing if in development mode and searching for HP12345
-      if (process.env.NODE_ENV === 'development' && params.id === 'HP12345') {
+      if (isMockPatient(params.id)) {
         console.log('Returning mock patient data for GET request...');
+        const mockPatient = getMockPatient();
         return NextResponse.json({
           success: true,
           patient: mockPatient
@@ -157,38 +123,31 @@ export async function PUT(
     
     if (!patient) {
       // Handle mock data for testing if in development mode and searching for HP12345
-      if (process.env.NODE_ENV === 'development' && params.id === 'HP12345') {
+      if (isMockPatient(params.id)) {
         console.log('Updating mock patient data...');
         console.log('Received personalInfo:', personalInfo);
         console.log('Received medicalHistory:', medicalHistory);
         
         try {
-          // Update mock patient data safely
+          // Update mock patient data using the shared utility
+          const updates: any = {};
+          
           if (personalInfo) {
-            mockPatient.personalInfo = { ...mockPatient.personalInfo, ...personalInfo }
+            updates.personalInfo = personalInfo;
           }
           
           if (medicalHistory) {
-            // Handle medicalHistory updates more carefully
-            mockPatient.medicalHistory = {
-              conditions: medicalHistory.conditions || mockPatient.medicalHistory.conditions || [],
-              allergies: medicalHistory.allergies || mockPatient.medicalHistory.allergies || [],
-              medications: medicalHistory.medications || mockPatient.medicalHistory.medications || [],
-              immunizations: medicalHistory.immunizations || mockPatient.medicalHistory.immunizations || [],
-              procedures: medicalHistory.procedures || mockPatient.medicalHistory.procedures || [],
-              labResults: medicalHistory.labResults || mockPatient.medicalHistory.labResults || [],
-              vitalSigns: medicalHistory.vitalSigns || mockPatient.medicalHistory.vitalSigns || []
-            }
+            updates.medicalHistory = medicalHistory;
           }
           
-          mockPatient.updatedAt = new Date().toISOString()
+          const updatedMockPatient = updateMockPatient(updates);
           
           console.log('Mock patient updated successfully');
           
           return NextResponse.json({
             success: true,
             message: 'Patient updated successfully',
-            patient: mockPatient
+            patient: updatedMockPatient
           })
         } catch (mockError) {
           console.error('Error updating mock patient:', mockError);

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
+import { getMockPatient, isMockPatientById } from '@/lib/utils/mock-data';
 
 // GET - Fetch patient's documents
 export async function GET(request: NextRequest) {
@@ -24,8 +25,15 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('documents');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for documents...');
+      patient = getMockPatient();
+    } else {
+      patient = await Patient.findById(session.user.id).select('documents');
+    }
+    
     if (!patient) {
       return NextResponse.json(
         { error: 'Patient not found' },

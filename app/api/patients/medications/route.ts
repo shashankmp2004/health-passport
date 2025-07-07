@@ -4,6 +4,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import { medicationSchema } from '@/lib/utils/validation';
+import { getMockPatient, isMockPatientById, updateMockPatient } from '@/lib/utils/mock-data';
 
 // GET - Fetch patient's medications
 export async function GET(request: NextRequest) {
@@ -24,8 +25,15 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('medications');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for medications...');
+      patient = getMockPatient();
+    } else {
+      patient = await Patient.findById(session.user.id).select('medications');
+    }
+    
     if (!patient) {
       return NextResponse.json(
         { error: 'Patient not found' },
@@ -33,7 +41,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const medications = patient.medications || [];
+    const medications = patient.medications || patient.medicalHistory?.medications || [];
     const currentDate = new Date();
 
     // Filter medications based on status
@@ -65,7 +73,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         medications: sortedMedications.map((med: any) => ({
-          id: med._id,
+          id: med._id || med.id || `med_${Math.random()}`,
           name: med.name,
           dosage: med.dosage,
           frequency: med.frequency,
@@ -73,6 +81,7 @@ export async function GET(request: NextRequest) {
           endDate: med.endDate,
           prescribedBy: med.prescribedBy,
           instructions: med.instructions,
+          status: med.status,
           isActive: !med.endDate || new Date(med.endDate) > currentDate,
         })),
         statistics: {
