@@ -1,9 +1,6 @@
 import HospitalPatientRecord from '@/lib/models/HospitalPatientRecord';
 import dbConnect from '@/lib/db/mongodb';
 
-import HospitalPatientRecord from '@/lib/models/HospitalPatientRecord';
-import dbConnect from '@/lib/db/mongodb';
-
 /**
  * DEPRECATED: Cleanup function for expired hospital patient records
  * 24-hour access limit has been removed, so this function is now a no-op

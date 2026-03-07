@@ -200,7 +200,7 @@ export default function HospitalVerifyOTP() {
         <div className="w-full max-w-md">
           {/* Mobile back button */}
           <div className="lg:hidden mb-6">
-            <Link href="/auth/hospital/signup" className="inline-flex items-center text-gray-600 hover:text-gray-900">
+            <Link href="/auth/hospital/signup" className="inline-flex items-center text-gray-600 hover:text-gray-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Signup
             </Link>
@@ -211,7 +211,7 @@ export default function HospitalVerifyOTP() {
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Hospital className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">HealthPassport</span>
+              <span className="text-xl font-bold text-gray-800">HealthPassport</span>
             </div>
           </div>
 
@@ -221,7 +221,7 @@ export default function HospitalVerifyOTP() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Smartphone className="w-8 h-8 text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Facility Phone</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify Facility Phone</h2>
                 <p className="text-gray-600 mb-2">
                   We've sent a 6-digit verification code to
                 </p>

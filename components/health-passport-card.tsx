@@ -1,156 +1,90 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { QrCode, Shield, Heart, Calendar, User, MapPin } from "lucide-react"
+import { QrCode } from "lucide-react"
 import Image from "next/image"
 
 interface HealthPassportCardProps {
   patientName?: string
   patientId?: string
+  dob?: string
   bloodType?: string
   emergencyContact?: string
-  lastVisit?: string
-  location?: string
   avatar?: string
-  vitals?: {
-    bloodPressure?: string
-    heartRate?: string
-    temperature?: string
-    weight?: string
-  }
   className?: string
 }
 
 export function HealthPassportCard({
   patientName,
   patientId,
+  dob,
   bloodType,
   emergencyContact,
-  lastVisit,
-  location,
   avatar = "/placeholder-user.jpg",
-  vitals,
   className = ""
 }: HealthPassportCardProps) {
   return (
-    <Card className={`w-full max-w-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white border-0 shadow-2xl overflow-hidden ${className}`}>
-      <div className="relative p-6">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full translate-x-20 translate-y-20"></div>
-          <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white rounded-full -translate-y-12"></div>
+    <Card className={`w-full max-w-2xl aspect-video flex flex-col bg-secondary text-black border-4 border-black border-solid rounded-none shadow-brutal-lg overflow-hidden ${className}`}>
+      {/* Brutalist Header Block */}
+      <div className="border-b-4 border-black px-4 py-2 sm:px-6 sm:py-3 bg-white flex justify-between items-center shrink-0">
+        <h2 className="font-display font-black text-xl sm:text-2xl lg:text-3xl uppercase tracking-tighter mix-blend-multiply leading-none">
+          Health Passport
+        </h2>
+        <div className="font-bold border-2 border-black px-2 py-1 bg-primary text-black text-[10px] sm:text-xs uppercase shadow-brutal-sm hidden sm:block">
+          CONFIDENTIAL
+        </div>
+      </div>
+
+      <div className="flex-1 p-3 sm:p-5 flex flex-row gap-3 sm:gap-6 overflow-hidden">
+        {/* Left Section - Avatar */}
+        <div className="w-[25%] sm:w-[20%] flex flex-col items-center shrink-0">
+          <div className="w-full aspect-square border-4 border-black shadow-brutal-sm bg-white overflow-hidden mb-2 sm:mb-4">
+            <Image
+              src={avatar}
+              alt={patientName || 'Patient'}
+              width={160}
+              height={160}
+              className="w-full h-full object-cover grayscale contrast-125 mix-blend-multiply"
+            />
+          </div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between">
-          {/* Left Section - Patient Info */}
-          <div className="flex items-center space-x-4 flex-1">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-xl overflow-hidden border-3 border-white/30 shadow-lg">
-                <Image
-                  src={avatar}
-                  alt={patientName || 'Patient'}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                <Shield className="w-3 h-3 text-white" />
-              </div>
-            </div>
+        {/* Center Section - Patient Details */}
+        <div className="flex-1 flex flex-col justify-between border-l-4 border-black pl-3 sm:pl-6 overflow-hidden">
+          <div className="space-y-1 sm:space-y-3">
+             <div className="flex flex-col">
+                <span className="font-bold uppercase text-[8px] sm:text-[10px] mb-0.5">Patient Name</span>
+                <h3 className="text-sm sm:text-xl lg:text-3xl font-black uppercase leading-none truncate">{patientName || 'UNKNOWN PATIENT'}</h3>
+             </div>
+             
+             <div className="flex flex-col">
+                <span className="font-bold uppercase text-[8px] sm:text-[10px] mb-0.5">HP ID</span>
+                <p className="text-black font-bold font-mono tracking-wider w-fit bg-white border-2 border-black px-1 py-0.5 sm:px-2 sm:py-1 shadow-brutal-sm text-[10px] sm:text-sm truncate max-w-full">{patientId || 'ID-XXX-XXX'}</p>
+             </div>
 
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">{patientName || 'Patient Name'}</h3>
-              <p className="text-blue-100 text-sm font-medium">{patientId || 'Patient ID'}</p>
-              <div className="flex items-center space-x-3 text-sm">
+             <div className="grid grid-cols-2 gap-2 mt-2 sm:mt-4">
+                <div className="flex flex-col">
+                    <span className="font-bold uppercase text-[8px] sm:text-[10px] mb-0.5">D.O.B.</span>
+                    <p className="text-black font-black text-[10px] sm:text-base leading-none">{dob || 'DD/MM/YYYY'}</p>
+                </div>
                 {bloodType && (
-                  <Badge variant="secondary" className="bg-white/20 text-white border-0 hover:bg-white/20">
-                    <Heart className="w-3 h-3 mr-1" />
-                    {bloodType}
-                  </Badge>
-                )}
-                {emergencyContact && (
-                  <span className="text-blue-100">{emergencyContact}</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Center Section - Health Status */}
-          <div className="px-6 text-center">
-            <div className="space-y-2">
-              {lastVisit && (
-                <>
-                  <div className="flex items-center justify-center space-x-2">
-                    <Calendar className="w-4 h-4 text-blue-200" />
-                    <span className="text-sm text-blue-100">Last Visit</span>
-                  </div>
-                  <p className="text-white font-semibold">{lastVisit}</p>
-                </>
-              )}
-              {location && (
-                <div className="flex items-center justify-center space-x-2 mt-2">
-                  <MapPin className="w-4 h-4 text-blue-200" />
-                  <span className="text-sm text-blue-100">{location}</span>
+                <div className="flex flex-col">
+                    <span className="font-bold uppercase text-[8px] sm:text-[10px] mb-0.5">Blood</span>
+                    <p className="font-black text-destructive text-xs sm:text-base leading-none flex items-center">{bloodType}</p>
                 </div>
-              )}
-              {!lastVisit && !location && (
-                <div className="text-center">
-                  <p className="text-sm text-blue-100">No recent visits</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Section - QR Code */}
-          <div className="text-center">
-            <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <QrCode className="w-12 h-12 text-gray-800" />
-            </div>
-            <p className="text-xs text-blue-100 mt-2">Scan to Access</p>
+                )}
+             </div>
           </div>
         </div>
 
-        {/* Bottom Section - Health Metrics */}
-        {vitals && Object.values(vitals).some(value => value) && (
-          <div className="mt-6 pt-4 border-t border-white/20">
-            <div className="flex justify-between items-center text-sm">
-              {vitals.bloodPressure && (
-                <div className="text-center">
-                  <p className="text-blue-100">Blood Pressure</p>
-                  <p className="text-white font-semibold">{vitals.bloodPressure}</p>
-                </div>
-              )}
-              {vitals.heartRate && (
-                <div className="text-center">
-                  <p className="text-blue-100">Heart Rate</p>
-                  <p className="text-white font-semibold">{vitals.heartRate}</p>
-                </div>
-              )}
-              {vitals.temperature && (
-                <div className="text-center">
-                  <p className="text-blue-100">Temperature</p>
-                  <p className="text-white font-semibold">{vitals.temperature}</p>
-                </div>
-              )}
-              {vitals.weight && (
-                <div className="text-center">
-                  <p className="text-blue-100">Weight</p>
-                  <p className="text-white font-semibold">{vitals.weight}</p>
-                </div>
-              )}
+        {/* Right Section - QR Code */}
+        <div className="w-[20%] sm:w-[22%] flex flex-col items-center justify-center shrink-0 border-l-4 border-black pl-3 sm:pl-6">
+            <div className="w-full aspect-square border-4 border-black bg-white p-1 sm:p-2 shadow-brutal-sm mb-2 mt-auto">
+                <QrCode className="w-full h-full text-black" strokeWidth={1.5} />
             </div>
-          </div>
-        )}
-
-        {/* Health Passport Branding */}
-        <div className="absolute top-4 right-4">
-          <div className="flex items-center space-x-2 opacity-60">
-            <Heart className="w-4 h-4" />
-            <span className="text-xs font-medium">HealthPassport</span>
-          </div>
+            <div className="bg-black text-white w-full text-center py-1 font-black text-[8px] sm:text-xs uppercase mt-auto">
+                SCAN
+            </div>
         </div>
       </div>
     </Card>

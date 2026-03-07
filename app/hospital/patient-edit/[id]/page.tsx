@@ -316,7 +316,7 @@ export default function PatientEdit() {
         <Card>
           <CardContent className="p-6">
             <div className="text-center py-12">
-              <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-medium text-red-600 mb-2">Access Error</h3>
               <p className="text-red-500">{error}</p>
               <Button 
@@ -901,7 +901,7 @@ export default function PatientEdit() {
                             {lab.results && (
                               <div className="mt-2">
                                 <p className="text-sm font-medium text-gray-700">Results:</p>
-                                <p className="text-sm text-gray-900 font-medium">{lab.results}</p>
+                                <p className="text-sm text-gray-800 font-medium">{lab.results}</p>
                               </div>
                             )}
                             {lab.referenceRange && (
@@ -926,7 +926,7 @@ export default function PatientEdit() {
                                     >
                                       <div className="flex items-center space-x-2">
                                         <FileText className="w-4 h-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-gray-900">{file.name}</span>
+                                        <span className="text-sm font-medium text-gray-800">{file.name}</span>
                                         <span className="text-xs text-gray-500">
                                           ({(file.size / 1024 / 1024).toFixed(2)} MB)
                                         </span>

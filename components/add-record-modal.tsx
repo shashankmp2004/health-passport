@@ -555,7 +555,7 @@ export function AddRecordModal({ isOpen, onClose, onSave, type, title }: AddReco
                         <div className="flex items-center space-x-3">
                           <FileText className="w-5 h-5 text-blue-600" />
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                            <p className="text-sm font-medium text-gray-800">{file.name}</p>
                             <p className="text-xs text-gray-500">
                               {(file.size / 1024 / 1024).toFixed(2)} MB
                             </p>

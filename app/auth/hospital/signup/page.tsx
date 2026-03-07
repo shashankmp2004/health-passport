@@ -92,185 +92,165 @@ export default function HospitalSignup() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Features */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-900 to-green-800 text-white p-12 flex-col justify-between">
+    <div className="min-h-screen flex bg-background selection:bg-black selection:text-white">
+      {/* Left Side - Typography Banner */}
+      <div className="hidden lg:flex lg:w-1/3 bg-secondary border-r-4 border-black p-12 flex-col justify-between brutal-enter">
         <div>
-          <Link href="/" className="inline-flex items-center text-white hover:text-gray-300 mb-8">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+          <Link href="/" className="inline-flex items-center text-black font-black uppercase border-2 border-black bg-white px-4 py-2 hover:bg-black hover:text-white transition-colors shadow-brutal-sm mb-12">
+            &lt;- Back to Home
           </Link>
 
           <div className="mb-12">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6">
-              <Hospital className="w-8 h-8 text-green-600" />
-            </div>
-
-            <h1 className="text-4xl font-bold mb-8">
-              Healthcare Provider
-              <br />
-              Registration
+            <h1 className="text-7xl font-display font-black mb-8 uppercase tracking-tighter leading-none break-words">
+              REGISTER<br />
+              FACILITY_
             </h1>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">Secure Facility Registration</span>
+            <div className="space-y-6 font-bold text-xl border-l-8 border-black pl-6">
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>VERIFY FACILITY</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">Instant Patient Access</span>
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>PATIENT ACCESS</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">HIPAA Compliant System</span>
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>HIPAA CORE</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-green-500 rounded-full"></div>
-            <div className="w-8 h-8 bg-emerald-500 rounded-full"></div>
-          </div>
-          <div>
-            <p className="text-sm">@healthpassport</p>
-            <p className="text-sm text-gray-300">Healthcare Provider Network</p>
-          </div>
+        <div className="border-t-4 border-black pt-6">
+          <p className="font-black text-2xl uppercase">PROVIDER NETWORK.</p>
         </div>
       </div>
 
       {/* Right Side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-2/3 flex items-center justify-center p-8 bg-white brutal-enter delay-100 overflow-y-auto">
+        <div className="w-full max-w-2xl">
           {/* Mobile back button */}
-          <div className="lg:hidden mb-6">
-            <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+          <div className="lg:hidden mb-10">
+            <Link href="/" className="inline-flex items-center text-black font-black uppercase border-2 border-black bg-secondary px-4 py-2 hover:bg-black hover:text-white transition-colors shadow-brutal-sm">
+              &lt;- Back to Home
             </Link>
           </div>
 
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Hospital className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">HealthPassport</span>
-            </div>
+          <div className="mb-10 lg:hidden">
+            <h1 className="text-5xl font-display font-black uppercase tracking-tighter leading-none">
+              REGISTER_
+            </h1>
           </div>
 
-          <Card className="border-0 shadow-none">
+          <Card className="border-4 border-black shadow-brutal-lg rounded-none bg-white p-8">
             <CardContent className="p-0">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Register Healthcare Facility</h2>
-                <p className="text-gray-600">Join HealthPassport to provide better patient care with secure health data access.</p>
+              <div className="mb-8 border-b-4 border-black pb-6">
+                <h2 className="text-3xl font-display font-black text-black mb-2 uppercase tracking-tight">Facility Details</h2>
+                <p className="font-bold text-gray-700 bg-primary/30 inline-block px-2 py-1 mb-2">JOIN HEALTHPASSPORT NETWORK.</p>
               </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="facilityName" className="text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="facilityName" className="text-sm font-black uppercase text-black">
                     Facility Name
                   </Label>
                   <Input
                     id="facilityName"
-                    placeholder="City General Hospital"
+                    placeholder="CITY GENERAL HOSPITAL"
                     value={formData.facilityName}
                     onChange={(e) => handleInputChange("facilityName", e.target.value)}
-                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                    className="h-14 border-4 border-black rounded-none uppercase text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                     required
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="facilityType" className="text-sm font-medium text-gray-700">
+                <div className="space-y-3">
+                  <Label htmlFor="facilityType" className="text-sm font-black uppercase text-black">
                     Facility Type
                   </Label>
                   <Select onValueChange={(value) => handleInputChange("facilityType", value)}>
-                    <SelectTrigger className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500">
-                      <SelectValue placeholder="Select type" />
+                    <SelectTrigger className="h-14 border-4 border-black rounded-none uppercase text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white">
+                      <SelectValue placeholder="SELECT TYPE" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hospital">Hospital</SelectItem>
-                      <SelectItem value="clinic">Clinic</SelectItem>
-                      <SelectItem value="urgent-care">Urgent Care</SelectItem>
-                      <SelectItem value="specialty">Specialty Practice</SelectItem>
-                      <SelectItem value="laboratory">Laboratory</SelectItem>
-                      <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                    <SelectContent className="border-4 border-black rounded-none shadow-brutal-lg">
+                      <SelectItem value="hospital" className="font-bold cursor-pointer">HOSPITAL</SelectItem>
+                      <SelectItem value="clinic" className="font-bold cursor-pointer">CLINIC</SelectItem>
+                      <SelectItem value="urgent-care" className="font-bold cursor-pointer">URGENT CARE</SelectItem>
+                      <SelectItem value="specialty" className="font-bold cursor-pointer">SPECIALTY</SelectItem>
+                      <SelectItem value="laboratory" className="font-bold cursor-pointer">LABORATORY</SelectItem>
+                      <SelectItem value="pharmacy" className="font-bold cursor-pointer">PHARMACY</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="adminFirstName" className="text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="adminFirstName" className="text-sm font-black uppercase text-black">
                     Admin First Name
                   </Label>
                   <Input
                     id="adminFirstName"
-                    placeholder="John"
+                    placeholder="JOHN"
                     value={formData.adminFirstName}
                     onChange={(e) => handleInputChange("adminFirstName", e.target.value)}
-                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                    className="h-14 border-4 border-black rounded-none uppercase text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                     required
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="adminLastName" className="text-sm font-medium text-gray-700">
+                <div className="space-y-3">
+                  <Label htmlFor="adminLastName" className="text-sm font-black uppercase text-black">
                     Admin Last Name
                   </Label>
                   <Input
                     id="adminLastName"
-                    placeholder="Smith"
+                    placeholder="SMITH"
                     value={formData.adminLastName}
                     onChange={(e) => handleInputChange("adminLastName", e.target.value)}
-                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                    className="h-14 border-4 border-black rounded-none uppercase text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@hospital.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-sm font-black uppercase text-black">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="ADMIN@HOSPITAL.COM"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="h-14 border-4 border-black rounded-none uppercase text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="phone" className="text-sm font-black uppercase text-black">
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    className="h-14 border-4 border-black rounded-none uppercase text-lg font-mono transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="licenseNumber" className="text-sm font-medium text-gray-700">
+              <div className="space-y-3">
+                <Label htmlFor="licenseNumber" className="text-sm font-black uppercase text-black">
                   License Number
                 </Label>
                 <Input
@@ -278,80 +258,80 @@ export default function HospitalSignup() {
                   placeholder="HL-2024-12345"
                   value={formData.licenseNumber}
                   onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
-                  className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                  className="h-14 border-4 border-black rounded-none uppercase text-lg font-mono transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="password" className="text-sm font-black uppercase text-black">
                     Password
                   </Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a strong password"
+                      placeholder="CREATE PASSWORD"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
-                      className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500 pr-12"
+                      className="h-14 border-4 border-black rounded-none text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none pr-12 bg-white"
                       required
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-12 border-0 shadow-none hover:bg-transparent hover:translate-x-0"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="font-black underline uppercase text-xs">{showPassword ? "HIDE" : "SHOW"}</span>
                     </Button>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                <div className="space-y-3">
+                  <Label htmlFor="confirmPassword" className="text-sm font-black uppercase text-black">
                     Confirm Password
                   </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="Confirm your password"
+                    placeholder="CONFIRM PASSWORD"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    className="h-12 border-2 border-gray-200 rounded-lg focus:border-green-500"
+                    className="h-14 border-4 border-black rounded-none text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+              <div className="space-y-3">
+                <Label htmlFor="address" className="text-sm font-black uppercase text-black">
                   Address
                 </Label>
                 <Textarea
                   id="address"
-                  placeholder="123 Medical Center Blvd, City, State 12345"
+                  placeholder="123 MEDICAL CENTER BLVD, CITY, STATE"
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
-                  className="min-h-[80px] border-2 border-gray-200 rounded-lg focus:border-green-500"
+                  className="min-h-[100px] border-4 border-black rounded-none text-lg uppercase transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none bg-white"
                   required
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"
+                className="w-full h-16 bg-secondary hover:bg-secondary text-black border-4 border-black uppercase font-black text-xl brutal-active"
               >
-                Register Facility
+                REGISTER FACILITY -&gt;
               </Button>
 
-              <div className="text-center">
-                <p className="text-sm text-gray-600">
-                  Already registered?{" "}
-                  <Link href="/auth/hospital/login" className="text-green-600 hover:text-green-700 font-medium">
-                    Sign in here
+              <div className="text-center border-t-4 border-black pt-6">
+                <p className="text-sm font-bold uppercase">
+                  ALREADY REGISTERED?{" "}
+                  <Link href="/auth/hospital/login" className="text-black bg-primary px-2 py-1 ml-2 border-2 border-black hover:bg-black hover:text-white transition-colors">
+                    SIGN IN
                   </Link>
                 </p>
               </div>

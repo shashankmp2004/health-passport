@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import Doctor from '@/lib/models/Doctor';
 import Hospital from '@/lib/models/Hospital';
+import { getMockPatient, isMockPatientById } from '@/lib/utils/mock-data';
 
 // GET - Fetch patient's visit history
 export async function GET(request: NextRequest) {
@@ -27,8 +28,15 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('visits');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for visits...');
+      patient = getMockPatient();
+    } else {
+      patient = await Patient.findById(session.user.id).select('visits');
+    }
+    
     if (!patient) {
       return NextResponse.json(
         { error: 'Patient not found' },

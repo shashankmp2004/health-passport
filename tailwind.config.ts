@@ -10,6 +10,15 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-public-sans)'],
+  			display: ['var(--font-space-grotesk)'],
+  		},
+  		boxShadow: {
+  			brutal: '4px 4px 0px 0px rgba(0,0,0,1)',
+  			'brutal-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+  			'brutal-sm': '2px 2px 0px 0px rgba(0,0,0,1)'
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -63,9 +72,9 @@ const config: Config = {
   			}
   		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: '0px',
+  			md: '0px',
+  			sm: '0px'
   		},
   		keyframes: {
   			'accordion-down': {

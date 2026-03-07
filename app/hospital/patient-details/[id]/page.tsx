@@ -273,7 +273,7 @@ export default function PatientDetails() {
         <Card>
           <CardContent className="p-6">
             <div className="text-center py-12">
-              <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-medium text-red-600 mb-2">Access Error</h3>
               <p className="text-red-500">{error}</p>
               <Button 

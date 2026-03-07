@@ -73,150 +73,132 @@ export default function PatientPrivacy() {
   ]
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 md:p-8 space-y-8 bg-secondary min-h-screen selection:bg-black selection:text-white pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 brutal-enter">
         <div>
-          <h1 className="text-2xl font-bold">Privacy & Security</h1>
-          <p className="text-gray-600">Control who can access your health information and how it's used</p>
+          <h1 className="text-4xl md:text-5xl font-display font-black uppercase tracking-tighter mix-blend-multiply">Privacy & Security</h1>
+          <p className="text-black font-bold text-lg border-l-4 border-black pl-3 mt-2 bg-white/50 inline-block pr-3">Control who can access your health information and how it's used</p>
         </div>
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          <Shield className="w-4 h-4 mr-1" />
+        <Badge className="bg-green-200 text-black border-4 border-black rounded-none font-black uppercase tracking-wider text-sm px-4 py-2 shadow-brutal-sm flex items-center">
+          <Shield className="w-5 h-5 mr-2" strokeWidth={3} />
           Secure
         </Badge>
       </div>
 
-      <Tabs defaultValue="privacy" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="privacy">Privacy Settings</TabsTrigger>
-          <TabsTrigger value="access">Access Logs</TabsTrigger>
-          <TabsTrigger value="sharing">Data Sharing</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+      <Tabs defaultValue="privacy" className="w-full brutal-enter delay-100">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto md:h-14 bg-white border-4 border-black rounded-none p-0 shadow-brutal-sm gap-0">
+          <TabsTrigger value="privacy" className="data-[state=active]:bg-primary data-[state=active]:text-black rounded-none border-r-4 border-b-4 md:border-b-0 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Privacy Settings</TabsTrigger>
+          <TabsTrigger value="access" className="data-[state=active]:bg-purple-200 data-[state=active]:text-black rounded-none border-r-0 md:border-r-4 border-b-4 md:border-b-0 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Access Logs</TabsTrigger>
+          <TabsTrigger value="sharing" className="data-[state=active]:bg-secondary data-[state=active]:text-black rounded-none border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Data Sharing</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-destructive data-[state=active]:text-black rounded-none font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Security</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="privacy" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Eye className="w-5 h-5 text-blue-600" />
+        <TabsContent value="privacy" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-primary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Eye className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Data Visibility Settings</span>
               </CardTitle>
-              <CardDescription>Control who can view and access your health information</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Control who can view and access your health information</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Healthcare Providers</p>
-                    <p className="text-sm text-gray-600">
-                      Allow authorized healthcare providers to access your complete medical records
-                    </p>
+                {[
+                  {
+                    id: 'shareWithProviders',
+                    title: 'Healthcare Providers',
+                    desc: 'Allow authorized healthcare providers to access your complete medical records',
+                    bg: 'bg-green-200/20',
+                  },
+                  {
+                    id: 'shareWithFamily',
+                    title: 'Family Members',
+                    desc: 'Allow designated family members to view your health information',
+                    bg: 'bg-purple-200/20',
+                  },
+                  {
+                    id: 'anonymousResearch',
+                    title: 'Anonymous Research',
+                    desc: 'Contribute anonymized data to medical research and studies',
+                    bg: 'bg-secondary/20',
+                  },
+                  {
+                    id: 'marketingEmails',
+                    title: 'Marketing Communications',
+                    desc: 'Receive marketing emails and promotional health content',
+                    bg: 'bg-destructive/20',
+                  },
+                  {
+                    id: 'dataAnalytics',
+                    title: 'Data Analytics',
+                    desc: 'Allow analysis of your data to improve healthcare services',
+                    bg: 'bg-primary/20',
+                  },
+                  {
+                    id: 'thirdPartySharing',
+                    title: 'Third-Party Sharing',
+                    desc: 'Share data with third-party applications and services',
+                    bg: 'bg-blue-200/20',
+                  },
+                ].map((setting) => (
+                  <div key={setting.id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all gap-4 ${setting.bg}`}>
+                    <div>
+                      <p className="font-black text-xl uppercase tracking-tighter mb-1">{setting.title}</p>
+                      <p className="text-sm font-bold text-gray-800 border-l-4 border-black pl-2">
+                        {setting.desc}
+                      </p>
+                    </div>
+                    <div className="border-4 border-black bg-white p-1 shrink-0">
+                      <Switch
+                        checked={privacySettings[setting.id as keyof typeof privacySettings]}
+                        onCheckedChange={(checked) =>
+                          setPrivacySettings((prev) => ({ ...prev, [setting.id]: checked }))
+                        }
+                        className="data-[state=checked]:bg-black data-[state=unchecked]:bg-gray-200"
+                      />
+                    </div>
                   </div>
-                  <Switch
-                    checked={privacySettings.shareWithProviders}
-                    onCheckedChange={(checked) =>
-                      setPrivacySettings((prev) => ({ ...prev, shareWithProviders: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Family Members</p>
-                    <p className="text-sm text-gray-600">
-                      Allow designated family members to view your health information
-                    </p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.shareWithFamily}
-                    onCheckedChange={(checked) => setPrivacySettings((prev) => ({ ...prev, shareWithFamily: checked }))}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Anonymous Research</p>
-                    <p className="text-sm text-gray-600">Contribute anonymized data to medical research and studies</p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.anonymousResearch}
-                    onCheckedChange={(checked) =>
-                      setPrivacySettings((prev) => ({ ...prev, anonymousResearch: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Marketing Communications</p>
-                    <p className="text-sm text-gray-600">Receive marketing emails and promotional health content</p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.marketingEmails}
-                    onCheckedChange={(checked) => setPrivacySettings((prev) => ({ ...prev, marketingEmails: checked }))}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Data Analytics</p>
-                    <p className="text-sm text-gray-600">Allow analysis of your data to improve healthcare services</p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.dataAnalytics}
-                    onCheckedChange={(checked) => setPrivacySettings((prev) => ({ ...prev, dataAnalytics: checked }))}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Third-Party Sharing</p>
-                    <p className="text-sm text-gray-600">Share data with third-party applications and services</p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.thirdPartySharing}
-                    onCheckedChange={(checked) =>
-                      setPrivacySettings((prev) => ({ ...prev, thirdPartySharing: checked }))
-                    }
-                  />
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="access" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-purple-600" />
+        <TabsContent value="access" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-purple-200/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Clock className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Access History</span>
               </CardTitle>
-              <CardDescription>View who has accessed your health information</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">View who has accessed your health information</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="space-y-4">
                 {accessLogs.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
+                  <div key={log.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] transition-all bg-white gap-4 group">
+                    <div className="flex items-start md:items-center space-x-4">
+                      <div className="flex-shrink-0 bg-gray-100 p-2 border-2 border-black group-hover:rotate-12 transition-transform">
                         {log.authorized ? (
-                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <CheckCircle className="w-6 h-6 text-green-500" strokeWidth={3} />
                         ) : (
-                          <XCircle className="w-5 h-5 text-red-500" />
+                          <XCircle className="w-6 h-6 text-destructive" strokeWidth={3} />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium">{log.accessor}</p>
-                        <p className="text-sm text-gray-600">{log.role}</p>
-                        <p className="text-sm text-gray-500">{log.action}</p>
+                        <p className="font-black text-xl uppercase tracking-tighter">{log.accessor}</p>
+                        <p className="text-sm font-bold uppercase bg-secondary inline-block px-1 border-2 border-black mb-1 mt-1">{log.role}</p>
+                        <p className="text-base font-bold border-l-4 border-black pl-2">{log.action}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">{log.timestamp}</p>
+                    <div className="flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t-4 border-black md:border-none border-dashed gap-3 md:gap-2">
+                      <p className="text-sm font-black uppercase tracking-wider bg-gray-100 px-2 py-1 border-2 border-black">{log.timestamp}</p>
                       <Badge
-                        variant={log.authorized ? "default" : "destructive"}
-                        className={log.authorized ? "bg-green-100 text-green-800" : ""}
+                        className={`border-4 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm ${
+                          log.authorized ? "bg-green-200 text-black" : "bg-destructive text-white"
+                        }`}
                       >
                         {log.authorized ? "Authorized" : "Blocked"}
                       </Badge>
@@ -228,50 +210,54 @@ export default function PatientPrivacy() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="sharing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-orange-600" />
+        <TabsContent value="sharing" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-secondary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Users className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Data Sharing Agreements</span>
               </CardTitle>
-              <CardDescription>Manage your participation in research studies and data sharing</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Manage your participation in research studies and data sharing</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {dataSharing.map((agreement, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">{agreement.organization}</h3>
+                  <div key={index} className="p-5 border-4 border-black bg-white shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all group">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                      <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter group-hover:scale-[1.02] transition-transform origin-left">{agreement.organization}</h3>
                       <Badge
-                        variant={agreement.status === "Active" ? "default" : "secondary"}
-                        className={
+                        className={`border-4 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm ${
                           agreement.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }
+                            ? "bg-green-200 text-black"
+                            : "bg-secondary text-black"
+                        }`}
                       >
                         {agreement.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{agreement.purpose}</p>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {agreement.dataTypes.map((type, typeIndex) => (
-                        <Badge key={typeIndex} variant="outline" className="text-xs">
-                          {type}
-                        </Badge>
-                      ))}
+                    <p className="text-base font-bold border-l-4 border-black pl-3 mb-4 uppercase">{agreement.purpose}</p>
+                    
+                    <div className="mb-4">
+                      <span className="text-xs font-black uppercase mb-2 block">Data Shared:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {agreement.dataTypes.map((type, typeIndex) => (
+                          <Badge key={typeIndex} className="bg-white text-black border-2 border-black rounded-none font-bold shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 transition-transform uppercase text-xs">
+                            {type}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>
-                        {agreement.startDate} - {agreement.endDate}
-                      </span>
-                      <div className="space-x-2">
-                        <Button variant="outline" size="sm">
-                          View Details
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 pt-4 border-t-4 border-black border-dashed">
+                      <div className="bg-gray-100 border-2 border-black px-3 py-1.5 font-bold uppercase text-xs sm:text-sm shadow-[2px_2px_0px_#000]">
+                        {new Date(agreement.startDate).toLocaleDateString()} <span className="mx-2 font-black">TO</span> {new Date(agreement.endDate).toLocaleDateString()}
+                      </div>
+                      <div className="flex w-full sm:w-auto space-x-3">
+                        <Button className="flex-1 sm:flex-none h-10 border-4 border-black rounded-none bg-white text-black hover:bg-black hover:text-white uppercase font-black tracking-wider transition-colors shadow-brutal-sm">
+                          Details
                         </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 border-red-200 bg-transparent">
-                          Revoke Access
+                        <Button className="flex-1 sm:flex-none h-10 border-4 border-black rounded-none bg-destructive text-white hover:bg-black hover:text-white uppercase font-black tracking-wider transition-colors shadow-brutal-sm">
+                          Revoke
                         </Button>
                       </div>
                     </div>
@@ -282,90 +268,117 @@ export default function PatientPrivacy() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-red-600" />
+        <TabsContent value="security" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-destructive/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Shield className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Security Overview</span>
               </CardTitle>
-              <CardDescription>Your account security status and recommendations</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Your account security status and recommendations</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-8">
               {/* Security Score */}
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-green-800">Security Score: Excellent</h3>
-                    <p className="text-sm text-green-600">Your account is well protected</p>
+              <div className="p-5 bg-green-200 border-4 border-black shadow-[4px_4px_0px_#000] rotate-1 hover:rotate-0 transition-transform">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <h3 className="font-black text-2xl uppercase tracking-tighter text-black mb-1">Security Score: Excellent</h3>
+                    <p className="text-base font-bold text-black uppercase bg-white px-2 py-0.5 border-2 border-black inline-block">Your account is well protected</p>
                   </div>
-                  <div className="text-2xl font-bold text-green-700">95/100</div>
+                  <div className="text-4xl md:text-5xl font-black text-black bg-white p-3 border-4 border-black shadow-inner">
+                    95<span className="text-xl text-gray-500">/100</span>
+                  </div>
                 </div>
               </div>
 
               {/* Security Features */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "Strong Password",
+                    desc: "Meets security requirements",
+                    status: "Active",
+                    icon: <CheckCircle className="w-8 h-8 text-black" strokeWidth={3} />,
+                    action: null,
+                    bg: "bg-green-200/20"
+                  },
+                  {
+                    title: "2FA",
+                    desc: "Add an extra layer of security",
+                    status: "Inactive",
+                    icon: <XCircle className="w-8 h-8 text-black" strokeWidth={3} />,
+                    action: "Enable",
+                    bg: "bg-destructive/20"
+                  },
+                  {
+                    title: "Email Verification",
+                    desc: "Email address is verified",
+                    status: "Verified",
+                    icon: <CheckCircle className="w-8 h-8 text-black" strokeWidth={3} />,
+                    action: null,
+                    bg: "bg-green-200/20"
+                  },
+                  {
+                    title: "Data Encryption",
+                    desc: "Encrypted at rest and transit",
+                    status: "Active",
+                    icon: <CheckCircle className="w-8 h-8 text-black" strokeWidth={3} />,
+                    action: null,
+                    bg: "bg-green-200/20"
+                  }
+                ].map((feature, i) => (
+                  <div key={i} className="flex flex-col h-full justify-between p-5 border-4 border-black bg-white shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all">
                     <div>
-                      <p className="font-medium">Strong Password</p>
-                      <p className="text-sm text-gray-600">Password meets security requirements</p>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`p-2 border-4 border-black ${feature.bg}`}>
+                          {feature.icon}
+                        </div>
+                        {feature.status === "Active" || feature.status === "Verified" ? (
+                          <Badge className="bg-green-200 text-black border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">
+                            {feature.status}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-white text-black border-2 border-dashed border-black rounded-none font-black uppercase shadow-brutal-sm">
+                            {feature.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <h4 className="font-black text-xl uppercase tracking-tighter mb-1">{feature.title}</h4>
+                      <p className="text-sm font-bold text-gray-800 border-l-4 border-black pl-2 mb-4">{feature.desc}</p>
                     </div>
+                    {feature.action && (
+                      <Button className="w-full h-10 border-4 border-black rounded-none bg-black text-white hover:bg-secondary hover:text-black uppercase font-black tracking-wider transition-colors shadow-brutal-sm">
+                        {feature.action}
+                      </Button>
+                    )}
                   </div>
-                  <Badge className="bg-green-100 text-green-800">Active</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <XCircle className="w-5 h-5 text-red-500" />
-                    <div>
-                      <p className="font-medium">Two-Factor Authentication</p>
-                      <p className="text-sm text-gray-600">Add an extra layer of security</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Enable
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <div>
-                      <p className="font-medium">Email Verification</p>
-                      <p className="text-sm text-gray-600">Email address is verified</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-100 text-green-800">Verified</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <div>
-                      <p className="font-medium">Data Encryption</p>
-                      <p className="text-sm text-gray-600">All data is encrypted at rest and in transit</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-100 text-green-800">Active</Badge>
-                </div>
+                ))}
               </div>
 
               {/* Security Recommendations */}
-              <div className="pt-4 border-t">
-                <h3 className="font-medium mb-4 flex items-center">
-                  <AlertTriangle className="w-4 h-4 mr-2 text-yellow-500" />
-                  Security Recommendations
+              <div className="pt-8 border-t-8 border-black">
+                <h3 className="font-display font-black text-2xl uppercase tracking-tighter mb-6 flex items-center bg-secondary w-fit px-3 py-1 border-4 border-black -rotate-1">
+                  <AlertTriangle className="w-6 h-6 mr-3 text-black" strokeWidth={3} />
+                  Recommendations
                 </h3>
-                <div className="space-y-3">
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="font-medium text-yellow-800">Enable Two-Factor Authentication</p>
-                    <p className="text-sm text-yellow-600">Protect your account with an additional verification step</p>
+                <div className="space-y-4">
+                  <div className="p-4 bg-white border-4 border-black border-dashed shadow-[4px_4px_0px_#000] flex items-start gap-4 hover:-translate-y-1 hover:-translate-x-1 transition-transform">
+                    <div className="bg-secondary p-2 border-2 border-black mt-1">
+                      <Shield className="w-6 h-6 text-black" strokeWidth={3} />
+                    </div>
+                    <div>
+                      <p className="font-black text-lg uppercase">Enable Two-Factor Authentication</p>
+                      <p className="text-sm font-bold text-gray-700">Protect your account with an additional verification step when modifying sensitive settings.</p>
+                    </div>
                   </div>
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="font-medium text-blue-800">Review Access Permissions</p>
-                    <p className="text-sm text-blue-600">Regularly review who has access to your health information</p>
+                  <div className="p-4 bg-white border-4 border-black border-dashed shadow-[4px_4px_0px_#000] flex items-start gap-4 hover:-translate-y-1 hover:-translate-x-1 transition-transform">
+                    <div className="bg-primary/50 p-2 border-2 border-black mt-1">
+                      <Eye className="w-6 h-6 text-black" strokeWidth={3} />
+                    </div>
+                    <div>
+                      <p className="font-black text-lg uppercase">Review Access Permissions</p>
+                      <p className="text-sm font-bold text-gray-700">Regularly review who has access to your health information in the Privacy Settings tab.</p>
+                    </div>
                   </div>
                 </div>
               </div>

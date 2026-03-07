@@ -143,7 +143,7 @@ export default function PatientSearch() {
         <Card>
           <CardContent className="p-6">
             <div className="text-center py-4">
-              <Search className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <Search className="w-12 h-12 text-destructive mx-auto mb-4" />
               <p className="text-red-600 font-medium">{error}</p>
               <p className="text-sm text-gray-500 mt-2">Please try again or contact support if the issue persists</p>
             </div>

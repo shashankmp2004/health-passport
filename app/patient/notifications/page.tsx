@@ -100,18 +100,18 @@ export default function PatientNotifications() {
 
   const getStatusBadge = (status: string, isExpired: boolean) => {
     if (isExpired) {
-      return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Expired</Badge>
+      return <Badge className="bg-gray-200 text-gray-600 border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">Expired</Badge>
     }
     
     switch (status) {
       case 'pending':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">Pending Response</Badge>
+        return <Badge className="bg-secondary text-black border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">Pending Response</Badge>
       case 'approved':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Approved</Badge>
+        return <Badge className="bg-green-200 text-black border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">Approved</Badge>
       case 'denied':
-        return <Badge variant="default" className="bg-red-100 text-red-800">Denied</Badge>
+        return <Badge className="bg-destructive text-white border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">Denied</Badge>
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge className="bg-white text-black border-2 border-black rounded-none font-black uppercase shadow-brutal-sm">{status}</Badge>
     }
   }
 
@@ -132,13 +132,13 @@ export default function PatientNotifications() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-6 md:p-8 space-y-8 bg-secondary min-h-screen">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
-          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="h-12 bg-white border-4 border-black mb-4 w-64 shadow-brutal-sm"></div>
+          <div className="h-6 bg-white border-2 border-black mb-8 w-96 max-w-full"></div>
+          <div className="grid grid-cols-1 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-300 rounded-lg"></div>
+              <div key={i} className="h-40 bg-white border-4 border-black shadow-brutal-sm"></div>
             ))}
           </div>
         </div>
@@ -147,135 +147,139 @@ export default function PatientNotifications() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 md:p-8 space-y-8 bg-secondary min-h-screen selection:bg-black selection:text-white pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 brutal-enter">
         <div>
-          <h1 className="text-2xl font-bold">Access Requests</h1>
-          <p className="text-gray-600">Manage hospital access requests to your medical records</p>
+          <h1 className="text-4xl md:text-5xl font-display font-black uppercase tracking-tighter mix-blend-multiply">Access Requests</h1>
+          <p className="text-black font-bold text-lg border-l-4 border-black pl-3 mt-2 bg-white/50 inline-block pr-3">Manage hospital access requests to your medical records</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge className="bg-secondary text-black border-4 border-black rounded-none font-black uppercase tracking-wider text-sm px-4 py-2 shadow-brutal-sm">
             {counts.pending} Pending
           </Badge>
         </div>
       </div>
 
       {/* Privacy Notice */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start space-x-3">
-          <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+      <div className="p-6 bg-white border-4 border-black shadow-brutal-sm brutal-enter delay-100">
+        <div className="flex items-start space-x-4">
+          <div className="bg-primary/20 p-2 border-2 border-black -rotate-6">
+             <Shield className="w-8 h-8 text-black" strokeWidth={3} />
+          </div>
           <div>
-            <h3 className="text-sm font-semibold text-blue-800">Your Privacy is Protected</h3>
-            <p className="text-sm text-blue-700 mt-1">
+            <h3 className="text-xl font-black uppercase tracking-tight mb-2">Your Privacy is Protected</h3>
+            <p className="text-base font-bold text-gray-800 border-l-4 border-black pl-3 bg-gray-50 border-dashed py-2 pr-2">
               Hospitals must request your permission before accessing your medical records. 
               You have full control over who can see your information and for how long. 
-              Approved access automatically expires after 24 hours.
+              <span className="bg-secondary px-1 ml-1 border-2 border-black text-black">Approved access automatically expires after 24 hours.</span>
             </p>
           </div>
         </div>
       </div>
 
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="pending">
+      <Tabs defaultValue="pending" className="w-full brutal-enter delay-200">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto md:h-14 bg-white border-4 border-black rounded-none p-0 shadow-brutal-sm gap-0">
+          <TabsTrigger value="pending" className="data-[state=active]:bg-secondary data-[state=active]:text-black rounded-none border-r-4 border-b-4 md:border-b-0 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">
             Pending ({counts.pending})
           </TabsTrigger>
-          <TabsTrigger value="all">
-            All Requests ({counts.total})
+          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-black rounded-none border-r-0 md:border-r-4 border-b-4 md:border-b-0 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">
+            All ({counts.total})
           </TabsTrigger>
-          <TabsTrigger value="approved">
+          <TabsTrigger value="approved" className="data-[state=active]:bg-green-200 data-[state=active]:text-black rounded-none border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">
             Approved ({counts.approved})
           </TabsTrigger>
-          <TabsTrigger value="denied">
+          <TabsTrigger value="denied" className="data-[state=active]:bg-destructive data-[state=active]:text-black rounded-none font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">
             Denied ({counts.denied})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pending" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bell className="w-5 h-5 text-blue-600" />
+        <TabsContent value="pending" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-secondary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Bell className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Pending Access Requests</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">
                 Hospitals requesting access to your medical records
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {notifications.filter(n => n.status === 'pending' && !n.isExpired).length > 0 ? (
                   notifications
                     .filter(n => n.status === 'pending' && !n.isExpired)
                     .map((notification) => (
-                      <div key={notification.id} className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-start space-x-3">
-                            {getNotificationIcon(notification.type, notification.status)}
+                      <div key={notification.id} className="p-6 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 border-b-4 border-black pb-4 gap-4">
+                          <div className="flex items-start space-x-4">
+                            <div className="bg-secondary p-3 border-4 border-black">
+                               <Hospital className="w-8 h-8 text-black" strokeWidth={3} />
+                            </div>
                             <div>
-                              <h3 className="font-semibold text-blue-900">{notification.hospital.name}</h3>
-                              <p className="text-sm text-blue-700 mt-1">{notification.message}</p>
+                              <h3 className="font-black text-2xl uppercase tracking-tighter">{notification.hospital.name}</h3>
+                              <p className="text-base font-bold bg-gray-50 border-l-4 border-black pl-2 pr-2 py-1 mt-1 inline-block">{notification.message}</p>
                             </div>
                           </div>
-                          {getStatusBadge(notification.status, notification.isExpired)}
+                          <div>
+                            {getStatusBadge(notification.status, notification.isExpired)}
+                          </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-blue-700 mb-4">
-                          <div className="flex items-center space-x-2">
-                            <User className="w-4 h-4" />
-                            <span>Requested by: {notification.requestedBy?.name || 'Hospital Staff'}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm font-bold uppercase mb-6 bg-gray-50 border-4 border-black p-4">
+                          <div>
+                            <span className="text-gray-500 text-[10px] mb-1 flex items-center"><User className="w-3 h-3 mr-1" /> REQUESTED BY</span>
+                            <span className="text-black">{notification.requestedBy?.name || 'Hospital Staff'}</span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4" />
-                            <span>Received: {new Date(notification.createdAt).toLocaleDateString()}</span>
+                          <div>
+                            <span className="text-gray-500 text-[10px] mb-1 flex items-center"><Calendar className="w-3 h-3 mr-1" /> RECEIVED</span>
+                            <span className="text-black">{new Date(notification.createdAt).toLocaleDateString()}</span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4" />
-                            <span>Expires: {getTimeRemaining(notification.expiresAt)}</span>
+                          <div className="bg-secondary/20 -m-4 p-4 border-l-4 border-r-4 border-black flex flex-col justify-center">
+                            <span className="text-black text-[10px] mb-1 flex items-center"><Clock className="w-3 h-3 mr-1" /> EXPIRES IN</span>
+                            <span className="text-black font-black text-lg">{getTimeRemaining(notification.expiresAt)}</span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-medium">Access Duration: 24 hours if approved</span>
+                          <div className="flex flex-col justify-center pl-4 lg:pl-0 pt-4 lg:pt-0">
+                            <span className="text-gray-500 block text-[10px] mb-1">DURATION</span>
+                            <span className="text-black">24 hours if approved</span>
                           </div>
                         </div>
 
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                           <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="flex-1 h-12 border-4 border-black rounded-none bg-green-200 text-black hover:bg-black hover:text-white uppercase font-black tracking-wider transition-colors shadow-brutal-sm"
                             onClick={() => handleResponse(notification.id, 'approve')}
                             disabled={responding === notification.id}
                           >
                             {responding === notification.id ? (
                               <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-3"></div>
                                 Approving...
                               </>
                             ) : (
                               <>
-                                <CheckCircle className="w-4 h-4 mr-2" />
+                                <CheckCircle className="w-5 h-5 mr-2" strokeWidth={3} />
                                 Approve Access
                               </>
                             )}
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-red-300 text-red-700 hover:bg-red-50"
+                            className="flex-1 h-12 border-4 border-black rounded-none bg-white text-black hover:bg-destructive hover:text-black uppercase font-black tracking-wider transition-colors shadow-brutal-sm group"
                             onClick={() => handleResponse(notification.id, 'deny')}
                             disabled={responding === notification.id}
                           >
-                            <XCircle className="w-4 h-4 mr-2" />
+                            <XCircle className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" strokeWidth={3} />
                             Deny Access
                           </Button>
                         </div>
                       </div>
                     ))
                 ) : (
-                  <div className="text-center py-8">
-                    <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No pending access requests</p>
-                    <p className="text-sm text-gray-500">You'll be notified when hospitals request access to your records</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <Bell className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No pending requests</p>
+                    <p className="font-bold text-gray-500 uppercase">You'll be notified when hospitals request access</p>
                   </div>
                 )}
               </div>
@@ -283,90 +287,101 @@ export default function PatientNotifications() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Access Requests</CardTitle>
-              <CardDescription>Complete history of access requests</CardDescription>
+        <TabsContent value="all" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-primary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Bell className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
+                <span>All Access Requests</span>
+              </CardTitle>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Complete history of access requests</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="space-y-4">
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <div key={notification.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-start space-x-3">
-                          {getNotificationIcon(notification.type, notification.status)}
-                          <div>
-                            <h3 className="font-semibold">{notification.hospital.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                          </div>
-                        </div>
-                        {getStatusBadge(notification.status, notification.isExpired)}
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
-                        <span>Requested: {new Date(notification.createdAt).toLocaleDateString()}</span>
-                        {notification.respondedAt && (
-                          <span>Responded: {new Date(notification.respondedAt).toLocaleDateString()}</span>
-                        )}
-                        <span>Type: {notification.type.replace('_', ' ')}</span>
-                        {notification.status === 'pending' && !notification.isExpired && (
-                          <span className="text-blue-600">Expires: {getTimeRemaining(notification.expiresAt)}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No access requests yet</p>
-                    <p className="text-sm text-gray-500">When hospitals request access to your records, they'll appear here</p>
-                  </div>
-                )}
+              {notifications.length > 0 ? (
+                <div className="overflow-x-auto p-6 pt-0">
+                  <table className="w-full text-left border-collapse mt-6 border-4 border-black">
+                    <thead>
+                      <tr className="border-b-4 border-black bg-accent">
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Hospital</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Requested</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Status</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm">Responded</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {notifications.map((notification, index) => (
+                        <tr key={index} className="border-b-4 border-black hover:bg-primary/10 transition-colors bg-white">
+                          <td className="p-4 font-bold border-r-4 border-black">{notification.hospital.name}</td>
+                          <td className="p-4 font-bold border-r-4 border-black font-mono">{new Date(notification.createdAt).toLocaleDateString()}</td>
+                          <td className="p-4 border-r-4 border-black">
+                            {getStatusBadge(notification.status, notification.isExpired)}
+                          </td>
+                          <td className="p-4 font-bold text-sm">
+                             {notification.respondedAt ? new Date(notification.respondedAt).toLocaleDateString() : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12 border-t-4 border-black border-dashed bg-gray-50 m-6">
+                  <Bell className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                  <p className="font-black text-2xl uppercase mb-2">No access requests</p>
+                  <p className="font-bold text-gray-500 uppercase">When hospitals request access, they'll appear here</p>
+                </div>
+              )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="approved" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+        <TabsContent value="approved" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-green-200/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <CheckCircle className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Approved Requests</span>
               </CardTitle>
-              <CardDescription>Access requests you have approved</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Access requests you have approved</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {notifications.filter(n => n.status === 'approved').length > 0 ? (
                   notifications
                     .filter(n => n.status === 'approved')
                     .map((notification) => (
-                      <div key={notification.id} className="p-4 border border-green-200 rounded-lg bg-green-50">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-start space-x-3">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <div>
-                              <h3 className="font-semibold text-green-900">{notification.hospital.name}</h3>
-                              <p className="text-sm text-green-700 mt-1">{notification.message}</p>
-                            </div>
-                          </div>
-                          {getStatusBadge(notification.status, notification.isExpired)}
+                      <div key={notification.id} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                          <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter flex items-center">
+                            <CheckCircle className="w-6 h-6 mr-3 text-black" strokeWidth={3} />
+                            {notification.hospital.name}
+                          </h3>
+                          <Badge className="bg-green-200 text-black border-4 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">
+                            Approved
+                          </Badge>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-green-700">
-                          <span>Approved: {new Date(notification.respondedAt).toLocaleDateString()}</span>
-                          <span>Duration: 24 hours</span>
-                          <span>Requested by: {notification.requestedBy?.name}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold uppercase mb-4 bg-gray-50 border-4 border-black p-3">
+                          <div>
+                            <span className="text-gray-500 block text-[10px]">APPROVED ON</span> {new Date(notification.respondedAt).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="text-gray-500 block text-[10px]">REQUESTED BY</span> {notification.requestedBy?.name}
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium border-l-4 border-black pl-3 bg-gray-50 py-2 pr-2">
+                          <span className="uppercase font-black block text-xs mb-1">Reason:</span>
+                          {notification.message}
                         </div>
                       </div>
                     ))
                 ) : (
-                  <div className="text-center py-8">
-                    <CheckCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No approved requests</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <CheckCircle className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No approved requests</p>
+                    <p className="font-bold text-gray-500 uppercase">Requests you approve will appear here</p>
                   </div>
                 )}
               </div>
@@ -374,43 +389,47 @@ export default function PatientNotifications() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="denied" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <XCircle className="w-5 h-5 text-red-600" />
+        <TabsContent value="denied" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-destructive/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <XCircle className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Denied Requests</span>
               </CardTitle>
-              <CardDescription>Access requests you have denied</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Access requests you have denied</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {notifications.filter(n => n.status === 'denied').length > 0 ? (
                   notifications
                     .filter(n => n.status === 'denied')
                     .map((notification) => (
-                      <div key={notification.id} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-start space-x-3">
-                            <XCircle className="w-5 h-5 text-red-600" />
-                            <div>
-                              <h3 className="font-semibold text-red-900">{notification.hospital.name}</h3>
-                              <p className="text-sm text-red-700 mt-1">{notification.message}</p>
-                            </div>
-                          </div>
-                          {getStatusBadge(notification.status, notification.isExpired)}
+                      <div key={notification.id} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all opacity-80 hover:opacity-100">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                          <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter flex items-center line-through decoration-2">
+                            <XCircle className="w-6 h-6 mr-3 text-black" strokeWidth={3} />
+                            {notification.hospital.name}
+                          </h3>
+                          <Badge className="bg-destructive text-white border-4 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">
+                            Denied
+                          </Badge>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-red-700">
-                          <span>Denied: {new Date(notification.respondedAt).toLocaleDateString()}</span>
-                          <span>Requested by: {notification.requestedBy?.name}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold uppercase mb-4 bg-gray-50 border-4 border-black p-3">
+                          <div>
+                            <span className="text-gray-500 block text-[10px]">DENIED ON</span> {new Date(notification.respondedAt).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="text-gray-500 block text-[10px]">REQUESTED BY</span> {notification.requestedBy?.name}
+                          </div>
                         </div>
                       </div>
                     ))
                 ) : (
-                  <div className="text-center py-8">
-                    <XCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No denied requests</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <XCircle className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No denied requests</p>
+                    <p className="font-bold text-gray-500 uppercase">Requests you deny will appear here</p>
                   </div>
                 )}
               </div>

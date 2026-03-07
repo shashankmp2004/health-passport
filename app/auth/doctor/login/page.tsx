@@ -124,7 +124,7 @@ export default function DoctorLogin() {
         <div className="w-full max-w-md">
           {/* Mobile back button */}
           <div className="lg:hidden mb-6">
-            <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-900">
+            <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Link>
@@ -135,14 +135,14 @@ export default function DoctorLogin() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">HealthPassport</span>
+              <span className="text-xl font-bold text-gray-800">HealthPassport</span>
             </div>
           </div>
 
           <Card className="border-0 shadow-none">
             <CardContent className="p-0">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Doctor Sign In</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Doctor Sign In</h2>
                 <p className="text-gray-600">Enter your Doctor ID and password to access the medical portal.</p>
               </div>
 

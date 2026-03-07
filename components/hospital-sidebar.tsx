@@ -85,64 +85,81 @@ export function HospitalSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-            <Hospital className="w-5 h-5 text-white" />
+    <Sidebar className="border-r-4 border-black bg-white">
+      <SidebarHeader className="p-4 border-b-4 border-black bg-green-200">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-white border-4 border-black flex items-center justify-center shadow-brutal-sm rotate-3">
+            <Hospital className="w-6 h-6 text-black" strokeWidth={3} />
           </div>
           <div>
-            <h2 className="font-semibold text-lg">HealthPassport</h2>
-            <p className="text-sm text-gray-600">Provider Portal</p>
+            <h2 className="font-display font-black text-xl uppercase tracking-tighter mix-blend-multiply">HealthPassport</h2>
+            <p className="text-xs font-bold font-mono bg-white border-2 border-black inline-block px-1">PROVIDER PORTAL</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Patient Care</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">Patient Care</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-2">
+              {menuItems.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? 'bg-secondary border-black shadow-brutal-sm -rotate-1 translate-x-1 hover:bg-secondary' : 'hover:bg-secondary/20 hover:-rotate-1 hover:translate-x-1'}`}
+                    >
+                      <Link href={item.url} className="flex items-center space-x-3 w-full">
+                        <item.icon className="w-5 h-5 text-black" strokeWidth={isActive ? 3 : 2} />
+                        <span className={`font-black uppercase tracking-wider ${isActive ? 'text-black' : 'text-gray-700'}`}>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+        <SidebarGroup className="mt-6 border-t-4 border-dashed border-black pt-6">
+          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">Management</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {managementItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-2">
+              {managementItems.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? 'bg-primary border-black shadow-brutal-sm rotate-1 translate-x-1 hover:bg-primary' : 'hover:bg-primary/50 hover:rotate-1 hover:translate-x-1'}`}
+                    >
+                      <Link href={item.url} className="flex items-center space-x-3 w-full">
+                        <item.icon className="w-5 h-5 text-black" strokeWidth={isActive ? 3 : 2} />
+                        <span className={`font-black uppercase tracking-wider ${isActive ? 'text-black' : 'text-gray-700'}`}>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 border-t-4 border-black bg-accent">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/">
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
+            <SidebarMenuButton 
+               asChild
+               className="h-14 bg-white border-4 border-black shadow-brutal-sm rounded-none hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-lg transition-all text-destructive hover:bg-destructive hover:text-white group"
+            >
+              <Link href="/" className="flex justify-center items-center w-full">
+                <LogOut className="w-5 h-5 mr-3 group-hover:animate-bounce" strokeWidth={3} />
+                <span className="font-black uppercase tracking-wider text-base">Sign Out</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

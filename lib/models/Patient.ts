@@ -199,7 +199,6 @@ const PatientSchema = new Schema({
 })
 
 // Indexes for better performance
-PatientSchema.index({ healthPassportId: 1 })
 PatientSchema.index({ 'personalInfo.email': 1 })
 PatientSchema.index({ 'personalInfo.aadharNumber': 1 })
 

@@ -44,13 +44,13 @@ export default function MedicalHistory() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-6 md:p-8 space-y-8 bg-secondary min-h-screen">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded mb-4 w-64"></div>
-          <div className="h-4 bg-gray-300 rounded mb-6 w-96"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-96 bg-gray-300 rounded-lg"></div>
-            <div className="h-96 bg-gray-300 rounded-lg"></div>
+          <div className="h-12 bg-white border-4 border-black mb-4 w-64 shadow-brutal-sm"></div>
+          <div className="h-6 bg-white border-2 border-black mb-8 w-96 max-w-full"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="h-96 bg-white border-4 border-black shadow-brutal-sm"></div>
+            <div className="h-96 bg-white border-4 border-black shadow-brutal-sm"></div>
           </div>
         </div>
       </div>
@@ -64,69 +64,69 @@ export default function MedicalHistory() {
   const immunizations = medicalData?.immunizations || []
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 md:p-8 space-y-8 bg-secondary min-h-screen selection:bg-black selection:text-white pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 brutal-enter">
         <div>
-          <h1 className="text-2xl font-bold">Medical History</h1>
-          <p className="text-gray-600">Complete overview of your medical records and health history</p>
+          <h1 className="text-4xl md:text-5xl font-display font-black uppercase tracking-tighter mix-blend-multiply">Medical History</h1>
+          <p className="text-black font-bold text-lg border-l-4 border-black pl-3 mt-2 bg-white/50 inline-block pr-3">Complete overview of your medical records and health history</p>
         </div>
-        <Button variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+        <Button className="h-12 bg-black text-white hover:bg-secondary hover:text-black border-4 border-black rounded-none font-black text-base uppercase transition-colors shadow-brutal-sm hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-lg">
+          <Download className="w-5 h-5 mr-3" strokeWidth={3} />
           Export History
         </Button>
       </div>
 
-      <Tabs defaultValue="conditions" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="conditions">Conditions</TabsTrigger>
-          <TabsTrigger value="procedures">Procedures</TabsTrigger>
-          <TabsTrigger value="labs">Lab Results</TabsTrigger>
-          <TabsTrigger value="allergies">Allergies</TabsTrigger>
-          <TabsTrigger value="immunizations">Immunizations</TabsTrigger>
+      <Tabs defaultValue="conditions" className="w-full brutal-enter delay-100">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto md:h-14 bg-white border-4 border-black rounded-none p-0 shadow-brutal-sm gap-0">
+          <TabsTrigger value="conditions" className="data-[state=active]:bg-primary data-[state=active]:text-black rounded-none border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Conditions</TabsTrigger>
+          <TabsTrigger value="procedures" className="data-[state=active]:bg-secondary data-[state=active]:text-black rounded-none border-b-4 md:border-b-0 md:border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Procedures</TabsTrigger>
+          <TabsTrigger value="labs" className="data-[state=active]:bg-green-200 data-[state=active]:text-black rounded-none border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Lab Results</TabsTrigger>
+          <TabsTrigger value="allergies" className="data-[state=active]:bg-destructive data-[state=active]:text-black rounded-none border-r-4 border-black font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Allergies</TabsTrigger>
+          <TabsTrigger value="immunizations" className="data-[state=active]:bg-purple-200 data-[state=active]:text-black rounded-none font-black uppercase tracking-wider h-12 md:h-full text-xs sm:text-sm">Immunizations</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="conditions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Heart className="w-5 h-5 text-red-600" />
+        <TabsContent value="conditions" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-primary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Heart className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Medical Conditions</span>
               </CardTitle>
-              <CardDescription>Your current and past medical conditions</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Your current and past medical conditions</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {conditions.length > 0 ? (
                   conditions.map((condition: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-lg">{condition.name || condition.condition}</h3>
-                        <div className="flex space-x-2">
+                    <div key={index} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all group">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                        <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter">{condition.name || condition.condition}</h3>
+                        <div className="flex flex-wrap gap-2">
                           <Badge
-                            className={
+                            className={`border-2 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm ${
                               condition.status === "Active" || condition.status === "ongoing" 
-                                ? "bg-red-100 text-red-800" 
-                                : "bg-gray-100 text-gray-800"
-                            }
+                                ? "bg-destructive text-white" 
+                                : "bg-gray-200 text-black"
+                            }`}
                           >
                             {condition.status}
                           </Badge>
-                          {condition.severity && <Badge variant="outline">{condition.severity}</Badge>}
+                          {condition.severity && <Badge className="bg-white border-2 border-black text-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">{condition.severity}</Badge>}
                         </div>
                       </div>
-                      <div className="text-sm text-gray-600 mb-2">
-                        <span className="font-medium">Diagnosed:</span>{" "}
+                      <div className="flex items-center space-x-2 text-sm font-bold uppercase mb-3 bg-primary/20 px-2 py-1 border-2 border-black -rotate-1 group-hover:rotate-0 transition-transform">
+                        <span className="text-black">Diagnosed:</span>{" "}
                         {new Date(condition.diagnosedDate || condition.date).toLocaleDateString()}
                       </div>
-                      <p className="text-sm text-gray-700">{condition.description || condition.notes}</p>
+                      <p className="text-base font-medium border-l-4 border-black pl-3">{condition.description || condition.notes}</p>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Heart className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No medical conditions recorded</p>
-                    <p className="text-sm">Your medical conditions will be added by healthcare providers</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <Heart className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No conditions recorded</p>
+                    <p className="font-bold text-gray-500 uppercase">Conditions will be added by healthcare providers</p>
                   </div>
                 )}
               </div>
@@ -134,53 +134,53 @@ export default function MedicalHistory() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="procedures" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="w-5 h-5 text-blue-600" />
+        <TabsContent value="procedures" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-secondary/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <FileText className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Procedures & Tests</span>
               </CardTitle>
-              <CardDescription>Medical procedures and diagnostic tests</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Medical procedures and diagnostic tests</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {procedures.length > 0 ? (
                   procedures.map((procedure: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-lg">{procedure.procedure || procedure.name}</h3>
+                    <div key={index} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                        <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter">{procedure.procedure || procedure.name}</h3>
                         <Badge
-                          className={
+                          className={`border-2 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm ${
                             procedure.result === "Normal"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }
+                              ? "bg-green-200 text-black"
+                              : "bg-secondary text-black"
+                          }`}
                         >
                           {procedure.result}
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-2">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-bold uppercase mb-4 bg-gray-50 border-4 border-black p-3">
                         <div>
-                          <span className="font-medium">Date:</span> {new Date(procedure.date).toLocaleDateString()}
+                          <span className="text-gray-500 block text-[10px]">DATE</span> {new Date(procedure.date).toLocaleDateString()}
                         </div>
                         <div>
-                          <span className="font-medium">Provider:</span> {procedure.provider}
+                          <span className="text-gray-500 block text-[10px]">PROVIDER</span> {procedure.provider}
                         </div>
                         <div>
-                          <span className="font-medium">Location:</span> {procedure.location}
+                          <span className="text-gray-500 block text-[10px]">LOCATION</span> {procedure.location}
                         </div>
                       </div>
-                      <div className="text-sm text-gray-700">
-                        <span className="font-medium">Notes:</span> {procedure.notes}
+                      <div className="text-base font-medium border-l-4 border-black pl-3">
+                        <span className="font-black uppercase text-xs block mb-1">Notes:</span> {procedure.notes}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No procedures recorded</p>
-                    <p className="text-sm">Your medical procedures will be added by healthcare providers</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No procedures recorded</p>
+                    <p className="font-bold text-gray-500 uppercase">Procedures will be added by healthcare providers</p>
                   </div>
                 )}
               </div>
@@ -188,40 +188,40 @@ export default function MedicalHistory() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="labs" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="w-5 h-5 text-green-600" />
+        <TabsContent value="labs" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-green-200/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <FileText className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Laboratory Results</span>
               </CardTitle>
-              <CardDescription>Recent lab test results and values</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Recent lab test results and values</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {labResults.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2">Test</th>
-                        <th className="text-left p-2">Date</th>
-                        <th className="text-left p-2">Result</th>
-                        <th className="text-left p-2">Reference Range</th>
-                        <th className="text-left p-2">Status</th>
+                      <tr className="border-b-4 border-black bg-accent">
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Test</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Date</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black">Result</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm border-r-4 border-black hidden md:table-cell">Reference Range</th>
+                        <th className="p-4 font-black uppercase tracking-wider text-sm">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {labResults.map((lab: any, index: number) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2 font-medium">{lab.test}</td>
-                          <td className="p-2 text-gray-600">{new Date(lab.date).toLocaleDateString()}</td>
-                          <td className="p-2 font-semibold">{lab.result}</td>
-                          <td className="p-2 text-gray-600">{lab.range}</td>
-                          <td className="p-2">
+                        <tr key={index} className="border-b-4 border-black hover:bg-secondary/20 transition-colors bg-white">
+                          <td className="p-4 font-bold border-r-4 border-black">{lab.test}</td>
+                          <td className="p-4 font-bold font-mono border-r-4 border-black">{new Date(lab.date).toLocaleDateString()}</td>
+                          <td className="p-4 font-black text-xl border-r-4 border-black">{lab.result}</td>
+                          <td className="p-4 font-medium hidden md:table-cell border-r-4 border-black bg-gray-50">{lab.range}</td>
+                          <td className="p-4">
                             <Badge
-                              className={
-                                lab.status === "Normal" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                              }
+                              className={`border-2 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm ${
+                                lab.status === "Normal" ? "bg-green-200 text-black" : "bg-destructive text-white"
+                              }`}
                             >
                               {lab.status}
                             </Badge>
@@ -232,52 +232,52 @@ export default function MedicalHistory() {
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No lab results available</p>
-                  <p className="text-sm">Your lab results will be added by healthcare providers</p>
+                <div className="text-center py-12 border-t-4 border-black border-dashed bg-gray-50">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                  <p className="font-black text-2xl uppercase mb-2">No lab results available</p>
+                  <p className="font-bold text-gray-500 uppercase">Results will be added by healthcare providers</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="allergies" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
-                <span>Allergies & Adverse Reactions</span>
+        <TabsContent value="allergies" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-destructive/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <AlertTriangle className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
+                <span>Allergies & Reactions</span>
               </CardTitle>
-              <CardDescription>Known allergies and adverse drug reactions</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Known allergies and adverse drug reactions</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {allergies.length > 0 ? (
                   allergies.map((allergy: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg bg-red-50 border-red-200">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-lg text-red-800">{allergy.allergen || allergy.name}</h3>
+                    <div key={index} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] group">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                        <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter bg-destructive text-white px-3 py-1 border-2 border-black rotate-1 group-hover:rotate-0 transition-transform">{allergy.allergen || allergy.name}</h3>
                         <div className="flex space-x-2">
-                          <Badge className="bg-red-600 text-white">{allergy.severity}</Badge>
-                          <Badge variant="outline" className="border-red-300 text-red-700">
+                          <Badge className="bg-black text-white border-2 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">{allergy.severity}</Badge>
+                          <Badge className="bg-white border-2 border-black text-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">
                             {allergy.type}
                           </Badge>
                         </div>
                       </div>
-                      <div className="text-sm text-red-700 mb-2">
-                        <span className="font-medium">Reaction:</span> {allergy.reaction}
+                      <div className="text-base font-bold uppercase border-l-4 border-black pl-3 mb-2">
+                        <span className="text-black font-black">Reaction:</span> {allergy.reaction}
                       </div>
-                      <div className="text-sm text-red-700">
-                        <span className="font-medium">Notes:</span> {allergy.notes}
+                      <div className="text-sm font-medium border-l-4 border-gray-300 pl-3">
+                        <span className="text-black font-black uppercase">Notes:</span> {allergy.notes}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No allergies recorded</p>
-                    <p className="text-sm">Your allergy information will be added by healthcare providers</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No allergies recorded</p>
+                    <p className="font-bold text-gray-500 uppercase">Information will be added by healthcare providers</p>
                   </div>
                 )}
               </div>
@@ -285,39 +285,39 @@ export default function MedicalHistory() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="immunizations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Pill className="w-5 h-5 text-purple-600" />
+        <TabsContent value="immunizations" className="mt-8 outline-none">
+          <Card className="border-4 border-black rounded-none shadow-brutal-sm bg-white">
+            <CardHeader className="border-b-4 border-black bg-purple-200/20 pb-4">
+              <CardTitle className="flex items-center space-x-3 font-display font-black text-2xl uppercase">
+                <Pill className="w-8 h-8 text-black transition-transform hover:scale-110" strokeWidth={3} />
                 <span>Immunization History</span>
               </CardTitle>
-              <CardDescription>Vaccination records and immunization history</CardDescription>
+              <CardDescription className="font-bold text-black border-l-4 border-black pl-2 ml-1 uppercase">Vaccination records and immunization history</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                 {immunizations.length > 0 ? (
                   immunizations.map((immunization: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-lg">{immunization.vaccine}</h3>
-                        <Badge className="bg-purple-100 text-purple-800">{immunization.dose}</Badge>
+                    <div key={index} className="p-5 bg-white border-4 border-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all">
+                      <div className="flex items-center justify-between mb-4 border-b-4 border-black pb-3 border-dashed">
+                        <h3 className="font-black text-xl md:text-2xl uppercase tracking-tighter">{immunization.vaccine}</h3>
+                        <Badge className="bg-purple-200 text-black border-2 border-black rounded-none font-black uppercase text-sm px-3 py-1 shadow-brutal-sm">{immunization.dose}</Badge>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold uppercase bg-gray-50 border-4 border-black p-3">
                         <div>
-                          <span className="font-medium">Date:</span> {new Date(immunization.date).toLocaleDateString()}
+                          <span className="text-gray-500 block text-[10px]">DATE</span> {new Date(immunization.date).toLocaleDateString()}
                         </div>
                         <div>
-                          <span className="font-medium">Provider:</span> {immunization.provider}
+                          <span className="text-gray-500 block text-[10px]">PROVIDER</span> {immunization.provider}
                         </div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Pill className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No immunizations recorded</p>
-                    <p className="text-sm">Your vaccination history will be added by healthcare providers</p>
+                  <div className="text-center py-12 border-4 border-black border-dashed bg-gray-50">
+                    <Pill className="w-16 h-16 mx-auto mb-4 text-black opacity-20" strokeWidth={3} />
+                    <p className="font-black text-2xl uppercase mb-2">No immunizations recorded</p>
+                    <p className="font-bold text-gray-500 uppercase">Vaccination history will be added by healthcare providers</p>
                   </div>
                 )}
               </div>

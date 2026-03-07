@@ -4,6 +4,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import { medicalRecordSchema } from '@/lib/utils/validation';
+import { getMockPatient, isMockPatientById } from '@/lib/utils/mock-data';
 
 // GET - Fetch patient's medical history
 export async function GET(request: NextRequest) {
@@ -20,9 +21,20 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('medicalHistory');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for medical history...');
+      console.log('Session user ID:', session.user.id);
+      patient = getMockPatient();
+      console.log('Mock patient medical history:', JSON.stringify(patient.medicalHistory, null, 2));
+    } else {
+      console.log('Using real database for patient ID:', session.user.id);
+      patient = await Patient.findById(session.user.id).select('medicalHistory');
+    }
+    
     if (!patient) {
+      console.log('Patient not found for ID:', session.user.id);
       return NextResponse.json(
         { error: 'Patient not found' },
         { status: 404 }
@@ -31,25 +43,42 @@ export async function GET(request: NextRequest) {
 
     const medicalHistory = patient.medicalHistory || [];
 
+    // Handle different data structures (mock vs real database)
+    let conditions = [];
+    if (Array.isArray(medicalHistory)) {
+      // Real database structure - flat array
+      conditions = medicalHistory;
+    } else if (medicalHistory.conditions) {
+      // Mock data structure - nested object with conditions array
+      conditions = medicalHistory.conditions || [];
+    }
+
     // Sort by diagnosed date (most recent first)
-    const sortedHistory = medicalHistory.sort((a: any, b: any) => 
-      new Date(b.diagnosedDate).getTime() - new Date(a.diagnosedDate).getTime()
-    );
+    const sortedHistory = conditions.sort((a: any, b: any) => {
+      const dateA = new Date(a.diagnosedDate || 0).getTime();
+      const dateB = new Date(b.diagnosedDate || 0).getTime();
+      return dateB - dateA;
+    });
 
     return NextResponse.json({
       success: true,
       data: {
         medicalHistory: sortedHistory.map((record: any) => ({
-          id: record._id,
-          condition: record.condition,
+          id: record._id || record.id || `condition_${Math.random()}`,
+          condition: record.condition || record.name,
           diagnosedDate: record.diagnosedDate,
           status: record.status,
-          doctorId: record.doctorId,
+          doctorId: record.doctorId || record.doctor,
           notes: record.notes,
+          severity: record.severity
         })),
         totalRecords: sortedHistory.length,
-        activeConditions: sortedHistory.filter((record: any) => record.status === 'active').length,
-        chronicConditions: sortedHistory.filter((record: any) => record.status === 'chronic').length,
+        activeConditions: sortedHistory.filter((record: any) => 
+          (record.status || '').toLowerCase() === 'active'
+        ).length,
+        chronicConditions: sortedHistory.filter((record: any) => 
+          (record.status || '').toLowerCase() === 'chronic'
+        ).length,
       },
     });
 

@@ -4,6 +4,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
 import Patient from '@/lib/models/Patient';
 import { vitalSignSchema } from '@/lib/utils/validation';
+import { getMockPatient, isMockPatientById, updateMockPatient } from '@/lib/utils/mock-data';
 
 // GET - Fetch patient's vital signs
 export async function GET(request: NextRequest) {
@@ -26,8 +27,15 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get patient data
-    const patient = await Patient.findById(session.user.id).select('vitals');
+    // Get patient data - check for mock patient first
+    let patient;
+    if (isMockPatientById(session.user.id)) {
+      console.log('Using mock patient data for vitals...');
+      patient = getMockPatient();
+    } else {
+      patient = await Patient.findById(session.user.id).select('vitals');
+    }
+    
     if (!patient) {
       return NextResponse.json(
         { error: 'Patient not found' },

@@ -91,92 +91,69 @@ export default function PatientLogin() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Features */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-12 flex-col justify-between">
+    <div className="min-h-screen flex bg-background selection:bg-black selection:text-white">
+      {/* Left Side - Typography Banner */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary border-r-4 border-black p-12 flex-col justify-between brutal-enter">
         <div>
-          <Link href="/" className="inline-flex items-center text-white hover:text-gray-300 mb-8">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+          <Link href="/" className="inline-flex items-center text-black font-black uppercase border-2 border-black bg-white px-4 py-2 hover:bg-black hover:text-white transition-colors shadow-brutal-sm mb-12">
+            &lt;- Back to Home
           </Link>
 
           <div className="mb-12">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6">
-              <div className="w-8 h-8 bg-red-500 rounded-full"></div>
-              <div className="w-6 h-6 bg-blue-500 rounded-full -ml-2"></div>
-              <div className="w-4 h-4 bg-green-500 rounded-full -ml-1"></div>
-            </div>
-
-            <h1 className="text-4xl font-bold mb-8">
-              Patient Portal<br />
-              Access
+            <h1 className="text-7xl font-display font-black mb-8 uppercase tracking-tighter leading-none break-words">
+              PATIENT<br />
+              LOGIN<br />
+              PORTAL_
             </h1>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">Secure Health Passport Login</span>
+            <div className="space-y-6 font-bold text-xl border-l-8 border-black pl-6">
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>SECURE ACCESS</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">Instant Access to Records</span>
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>INSTANT RECORDS</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-lg">HIPAA Compliant Security</span>
+              <div className="flex items-center gap-4">
+                <span className="bg-black text-white px-2 py-1">[X]</span>
+                <span>HIPAA COMPLIANT</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-            <div className="w-8 h-8 bg-pink-500 rounded-full"></div>
-          </div>
-          <div>
-            <p className="text-sm">@healthpassport</p>
-            <p className="text-sm text-gray-400">hello@healthpassport.com</p>
-          </div>
+        <div className="border-t-4 border-black pt-6">
+          <p className="font-black text-2xl uppercase">SYSTEM IS ACTIVE.</p>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white brutal-enter delay-100">
         <div className="w-full max-w-md">
           {/* Mobile back button */}
-          <div className="lg:hidden mb-6">
-            <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+          <div className="lg:hidden mb-10">
+            <Link href="/" className="inline-flex items-center text-black font-black uppercase border-2 border-black bg-primary px-4 py-2 hover:bg-black hover:text-white transition-colors shadow-brutal-sm">
+              &lt;- Back to Home
             </Link>
           </div>
 
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">HealthPassport</span>
-            </div>
+          <div className="mb-10 lg:hidden">
+            <h1 className="text-5xl font-display font-black uppercase tracking-tighter leading-none">
+              PATIENT<br />LOGIN_
+            </h1>
           </div>
 
-          <Card className="border-0 shadow-none">
+          <Card className="border-4 border-black shadow-brutal-lg rounded-none bg-white p-8">
             <CardContent className="p-0">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Patient Sign In</h2>
-                <p className="text-gray-600">Please enter your Health Passport ID and password to access your health records.</p>
+              <div className="mb-8 border-b-4 border-black pb-6">
+                <h2 className="text-3xl font-display font-black text-black mb-2 uppercase tracking-tight">Access Records</h2>
+                <p className="font-bold text-gray-700 bg-secondary inline-block px-2 py-1 mb-2">PLEASE AUTHENTICATE.</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="healthPassportId" className="text-sm font-medium text-gray-700">
+              <form onSubmit={handleLogin} className="space-y-8">
+                <div className="space-y-3">
+                  <Label htmlFor="healthPassportId" className="text-sm font-black uppercase text-black">
                     Health Passport ID
                   </Label>
                   <div className="relative">
@@ -186,89 +163,82 @@ export default function PatientLogin() {
                       placeholder="HP-A28B3-T9I1L"
                       value={healthPassportId}
                       onChange={handleHealthPassportIdChange}
-                      className={`h-12 border-2 rounded-lg focus:border-blue-500 pr-10 ${
-                        isValidId === null 
-                          ? 'border-gray-200' 
-                          : isValidId 
-                            ? 'border-green-500' 
-                            : 'border-red-500'
+                      className={`h-14 border-4 border-black rounded-none uppercase font-mono text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none pr-12 focus:ring-0 ${
+                        isValidId === false ? 'bg-red-100' : 'bg-white'
                       }`}
                       maxLength={14}
                       required
                     />
                     {isValidId !== null && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                         {isValidId ? (
-                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
-                          </div>
+                          <div className="font-black text-xl text-green-600">✓</div>
                         ) : (
-                          <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✗</span>
-                          </div>
+                          <div className="font-black text-xl text-red-600">✗</div>
                         )}
                       </div>
                     )}
                   </div>
-                  <p className={`text-xs ${
-                    isValidId === false ? 'text-red-500' : 'text-gray-500'
+                  <p className={`text-xs font-bold uppercase ${
+                    isValidId === false ? 'text-red-600' : 'text-gray-600'
                   }`}>
                     {isValidId === false 
-                      ? 'Invalid format. Use: HP-XXXXX-XXXXX (e.g., HP-A28B3-T9I1L)'
-                      : 'Enter your unique Health Passport ID (e.g., HP-A28B3-T9I1L)'
+                      ? '!! INVALID FORMAT. MUST BE HP-XXXXX-XXXXX !!'
+                      : 'FORMAT: HP-XXXXX-XXXXX'
                     }
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <div className="space-y-3">
+                  <Label htmlFor="password" className="text-sm font-black uppercase text-black">
                     Password
                   </Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="ENTER PASSWORD"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 border-2 border-gray-200 rounded-lg focus:border-blue-500 pr-12"
+                      className="h-14 border-4 border-black rounded-none text-lg transition-transform focus:translate-x-1 focus:translate-y-1 shadow-brutal-sm focus:shadow-none pr-12 focus:ring-0 bg-white"
                       required
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-12 border-0 shadow-none hover:bg-transparent hover:translate-x-0"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="font-black underline uppercase text-xs">{showPassword ? "HIDE" : "SHOW"}</span>
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 bg-gray-100 p-3 border-2 border-black">
                   <Checkbox
                     id="keepLoggedIn"
                     checked={keepLoggedIn}
                     onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+                    className="border-2 border-black rounded-none shadow-none w-6 h-6 data-[state=checked]:bg-black data-[state=checked]:text-white"
                   />
-                  <Label htmlFor="keepLoggedIn" className="text-sm text-gray-600">
+                  <Label htmlFor="keepLoggedIn" className="text-sm font-bold uppercase cursor-pointer">
                     Keep me logged in
                   </Label>
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                  className="w-full h-16 bg-primary hover:bg-primary text-black border-4 border-black uppercase font-black text-xl brutal-active"
                 >
-                  Sign In
+                  SIGN IN -&gt;
                 </Button>
 
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    Need an account?{" "}
-                    <Link href="/auth/patient/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-                      Create one
+                <div className="text-center border-t-4 border-black pt-6">
+                  <p className="text-sm font-bold uppercase">
+                    NO ACCOUNT YET?{" "}
+                    <Link href="/auth/patient/signup" className="text-black bg-accent px-2 py-1 ml-2 border-2 border-black hover:bg-black hover:text-white transition-colors">
+                      CREATE ONE
                     </Link>
                   </p>
                 </div>

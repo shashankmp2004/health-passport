@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         phone,
         email
       },
-      medicalHistory: [],
+      medicalHistory: {},
       medications: [],
       vitals: [],
       visits: [],
