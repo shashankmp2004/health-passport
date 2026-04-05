@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -27,23 +27,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if patient is already in hospital records
-    const existingRecord = await HospitalPatientRecord.findOne({
-      hospitalId: session.user.id,
-      healthPassportId: healthPassportId
-    })
+    const hospitalId = session.user.role === 'admin' ? 'system-admin' : session.user.id;
+    const hospitalName = session.user.role === 'admin' ? 'System Administrator' : (session.user.name || 'Unknown Hospital');
 
-    if (existingRecord) {
-      return NextResponse.json(
-        { error: 'Patient is already in your hospital records' },
-        { status: 409 }
-      )
+    // Check if patient is already in hospital records (skip for admins adding globally)
+    if (session.user.role !== 'admin') {
+      const existingRecord = await HospitalPatientRecord.findOne({
+        hospitalId: hospitalId,
+        healthPassportId: healthPassportId
+      })
+
+      if (existingRecord) {
+        return NextResponse.json(
+          { error: 'Patient is already in your hospital records' },
+          { status: 409 }
+        )
+      }
     }
 
     // Create new hospital patient record
     const newRecord = new HospitalPatientRecord({
-      hospitalId: session.user.id,
-      hospitalName: session.user.name || 'Unknown Hospital',
+      hospitalId: hospitalId,
+      hospitalName: hospitalName,
       healthPassportId: healthPassportId,
       patientName: patientData.name,
       patientAge: patientData.age,

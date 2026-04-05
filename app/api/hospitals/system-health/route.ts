@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -21,13 +21,29 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get hospital data
-    const hospital = await Hospital.findById(session.user.id);
-    if (!hospital) {
-      return NextResponse.json(
-        { error: 'Hospital not found' },
-        { status: 404 }
-      );
+    // Get hospital data (for hospital users) or use system-wide counts (for admins)
+    let hospitalName = 'System';
+    let hospitalDocQuery: any = {};
+    let patientVisitQuery: any = {};
+    
+    if (session.user.role === 'hospital') {
+      // Get hospital data
+      const hospital = await Hospital.findById(session.user.id);
+      if (!hospital) {
+        return NextResponse.json(
+          { error: 'Hospital not found' },
+          { status: 404 }
+        );
+      }
+
+      hospitalName = hospital.facilityInfo?.name || 'Hospital';
+      hospitalDocQuery = { hospitalAffiliation: hospital.facilityInfo?.name };
+      patientVisitQuery = { 'visits.hospitalId': session.user.id };
+    } else if (session.user.role === 'admin') {
+      // Admin sees system-wide stats
+      hospitalName = 'System';
+      hospitalDocQuery = {}; // All doctors
+      patientVisitQuery = {}; // All patients
     }
 
     // Start health checks
@@ -37,7 +53,7 @@ export async function GET(request: NextRequest) {
     try {
       // Database connectivity check
       const dbStart = Date.now();
-      await Patient.countDocuments({ 'visits.hospitalId': session.user.id });
+      await Patient.countDocuments(patientVisitQuery);
       healthChecks.database = {
         status: 'healthy',
         responseTime: Date.now() - dbStart,
@@ -54,9 +70,7 @@ export async function GET(request: NextRequest) {
     try {
       // Staff system check
       const staffStart = Date.now();
-      const affiliatedDoctors = await Doctor.countDocuments({
-        hospitalAffiliation: hospital.facilityName
-      });
+      const affiliatedDoctors = await Doctor.countDocuments(hospitalDocQuery);
       
       healthChecks.staffSystem = {
         status: 'healthy',
@@ -75,9 +89,7 @@ export async function GET(request: NextRequest) {
     try {
       // Patient records system check
       const patientsStart = Date.now();
-      const totalPatients = await Patient.countDocuments({
-        'visits.hospitalId': session.user.id
-      });
+      const totalPatients = await Patient.countDocuments(patientVisitQuery);
       
       healthChecks.patientRecords = {
         status: 'healthy',

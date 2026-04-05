@@ -123,7 +123,7 @@ async function bulkDelete(
       }
 
       // Check permissions
-      if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+      if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
         results.failed.push({ id: documentId, error: 'Access denied' });
         continue;
       }
@@ -169,7 +169,7 @@ async function bulkUpdateCategory(
       }
 
       // Check permissions (only owner can update)
-      if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+      if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
         results.failed.push({ id: documentId, error: 'Access denied' });
         continue;
       }
@@ -210,7 +210,7 @@ async function bulkUpdateVisibility(
       }
 
       // Check permissions (only owner can update)
-      if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+      if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
         results.failed.push({ id: documentId, error: 'Access denied' });
         continue;
       }

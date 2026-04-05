@@ -168,7 +168,7 @@ export class FileAuditLogger {
     activity: FileActivityType;
     description: string;
     userId: string;
-    userRole: 'patient' | 'doctor' | 'hospital';
+    userRole: 'patient' | 'doctor' | 'hospital' | 'admin';
     userName: string;
     ipAddress: string;
     userAgent: string;

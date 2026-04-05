@@ -8,6 +8,14 @@ export async function POST(request: NextRequest) {
     let result
     
     switch (userType) {
+      case 'admin':
+        result = await signIn('admin', {
+          email: credentials.email,
+          password: credentials.password,
+          redirect: false
+        })
+        break
+
       case 'patient':
         result = await signIn('patient', {
           healthPassportId: credentials.healthPassportId,
@@ -66,6 +74,8 @@ export async function POST(request: NextRequest) {
 
 function getRedirectUrl(userType: string): string {
   switch (userType) {
+    case 'admin':
+      return '/hospital/dashboard'
     case 'patient':
       return '/patient/dashboard'
     case 'doctor':

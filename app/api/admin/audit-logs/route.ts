@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Only hospitals and admins can access audit logs
-    if (session.user.role !== 'hospital') {
+    if (session.user.role !== 'hospital' && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden - Hospital admin access required' },
         { status: 403 }
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only hospitals and admins can generate reports
-    if (session.user.role !== 'hospital') {
+    if (session.user.role !== 'hospital' && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden - Hospital admin access required' },
         { status: 403 }

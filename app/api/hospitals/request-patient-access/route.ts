@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -40,27 +40,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Get hospital information
-    const hospital = await Hospital.findById(session.user.id).select('facilityInfo adminInfo');
-    if (!hospital) {
-      return NextResponse.json(
-        { error: 'Hospital not found' },
-        { status: 404 }
-      );
+    let hospital: any = null;
+    let hospitalName = 'Unknown Hospital';
+    let hospitalId = session.user.id;
+
+    if (session.user.role === 'admin') {
+      // For admin, use system admin context
+      hospitalName = 'System Administrator';
+      hospitalId = 'system-admin';
+    } else {
+      // For hospital role, look up hospital details
+      hospital = await Hospital.findById(session.user.id).select('facilityInfo adminInfo');
+      if (!hospital) {
+        return NextResponse.json(
+          { error: 'Hospital not found' },
+          { status: 404 }
+        );
+      }
+
+      console.log('Hospital details:', {
+        id: hospital._id,
+        facilityName: hospital.facilityInfo?.name,
+        adminEmail: hospital.adminInfo?.email
+      });
+
+      // Ensure hospital name is available
+      hospitalName = hospital.facilityInfo?.name || session.user.name || 'Unknown Hospital';
     }
-
-    console.log('Hospital details:', {
-      id: hospital._id,
-      facilityName: hospital.facilityInfo?.name,
-      adminEmail: hospital.adminInfo?.email
-    });
-
-    // Ensure hospital name is available
-    const hospitalName = hospital.facilityInfo?.name || session.user.name || 'Unknown Hospital';
 
     // Check if there's already a pending request for this patient from this hospital
     const existingRequest = await PatientNotification.findOne({
       patientId: healthPassportId,
-      hospitalId: session.user.id,
+      hospitalId: hospitalId,
       status: 'pending'
     });
 
@@ -74,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Create notification for the patient
     const notificationData = {
       patientId: healthPassportId,
-      hospitalId: session.user.id,
+      hospitalId: hospitalId,
       hospitalName: hospitalName,
       type: 'access_request',
       status: 'pending',

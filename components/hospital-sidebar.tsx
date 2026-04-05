@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Sidebar,
@@ -11,7 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Search,
@@ -26,9 +26,9 @@ import {
   BarChart3,
   AlertTriangle,
   Bell,
-} from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
@@ -61,12 +61,12 @@ const menuItems = [
     url: "/hospital/analytics",
     icon: BarChart3,
   },
-]
+];
 
 const managementItems = [
   {
     title: "Staff Management",
-    url: "/hospital/staff",
+    url: "/hospital/staff-management",
     icon: Users,
   },
   {
@@ -79,10 +79,10 @@ const managementItems = [
     url: "/hospital/settings",
     icon: Settings,
   },
-]
+];
 
 export function HospitalSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <Sidebar className="border-r-4 border-black bg-white">
@@ -92,29 +92,45 @@ export function HospitalSidebar() {
             <Hospital className="w-6 h-6 text-black" strokeWidth={3} />
           </div>
           <div>
-            <h2 className="font-display font-black text-xl uppercase tracking-tighter mix-blend-multiply">HealthPassport</h2>
-            <p className="text-xs font-bold font-mono bg-white border-2 border-black inline-block px-1">PROVIDER PORTAL</p>
+            <h2 className="font-display font-black text-xl uppercase tracking-tighter mix-blend-multiply">
+              HealthPassport
+            </h2>
+            <p className="text-xs font-bold font-mono bg-white border-2 border-black inline-block px-1">
+              PROVIDER PORTAL
+            </p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">Patient Care</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">
+            Patient Care
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
               {menuItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
-                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? 'bg-secondary border-black shadow-brutal-sm -rotate-1 translate-x-1 hover:bg-secondary' : 'hover:bg-secondary/20 hover:-rotate-1 hover:translate-x-1'}`}
+                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? "bg-secondary border-black shadow-brutal-sm -rotate-1 translate-x-1 hover:bg-secondary" : "hover:bg-secondary/20 hover:-rotate-1 hover:translate-x-1"}`}
                     >
-                      <Link href={item.url} className="flex items-center space-x-3 w-full">
-                        <item.icon className="w-5 h-5 text-black" strokeWidth={isActive ? 3 : 2} />
-                        <span className={`font-black uppercase tracking-wider ${isActive ? 'text-black' : 'text-gray-700'}`}>{item.title}</span>
+                      <Link
+                        href={item.url}
+                        className="flex items-center space-x-3 w-full"
+                      >
+                        <item.icon
+                          className="w-5 h-5 text-black"
+                          strokeWidth={isActive ? 3 : 2}
+                        />
+                        <span
+                          className={`font-black uppercase tracking-wider ${isActive ? "text-black" : "text-gray-700"}`}
+                        >
+                          {item.title}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -125,21 +141,33 @@ export function HospitalSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-6 border-t-4 border-dashed border-black pt-6">
-          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">Management</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-black uppercase text-black mb-2 opacity-100">
+            Management
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
               {managementItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
-                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? 'bg-primary border-black shadow-brutal-sm rotate-1 translate-x-1 hover:bg-primary' : 'hover:bg-primary/50 hover:rotate-1 hover:translate-x-1'}`}
+                      className={`h-12 border-4 border-transparent hover:border-black rounded-none transition-all ${isActive ? "bg-primary border-black shadow-brutal-sm rotate-1 translate-x-1 hover:bg-primary" : "hover:bg-primary/50 hover:rotate-1 hover:translate-x-1"}`}
                     >
-                      <Link href={item.url} className="flex items-center space-x-3 w-full">
-                        <item.icon className="w-5 h-5 text-black" strokeWidth={isActive ? 3 : 2} />
-                        <span className={`font-black uppercase tracking-wider ${isActive ? 'text-black' : 'text-gray-700'}`}>{item.title}</span>
+                      <Link
+                        href={item.url}
+                        className="flex items-center space-x-3 w-full"
+                      >
+                        <item.icon
+                          className="w-5 h-5 text-black"
+                          strokeWidth={isActive ? 3 : 2}
+                        />
+                        <span
+                          className={`font-black uppercase tracking-wider ${isActive ? "text-black" : "text-gray-700"}`}
+                        >
+                          {item.title}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -153,18 +181,26 @@ export function HospitalSidebar() {
       <SidebarFooter className="p-4 border-t-4 border-black bg-accent">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-               asChild
-               className="h-14 bg-white border-4 border-black shadow-brutal-sm rounded-none hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-lg transition-all text-destructive hover:bg-destructive hover:text-white group"
+            <SidebarMenuButton
+              asChild
+              className="h-14 bg-white border-4 border-black shadow-brutal-sm rounded-none hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-lg transition-all text-destructive hover:bg-destructive hover:text-white group"
             >
-              <Link href="/" className="flex justify-center items-center w-full">
-                <LogOut className="w-5 h-5 mr-3 group-hover:animate-bounce" strokeWidth={3} />
-                <span className="font-black uppercase tracking-wider text-base">Sign Out</span>
+              <Link
+                href="/"
+                className="flex justify-center items-center w-full"
+              >
+                <LogOut
+                  className="w-5 h-5 mr-3 group-hover:animate-bounce"
+                  strokeWidth={3}
+                />
+                <span className="font-black uppercase tracking-wider text-base">
+                  Sign Out
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

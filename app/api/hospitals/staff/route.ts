@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -29,19 +29,27 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get hospital data
-    const hospital = await Hospital.findById(session.user.id);
-    if (!hospital) {
-      return NextResponse.json(
-        { error: 'Hospital not found' },
-        { status: 404 }
-      );
-    }
+    // Build query for doctors
+    let query: any = {};
+    
+    if (session.user.role === 'hospital') {
+      // Get hospital data
+      const hospital = await Hospital.findById(session.user.id);
+      if (!hospital) {
+        return NextResponse.json(
+          { error: 'Hospital not found' },
+          { status: 404 }
+        );
+      }
 
-    // Build query for affiliated doctors
-    let query: any = {
-      hospitalAffiliation: hospital.facilityName
-    };
+      // Query for doctors affiliated with this hospital
+      query = {
+        'personalInfo.hospitalAffiliation': hospital.facilityInfo?.name
+      };
+    } else if (session.user.role === 'admin') {
+      // Admins see all doctors
+      query = {};
+    }
 
     // Add search functionality
     if (search) {
@@ -51,21 +59,21 @@ export async function GET(request: NextRequest) {
           { 'personalInfo.firstName': { $regex: search, $options: 'i' } },
           { 'personalInfo.lastName': { $regex: search, $options: 'i' } },
           { 'personalInfo.email': { $regex: search, $options: 'i' } },
-          { licenseNumber: { $regex: search, $options: 'i' } },
+          { 'personalInfo.licenseNumber': { $regex: search, $options: 'i' } },
         ]
       };
     }
 
     // Filter by specialty
     if (specialty) {
-      query.specialty = specialty;
+      query['personalInfo.specialty'] = specialty;
     }
 
     // Filter by verification status
     if (status === 'verified') {
-      query.isVerified = true;
+      query['credentials.verified'] = true;
     } else if (status === 'pending') {
-      query.isVerified = false;
+      query['credentials.verified'] = false;
     }
 
     // Get doctors
@@ -111,9 +119,9 @@ export async function GET(request: NextRequest) {
           name: `${doctor.personalInfo.firstName} ${doctor.personalInfo.lastName}`,
           email: doctor.personalInfo.email,
           phone: doctor.personalInfo.phone,
-          licenseNumber: doctor.licenseNumber,
-          specialty: doctor.specialty,
-          isVerified: doctor.isVerified,
+          licenseNumber: doctor.personalInfo.licenseNumber,
+          specialty: doctor.personalInfo.specialty,
+          isVerified: doctor.credentials?.verified || false,
           joinDate: doctor.createdAt,
           lastActive: lastVisit?.date || null,
           statistics: {
@@ -136,7 +144,7 @@ export async function GET(request: NextRequest) {
     const paginatedDoctors = enrichedDoctors.slice(startIndex, endIndex);
 
     // Get unique specialties for filtering
-    const allSpecialties = [...new Set(doctors.map(doc => doc.specialty).filter(Boolean))];
+    const allSpecialties = [...new Set(doctors.map(doc => doc.personalInfo?.specialty).filter(Boolean))];
 
     return NextResponse.json({
       success: true,
@@ -177,7 +185,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -218,7 +226,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if doctor is already affiliated
-    if (doctor.hospitalAffiliation === hospital.facilityName) {
+    if (doctor.personalInfo?.hospitalAffiliation === hospital.facilityInfo?.name) {
       return NextResponse.json(
         { error: 'Doctor is already affiliated with this hospital' },
         { status: 400 }
@@ -226,9 +234,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Update doctor's hospital affiliation
-    doctor.hospitalAffiliation = hospital.facilityName;
+    doctor.personalInfo.hospitalAffiliation = hospital.facilityInfo?.name;
     if (specialty) {
-      doctor.specialty = specialty;
+      doctor.personalInfo.specialty = specialty;
     }
     
     await doctor.save();
@@ -243,8 +251,8 @@ export async function POST(request: NextRequest) {
           id: doctor._id,
           name: `${doctor.personalInfo.firstName} ${doctor.personalInfo.lastName}`,
           email: doctor.personalInfo.email,
-          specialty: doctor.specialty,
-          isVerified: doctor.isVerified,
+          specialty: doctor.personalInfo.specialty,
+          isVerified: doctor.credentials?.verified || false,
         }
       },
     });

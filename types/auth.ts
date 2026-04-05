@@ -5,7 +5,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string
-      role: 'patient' | 'doctor' | 'hospital'
+      role: 'patient' | 'doctor' | 'hospital' | 'admin'
       healthPassportId?: string
       doctorId?: string
       hospitalId?: string
@@ -16,7 +16,7 @@ declare module 'next-auth' {
   }
 
   interface User extends DefaultUser {
-    role: 'patient' | 'doctor' | 'hospital'
+    role: 'patient' | 'doctor' | 'hospital' | 'admin'
     healthPassportId?: string
     doctorId?: string
     hospitalId?: string
@@ -28,7 +28,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: 'patient' | 'doctor' | 'hospital'
+    role: 'patient' | 'doctor' | 'hospital' | 'admin'
     userId: string
     healthPassportId?: string
     doctorId?: string
@@ -42,7 +42,7 @@ declare module 'next-auth/jwt' {
 export interface User {
   id: string
   email: string
-  role: 'patient' | 'doctor' | 'hospital'
+  role: 'patient' | 'doctor' | 'hospital' | 'admin'
   name: string
 }
 

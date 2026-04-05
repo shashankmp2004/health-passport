@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/db/mongodb';
+import mongoose from 'mongoose';
 import Patient from '@/lib/models/Patient';
 import Doctor from '@/lib/models/Doctor';
 import Hospital from '@/lib/models/Hospital';
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital or Doctor access required' },
         { status: 401 }
@@ -38,10 +39,29 @@ export async function GET(request: NextRequest) {
 
     // For hospital users, get patients from their hospital
     // For doctor users, get patients they've treated
+    // For admin users, get all patients
     let patients: any[] = [];
     let hospitalRecords: any[] = [];
     
-    if (session.user.role === 'hospital') {
+    if (session.user.role === 'admin') {
+      // Admin gets all patients globally
+      console.log('Admin user accessing all patient records');
+      
+      // Get all hospital records for context (up to 1000)
+      hospitalRecords = await HospitalPatientRecord.find({})
+        .limit(1000)
+        .lean();
+      
+      console.log(`Found ${hospitalRecords.length} total hospital records`);
+      
+      // Get all patients
+      patients = await Patient.find({})
+        .select('personalInfo visits medicalHistory healthPassportId')
+        .limit(limit)
+        .lean();
+      
+      console.log(`Found ${patients.length} patients`);
+    } else if (session.user.role === 'hospital') {
       // Get hospital patient records that are active
       console.log('Querying hospital records with:', {
         hospitalId: session.user.id,
@@ -99,7 +119,7 @@ export async function GET(request: NextRequest) {
     
     // Process patients found in the database
     for (const patient of patients) {
-      const visits = patient.visits || [];
+      const visits = Array.isArray(patient.visits) ? patient.visits : [];
       const lastVisit = visits.length > 0 ? visits[visits.length - 1] : null;
       
       // Get hospital record if it exists (find from the already fetched records for efficiency)
@@ -115,19 +135,24 @@ export async function GET(request: NextRequest) {
       // Get doctor info for last visit
       let doctorInfo = null;
       if (lastVisit?.doctorId) {
-        const doctor = await Doctor.findById(lastVisit.doctorId).select('personalInfo specialty');
-        if (doctor) {
-          doctorInfo = {
-            name: `${doctor.personalInfo.firstName} ${doctor.personalInfo.lastName}`,
-            specialty: doctor.specialty
-          };
+        const doctorId = String(lastVisit.doctorId);
+        if (mongoose.Types.ObjectId.isValid(doctorId)) {
+          const doctor = await Doctor.findById(doctorId).select('personalInfo specialty');
+          if (doctor) {
+            doctorInfo = {
+              name: `${doctor.personalInfo.firstName} ${doctor.personalInfo.lastName}`,
+              specialty: doctor.specialty
+            };
+          }
         }
       }
 
       // Calculate basic statistics
       const recordsCount = visits.length + (patient.medicalHistory?.documents?.length || 0);
       const recentVisits = visits.filter((visit: any) => {
+        if (!visit?.date) return false;
         const visitDate = new Date(visit.date);
+        if (Number.isNaN(visitDate.getTime())) return false;
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         return visitDate >= thirtyDaysAgo;
@@ -140,7 +165,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Determine risk level based on conditions and recent visits
-      const conditions = patient.medicalHistory?.conditions || [];
+      const conditions = Array.isArray(patient.medicalHistory?.conditions) ? patient.medicalHistory.conditions : [];
       let riskLevel = 'Low';
       
       // Use hospital record risk level if available, otherwise calculate
@@ -148,9 +173,13 @@ export async function GET(request: NextRequest) {
         riskLevel = hospitalRecord.riskLevel;
       } else {
         const highRiskConditions = ['Heart Disease', 'Diabetes', 'Hypertension', 'Cancer', 'Stroke'];
-        const hasHighRiskCondition = conditions.some((condition: any) => 
-          highRiskConditions.some(risk => condition.name?.toLowerCase().includes(risk.toLowerCase()))
-        );
+        const hasHighRiskCondition = conditions.some((condition: any) => {
+          const conditionName = typeof condition === 'string'
+            ? condition
+            : (condition?.name || '');
+          const normalizedName = String(conditionName).toLowerCase();
+          return highRiskConditions.some(risk => normalizedName.includes(risk.toLowerCase()));
+        });
         
         if (hasHighRiskCondition && conditions.length > 2) {
           riskLevel = 'High';
@@ -160,8 +189,10 @@ export async function GET(request: NextRequest) {
       }
 
       // Use hospital record data when available, fallback to patient data
-      const patientName = hospitalRecord?.patientName || `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`;
-      const patientAge = hospitalRecord?.patientAge || (patient.personalInfo.dateOfBirth ? 
+      const firstName = patient?.personalInfo?.firstName || 'Unknown';
+      const lastName = patient?.personalInfo?.lastName || 'Patient';
+      const patientName = hospitalRecord?.patientName || `${firstName} ${lastName}`;
+      const patientAge = hospitalRecord?.patientAge || (patient?.personalInfo?.dateOfBirth ? 
         new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear() : 
         null);
 
@@ -174,7 +205,12 @@ export async function GET(request: NextRequest) {
         recordsCount,
         status: isActive ? 'Active' : 'Inactive',
         riskLevel,
-        conditions: (hospitalRecord?.conditions || conditions.map((c: any) => c.name)).slice(0, 3), // Show max 3 conditions
+        conditions: (
+          hospitalRecord?.conditions ||
+          conditions
+            .map((c: any) => typeof c === 'string' ? c : c?.name)
+            .filter(Boolean)
+        ).slice(0, 3), // Show max 3 conditions
         lastUpdate: lastVisit?.date || hospitalRecord?.lastUpdated || patient.updatedAt,
         doctor: doctorInfo,
         addedToHospital: !!hospitalRecord,
@@ -182,8 +218,8 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // For hospital users, also add patients that exist only in hospital records but not in Patient collection
-    if (session.user.role === 'hospital') {
+    // For hospital and admin users, also add patients that exist only in hospital records but not in Patient collection
+    if (session.user.role === 'hospital' || session.user.role === 'admin') {
       const existingPatientIds = patients.map(p => p.healthPassportId);
       const orphanedRecords = hospitalRecords.filter(record => 
         !existingPatientIds.includes(record.healthPassportId)
@@ -234,7 +270,9 @@ export async function GET(request: NextRequest) {
       const visits = patient.visits || [];
       const recentVisits = visits
         .filter((visit: any) => {
+          if (!visit?.date) return false;
           const visitDate = new Date(visit.date);
+          if (Number.isNaN(visitDate.getTime())) return false;
           const sevenDaysAgo = new Date();
           sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
           return visitDate >= sevenDaysAgo;
@@ -244,7 +282,7 @@ export async function GET(request: NextRequest) {
       for (const visit of recentVisits) {
         recentActivity.push({
           patientId: patient._id,
-          patientName: `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`,
+          patientName: `${patient?.personalInfo?.firstName || 'Unknown'} ${patient?.personalInfo?.lastName || 'Patient'}`,
           action: visit.diagnosis ? `Diagnosed with ${visit.diagnosis}` : 'Visit completed',
           timestamp: visit.date,
           type: 'visit'
@@ -252,8 +290,8 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Add hospital record activities for hospital users
-    if (session.user.role === 'hospital') {
+    // Add hospital record activities for hospital and admin users
+    if (session.user.role === 'hospital' || session.user.role === 'admin') {
       const recentHospitalRecords = hospitalRecords
         .filter(record => {
           const addedDate = new Date(record.addedDate);
@@ -322,7 +360,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Patient records fetch error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+      },
       { status: 500 }
     );
   }

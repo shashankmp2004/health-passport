@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -29,19 +29,28 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get hospital data
-    const hospital = await Hospital.findById(session.user.id);
-    if (!hospital) {
-      return NextResponse.json(
-        { error: 'Hospital not found' },
-        { status: 404 }
-      );
-    }
+    // For admin users, return all patients
+    // For hospital users, return patients who have visited this hospital
+    let query: any;
+    let hospitalId = session.user.id;
 
-    // Get patients who have visits at this hospital
-    let query: any = {
-      'visits.hospitalId': session.user.id
-    };
+    if (session.user.role === 'admin') {
+      // Admin gets all patients
+      query = {};
+    } else {
+      // Get hospital data
+      const hospital = await Hospital.findById(session.user.id);
+      if (!hospital) {
+        return NextResponse.json(
+          { error: 'Hospital not found' },
+          { status: 404 }
+        );
+      }
+
+      query = {
+        'visits.hospitalId': session.user.id
+      };
+    }
 
     // Add search functionality
     if (search) {
@@ -62,25 +71,41 @@ export async function GET(request: NextRequest) {
     // Get affiliated doctors if department filter is needed
     let affiliatedDoctors: any[] = [];
     if (department) {
-      affiliatedDoctors = await Doctor.find({
-        hospitalAffiliation: hospital.facilityName,
-        specialty: department
-      }).select('_id');
+      if (session.user.role === 'admin') {
+        // For admin, get doctors with the specified specialty
+        affiliatedDoctors = await Doctor.find({
+          specialty: department
+        }).select('_id');
+      } else {
+        // For hospital, get doctors affiliated with that hospital
+        const hospital = await Hospital.findById(session.user.id);
+        affiliatedDoctors = await Doctor.find({
+          hospitalAffiliation: hospital?.facilityInfo?.name,
+          specialty: department
+        }).select('_id');
+      }
     }
 
     // Process and enrich patient data
     const enrichedPatients = await Promise.all(
       patientsWithVisits.map(async patient => {
-        // Get hospital visits
-        const hospitalVisits = patient.visits?.filter((visit: any) => 
-          visit.hospitalId.toString() === session.user.id
-        ) || [];
+        // Get hospital/relevant visits
+        let relevantVisits;
+        if (session.user.role === 'admin') {
+          // Admin sees all visits
+          relevantVisits = patient.visits || [];
+        } else {
+          // Hospital sees only their visits
+          relevantVisits = patient.visits?.filter((visit: any) => 
+            visit.hospitalId.toString() === session.user.id
+          ) || [];
+        }
 
         // Filter by department if specified
-        let filteredVisits = hospitalVisits;
+        let filteredVisits = relevantVisits;
         if (department && affiliatedDoctors.length > 0) {
           const doctorIds = affiliatedDoctors.map(doc => doc._id.toString());
-          filteredVisits = hospitalVisits.filter((visit: any) => 
+          filteredVisits = relevantVisits.filter((visit: any) => 
             doctorIds.includes(visit.doctorId?.toString())
           );
         }
@@ -106,19 +131,19 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Get active conditions from hospital visits
-        const hospitalConditions = patient.medicalHistory?.filter((condition: any) => {
+        // Get active conditions from relevant visits
+        const relevantConditions = patient.medicalHistory?.filter((condition: any) => {
           if (!condition.doctorId) return false;
-          // Check if the condition was diagnosed by a doctor affiliated with this hospital
-          return hospitalVisits.some((visit: any) => 
+          // Check if the condition was diagnosed by a doctor in relevant visits
+          return relevantVisits.some((visit: any) => 
             visit.doctorId?.toString() === condition.doctorId.toString()
           );
         }) || [];
 
-        // Get current medications from hospital doctors
-        const hospitalMedications = patient.medications?.filter((med: any) => {
+        // Get current medications from relevant doctors
+        const relevantMedications = patient.medications?.filter((med: any) => {
           if (!med.prescribedBy) return false;
-          return hospitalVisits.some((visit: any) => 
+          return relevantVisits.some((visit: any) => 
             visit.doctorId?.toString() === med.prescribedBy.toString()
           ) && (!med.endDate || new Date(med.endDate) > new Date());
         }) || [];
@@ -141,15 +166,15 @@ export async function GET(request: NextRequest) {
             doctor: attendingDoctor,
           } : null,
           visitCount: filteredVisits.length,
-          totalHospitalVisits: hospitalVisits.length,
-          activeConditions: hospitalConditions.filter((condition: any) => 
+          totalHospitalVisits: relevantVisits.length,
+          activeConditions: relevantConditions.filter((condition: any) => 
             condition.status === 'active'
           ).map((condition: any) => ({
             condition: condition.condition,
             diagnosedDate: condition.diagnosedDate,
             status: condition.status,
           })),
-          currentMedications: hospitalMedications.slice(0, 3).map((med: any) => ({
+          currentMedications: relevantMedications.slice(0, 3).map((med: any) => ({
             name: med.name,
             dosage: med.dosage,
             frequency: med.frequency,
@@ -161,7 +186,7 @@ export async function GET(request: NextRequest) {
             date: vital.recordedDate,
           })),
           totalDocuments: patient.documents?.length || 0,
-          riskLevel: calculateRiskLevel(hospitalConditions, hospitalMedications, recentVitals),
+          riskLevel: calculateRiskLevel(relevantConditions, relevantMedications, recentVitals),
         };
       })
     );

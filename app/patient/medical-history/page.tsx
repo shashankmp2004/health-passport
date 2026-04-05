@@ -18,7 +18,7 @@ export default function MedicalHistory() {
   useEffect(() => {
     if (status === 'loading') return
 
-    if (!session || session.user.role !== 'patient') {
+    if (!session || (session.user.role !== 'patient' && session.user.role !== 'admin')) {
       router.push('/auth/patient/login')
       return
     }

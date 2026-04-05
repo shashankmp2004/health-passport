@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
     '/auth/doctor/signup',
     '/auth/hospital/login',
     '/auth/hospital/signup',
+    '/auth/admin/login',
     '/auth/patient/verify-otp',
     '/auth/hospital/verify-otp',
     '/api/patients/register',
@@ -47,6 +48,11 @@ export async function middleware(request: NextRequest) {
   // Role-based route protection
   const userRole = token.role
 
+  // Admin has unrestricted access to protected routes
+  if (userRole === 'admin') {
+    return NextResponse.next()
+  }
+
   // Patient routes
   if (pathname.startsWith('/patient') && userRole !== 'patient') {
     const homeUrl = new URL('/', request.url)
@@ -66,7 +72,8 @@ export async function middleware(request: NextRequest) {
       !pathname.includes('register') &&
       userRole !== 'patient' && 
       userRole !== 'doctor' && 
-      userRole !== 'hospital') {
+      userRole !== 'hospital' &&
+      userRole !== 'admin') {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -76,7 +83,8 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/doctors') && 
       !pathname.includes('register') &&
       userRole !== 'doctor' && 
-      userRole !== 'hospital') {
+      userRole !== 'hospital' &&
+      userRole !== 'admin') {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -85,7 +93,8 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/api/hospitals') && 
       !pathname.includes('register') &&
-      userRole !== 'hospital') {
+      userRole !== 'hospital' &&
+      userRole !== 'admin') {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }

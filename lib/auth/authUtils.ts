@@ -1,7 +1,7 @@
 import { signIn } from 'next-auth/react'
 
 export interface LoginFormData {
-  userType: 'patient' | 'doctor' | 'hospital'
+  userType: 'patient' | 'doctor' | 'hospital' | 'admin'
   healthPassportId?: string
   email?: string
   password: string
@@ -45,6 +45,17 @@ export async function handleLogin(formData: LoginFormData) {
         })
         break
 
+      case 'admin':
+        if (!formData.email) {
+          throw new Error('Email is required')
+        }
+        result = await signIn('admin', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false
+        })
+        break
+
       default:
         throw new Error('Invalid user type')
     }
@@ -73,6 +84,8 @@ function getRedirectUrl(userType: string): string {
     case 'doctor':
       return '/hospital/dashboard'
     case 'hospital':
+      return '/hospital/dashboard'
+    case 'admin':
       return '/hospital/dashboard'
     default:
       return '/'

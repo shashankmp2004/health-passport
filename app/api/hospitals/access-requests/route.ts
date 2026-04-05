@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital access required' },
         { status: 401 }
@@ -18,25 +18,31 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const parsedLimit = parseInt(searchParams.get('limit') || '20');
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 20;
 
     // Connect to database
     await dbConnect();
 
-    // Build query for hospital's requests
-    const query: any = { hospitalId: session.user.id };
+    // Build query for hospital's requests  
+    const hospitalId = session.user.role === 'admin' ? 'system-admin' : session.user.id;
+    const query: any = { hospitalId };
     if (status) {
       query.status = status;
     }
 
-    // Get access requests made by this hospital
+    // Get access requests made by this hospital/admin
     const requests = await PatientNotification.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
 
     // Transform requests for frontend
-    const transformedRequests = requests.map(request => ({
+    const transformedRequests = requests.map(request => {
+      const expiresAt = request.expiresAt ? new Date(request.expiresAt) : null;
+      const isExpired = expiresAt ? new Date() > expiresAt : false;
+
+      return {
       id: request._id,
       patientId: request.patientId,
       patientName: request.metadata?.patientName || 'Unknown Patient',
@@ -47,13 +53,14 @@ export async function GET(request: NextRequest) {
       createdAt: request.createdAt,
       respondedAt: request.respondedAt,
       expiresAt: request.expiresAt,
-      isExpired: new Date() > new Date(request.expiresAt),
+      isExpired,
       accessDuration: request.metadata?.accessDuration || 24
-    }));
+      };
+    });
 
     // Get counts by status
     const statusCounts = await PatientNotification.aggregate([
-      { $match: { hospitalId: session.user.id } },
+      { $match: { hospitalId } },
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
 
@@ -66,7 +73,9 @@ export async function GET(request: NextRequest) {
     const totalCount = statusCounts.reduce((sum, item) => sum + item.count, 0);
 
     console.log('Access requests debug:', {
-      hospitalId: session.user.id,
+      userId: session.user.id,
+      userRole: session.user.role,
+      hospitalId,
       statusCounts,
       calculatedCounts: counts,
       totalCount,
@@ -90,7 +99,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching access requests:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+      },
       { status: 500 }
     );
   }

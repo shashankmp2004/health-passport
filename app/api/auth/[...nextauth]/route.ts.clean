@@ -65,6 +65,7 @@ export const authOptions: AuthOptions = {
         try {
           if (process.env.NODE_ENV === 'development' && credentials.healthPassportId === 'HP12345') {
             if (credentials.password === 'test123' || credentials.password === 'password') {
+              console.log('Mock patient authentication successful');
               return {
                 id: 'mock_patient_1',
                 email: 'john.doe@email.com',

@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor' && session.user.role !== 'admin')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Hospital access required' },
+        { error: 'Unauthorized - Hospital, Doctor, or Admin access required' },
         { status: 401 }
       );
     }
@@ -21,24 +21,76 @@ export async function GET(request: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Get hospital data
-    const hospital = await Hospital.findById(session.user.id).select('-password');
-    if (!hospital) {
-      return NextResponse.json(
-        { error: 'Hospital not found' },
-        { status: 404 }
-      );
+    let hospital: any;
+    let patientsWithVisits: any[];
+    let affiliatedDoctors: any[];
+
+    // Handle admin users separately - they get access to all hospitals/data
+    if (session.user.role === 'admin') {
+      // For admin: get all hospitals, patients, and doctors
+      hospital = {
+        _id: 'admin-system',
+        facilityName: 'System Admin View',
+        facilityType: 'Administrative Portal',
+        email: session.user.email || 'admin@system.local',
+        phone: '+1-000-0000',
+        address: 'Global Network',
+        licenseNumber: 'ADMIN-001',
+        isVerified: true,
+        adminFirstName: 'System',
+        adminLastName: 'Administrator'
+      };
+
+      patientsWithVisits = await Patient.find({}).select('personalInfo visits medicalHistory medications vitals').limit(100);
+      affiliatedDoctors = await Doctor.find({}).select('personalInfo specialty isVerified').limit(100);
+    } else if (session.user.role === 'doctor') {
+      // Doctor dashboard flow
+      const doctor = await Doctor.findById(session.user.id).select('personalInfo specialty isVerified hospitalAffiliation');
+      if (!doctor) {
+        return NextResponse.json(
+          { error: 'Doctor not found' },
+          { status: 404 }
+        );
+      }
+
+      hospital = {
+        _id: `doctor-${doctor._id}`,
+        facilityName: doctor.hospitalAffiliation || `Dr. ${doctor.personalInfo.firstName} ${doctor.personalInfo.lastName}`,
+        facilityType: 'Doctor Portal',
+        email: doctor.personalInfo.email,
+        phone: doctor.personalInfo.phone || '',
+        address: 'N/A',
+        licenseNumber: doctor.doctorId || 'N/A',
+        isVerified: doctor.isVerified,
+        adminFirstName: doctor.personalInfo.firstName,
+        adminLastName: doctor.personalInfo.lastName,
+      };
+
+      patientsWithVisits = await Patient.find({
+        'visits.doctorId': session.user.id,
+      }).select('personalInfo visits medicalHistory medications vitals').limit(100);
+
+      affiliatedDoctors = [doctor];
+    } else {
+      // Regular hospital flow
+      hospital = await Hospital.findById(session.user.id).select('-password');
+      if (!hospital) {
+        return NextResponse.json(
+          { error: 'Hospital not found' },
+          { status: 404 }
+        );
+      }
+
+      // Get patients who have visits at this hospital
+      patientsWithVisits = await Patient.find({
+        'visits.hospitalId': session.user.id
+      }).select('personalInfo visits medicalHistory medications vitals');
+
+      // Get doctors affiliated with this hospital
+      affiliatedDoctors = await Doctor.find({
+        hospitalAffiliation: hospital.facilityName
+      }).select('personalInfo specialty isVerified');
     }
-
-    // Get patients who have visits at this hospital
-    const patientsWithVisits = await Patient.find({
-      'visits.hospitalId': session.user.id
-    }).select('personalInfo visits medicalHistory medications vitals');
-
-    // Get doctors affiliated with this hospital
-    const affiliatedDoctors = await Doctor.find({
-      hospitalAffiliation: hospital.facilityName
-    }).select('personalInfo specialty isVerified');
 
     // Calculate date ranges
     const today = new Date();
@@ -55,9 +107,13 @@ export async function GET(request: NextRequest) {
     let monthlyVisits = 0;
     const departmentStats: { [key: string]: number } = {};
 
+    const isAdmin = session.user.role === 'admin';
+    const isDoctor = session.user.role === 'doctor';
+
     patientsWithVisits.forEach(patient => {
       patient.visits?.forEach((visit: any) => {
-        if (visit.hospitalId.toString() === session.user.id) {
+        // Admin sees all visits, doctor sees their own visits, hospital sees only hospital visits
+        if (isAdmin || (isDoctor && visit.doctorId?.toString() === session.user.id) || (!isDoctor && visit.hospitalId?.toString() === session.user.id)) {
           const visitDate = new Date(visit.date);
           
           if (visitDate >= today && visitDate < tomorrow) {
@@ -81,7 +137,7 @@ export async function GET(request: NextRequest) {
     const recentPatients = patientsWithVisits
       .map(patient => {
         const hospitalVisits = patient.visits?.filter((visit: any) => 
-          visit.hospitalId.toString() === session.user.id
+          isAdmin || (isDoctor && visit.doctorId?.toString() === session.user.id) || (!isDoctor && visit.hospitalId?.toString() === session.user.id)
         ) || [];
         
         const lastVisit = hospitalVisits.sort((a: any, b: any) => 

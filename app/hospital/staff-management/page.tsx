@@ -1,14 +1,26 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -16,11 +28,108 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Plus, Search, Filter, MoreHorizontal, Phone, Mail, Clock, UserCheck, UserX, Edit } from "lucide-react"
+} from "@/components/ui/dialog";
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Phone,
+  Mail,
+  Clock,
+  UserCheck,
+  UserX,
+  Edit,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function StaffManagement() {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: session } = useSession();
+
+  const [adminStaff, setAdminStaff] = useState<any[]>([]);
+  const [adminStats, setAdminStats] = useState<any>(null);
+  const [adminFilters, setAdminFilters] = useState<any>(null);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [specialtyFilter, setSpecialtyFilter] = useState("all");
+
+  const isAdmin = session?.user?.role === "admin";
+
+  const fetchAdminStaff = async () => {
+    if (!isAdmin) return;
+
+    try {
+      setAdminLoading(true);
+      setAdminError(null);
+
+      const params = new URLSearchParams();
+      params.set("limit", "100");
+
+      if (searchTerm.trim()) {
+        params.set("search", searchTerm.trim());
+      }
+
+      if (statusFilter !== "all") {
+        params.set("status", statusFilter);
+      }
+
+      if (specialtyFilter !== "all") {
+        params.set("specialty", specialtyFilter);
+      }
+
+      const response = await fetch(`/api/hospitals/staff?${params.toString()}`);
+
+      if (!response.ok) {
+        const rawBody = await response.text();
+        let errorMessage = `Failed to fetch admin staff (${response.status})`;
+
+        try {
+          const parsed = rawBody ? JSON.parse(rawBody) : {};
+          if (parsed.error) {
+            errorMessage = parsed.error;
+          }
+        } catch {
+          if (rawBody) {
+            errorMessage = rawBody;
+          }
+        }
+
+        setAdminError(errorMessage);
+        setAdminStaff([]);
+        setAdminStats(null);
+        setAdminFilters(null);
+        return;
+      }
+
+      const result = await response.json();
+      setAdminStaff(result?.data?.staff || []);
+      setAdminStats(result?.data?.statistics || null);
+      setAdminFilters(result?.data?.filters || null);
+    } catch (error) {
+      console.warn("Admin staff fetch failed:", error);
+      setAdminError("Unable to load admin staff data");
+      setAdminStaff([]);
+      setAdminStats(null);
+      setAdminFilters(null);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminStaff();
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timeout = setTimeout(() => {
+      fetchAdminStaff();
+    }, 250);
+
+    return () => clearTimeout(timeout);
+  }, [isAdmin, searchTerm, statusFilter, specialtyFilter]);
 
   const staff = [
     {
@@ -113,7 +222,7 @@ export default function StaffManagement() {
       schedule: "Mon-Thu 9AM-5PM",
       lastLogin: "2024-01-05 02:15 PM",
     },
-  ]
+  ];
 
   const departments = [
     { name: "Cardiology", staff: 12, active: 11, onLeave: 1 },
@@ -122,39 +231,39 @@ export default function StaffManagement() {
     { name: "Orthopedics", staff: 8, active: 7, onLeave: 1 },
     { name: "Pediatrics", staff: 10, active: 8, onLeave: 2 },
     { name: "General Ward", staff: 30, active: 28, onLeave: 2 },
-  ]
+  ];
 
   const shifts = [
     { name: "Day Shift", time: "6AM - 6PM", staff: 45, coverage: 95 },
     { name: "Night Shift", time: "6PM - 6AM", staff: 32, coverage: 85 },
     { name: "Weekend", time: "Sat-Sun", staff: 28, coverage: 90 },
-  ]
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "on-leave":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "inactive":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "active":
-        return <UserCheck className="w-4 h-4" />
+        return <UserCheck className="w-4 h-4" />;
       case "on-leave":
-        return <Clock className="w-4 h-4" />
+        return <Clock className="w-4 h-4" />;
       case "inactive":
-        return <UserX className="w-4 h-4" />
+        return <UserX className="w-4 h-4" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const filteredStaff = staff.filter(
     (member) =>
@@ -162,7 +271,169 @@ export default function StaffManagement() {
       member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  );
+
+  if (isAdmin) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Admin Staff Management</h1>
+            <p className="text-gray-600">
+              System-wide doctor and staff oversight
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={fetchAdminStaff}
+            disabled={adminLoading}
+          >
+            Refresh
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-gray-600">Total Doctors</p>
+              <p className="text-2xl font-bold">
+                {adminStats?.totalDoctors || 0}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-gray-600">Verified</p>
+              <p className="text-2xl font-bold text-green-600">
+                {adminStats?.verifiedDoctors || 0}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-gray-600">Pending Verification</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {adminStats?.pendingVerification || 0}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-gray-600">Specialties</p>
+              <p className="text-2xl font-bold">
+                {adminStats?.specialties || 0}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  className="pl-10"
+                  placeholder="Search doctors by name, email, license"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={specialtyFilter}
+                onValueChange={setSpecialtyFilter}
+              >
+                <SelectTrigger className="w-full md:w-56">
+                  <SelectValue placeholder="Specialty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Specialties</SelectItem>
+                  {(adminFilters?.availableSpecialties || []).map(
+                    (specialty: string) => (
+                      <SelectItem key={specialty} value={specialty}>
+                        {specialty}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Staff Directory</CardTitle>
+            <CardDescription>Live data for admin users</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {adminError && (
+              <div className="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">
+                {adminError}
+              </div>
+            )}
+
+            {adminLoading ? (
+              <div className="text-sm text-gray-500">Loading staff...</div>
+            ) : adminStaff.length === 0 ? (
+              <div className="text-sm text-gray-500">
+                No staff found for current filters.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {adminStaff.map((member) => (
+                  <div
+                    key={member.id}
+                    className="p-4 border rounded-lg bg-white"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold">{member.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          {member.specialty || "General"}
+                        </p>
+                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          License: {member.licenseNumber || "N/A"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <Badge
+                          className={
+                            member.isVerified
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }
+                        >
+                          {member.isVerified ? "Verified" : "Pending"}
+                        </Badge>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Patients: {member.statistics?.totalPatients || 0}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Visits: {member.statistics?.totalVisits || 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -170,7 +441,9 @@ export default function StaffManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Staff Management</h1>
-          <p className="text-gray-600">Manage hospital staff, schedules, and departments</p>
+          <p className="text-gray-600">
+            Manage hospital staff, schedules, and departments
+          </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -182,7 +455,9 @@ export default function StaffManagement() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Staff Member</DialogTitle>
-              <DialogDescription>Enter details for the new staff member</DialogDescription>
+              <DialogDescription>
+                Enter details for the new staff member
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -197,7 +472,11 @@ export default function StaffManagement() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Enter email address" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email address"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
@@ -234,7 +513,9 @@ export default function StaffManagement() {
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline">Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700">Add Staff</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  Add Staff
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -304,7 +585,9 @@ export default function StaffManagement() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={member.avatar || "/placeholder.svg"} />
+                        <AvatarImage
+                          src={member.avatar || "/placeholder.svg"}
+                        />
                         <AvatarFallback>
                           {member.name
                             .split(" ")
@@ -317,15 +600,19 @@ export default function StaffManagement() {
                           <h3 className="font-semibold">{member.name}</h3>
                           <Badge className={getStatusColor(member.status)}>
                             {getStatusIcon(member.status)}
-                            <span className="ml-1 capitalize">{member.status.replace("-", " ")}</span>
+                            <span className="ml-1 capitalize">
+                              {member.status.replace("-", " ")}
+                            </span>
                           </Badge>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">Role:</span> {member.role}
+                            <span className="font-medium">Role:</span>{" "}
+                            {member.role}
                           </div>
                           <div>
-                            <span className="font-medium">Department:</span> {member.department}
+                            <span className="font-medium">Department:</span>{" "}
+                            {member.department}
                           </div>
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 mr-1" />
@@ -338,13 +625,16 @@ export default function StaffManagement() {
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
                           <div>
-                            <span className="font-medium">Experience:</span> {member.experience}
+                            <span className="font-medium">Experience:</span>{" "}
+                            {member.experience}
                           </div>
                           <div>
-                            <span className="font-medium">Shift:</span> {member.shift}
+                            <span className="font-medium">Shift:</span>{" "}
+                            {member.shift}
                           </div>
                           <div>
-                            <span className="font-medium">Last Login:</span> {member.lastLogin}
+                            <span className="font-medium">Last Login:</span>{" "}
+                            {member.lastLogin}
                           </div>
                         </div>
                       </div>
@@ -372,28 +662,40 @@ export default function StaffManagement() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{dept.name}</span>
-                    <Badge className="bg-blue-100 text-blue-800">{dept.staff} staff</Badge>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {dept.staff} staff
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Active Staff</span>
-                      <span className="font-semibold text-green-600">{dept.active}</span>
+                      <span className="text-sm text-gray-600">
+                        Active Staff
+                      </span>
+                      <span className="font-semibold text-green-600">
+                        {dept.active}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">On Leave</span>
-                      <span className="font-semibold text-yellow-600">{dept.onLeave}</span>
+                      <span className="font-semibold text-yellow-600">
+                        {dept.onLeave}
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full"
-                        style={{ width: `${(dept.active / dept.staff) * 100}%` }}
+                        style={{
+                          width: `${(dept.active / dept.staff) * 100}%`,
+                        }}
                       />
                     </div>
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Staffing Level</span>
-                      <span>{Math.round((dept.active / dept.staff) * 100)}%</span>
+                      <span>
+                        {Math.round((dept.active / dept.staff) * 100)}%
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -471,7 +773,9 @@ export default function StaffManagement() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Department Distribution</CardTitle>
+                <CardTitle className="text-lg">
+                  Department Distribution
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -505,16 +809,28 @@ export default function StaffManagement() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                  >
                     Export Staff List
                   </Button>
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                  >
                     Generate Schedule
                   </Button>
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                  >
                     Staff Performance
                   </Button>
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                  >
                     Attendance Report
                   </Button>
                 </div>
@@ -524,5 +840,5 @@ export default function StaffManagement() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

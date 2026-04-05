@@ -12,7 +12,7 @@ export async function GET(
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital or Doctor access required' },
         { status: 401 }
@@ -91,7 +91,7 @@ export async function PUT(
     
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital or Doctor access required' },
         { status: 401 }
@@ -232,7 +232,7 @@ export async function DELETE(
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor')) {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'doctor' && session.user.role !== 'admin')) {
       return NextResponse.json(
         { error: 'Unauthorized - Hospital or Doctor access required' },
         { status: 401 }

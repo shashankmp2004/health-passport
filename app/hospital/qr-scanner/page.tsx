@@ -25,7 +25,7 @@ export default function QRScanner() {
   useEffect(() => {
     if (status === 'loading') return
 
-    if (!session || session.user.role !== 'hospital') {
+    if (!session || (session.user.role !== 'hospital' && session.user.role !== 'admin')) {
       router.push('/auth/hospital/login')
       return
     }

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       file.name,
       type,
       session.user.id,
-      session.user.role as 'patient' | 'doctor' | 'hospital'
+      session.user.role as 'patient' | 'doctor' | 'hospital' | 'admin'
     );
 
     if (!uploadResult.success || !uploadResult.data) {

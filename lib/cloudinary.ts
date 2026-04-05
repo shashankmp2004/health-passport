@@ -100,7 +100,7 @@ export const getUploadOptions = (fileType: string) => {
 export const generateSignedUploadUrl = async (
   fileType: string,
   userId: string,
-  userRole: 'patient' | 'doctor' | 'hospital'
+  userRole: 'patient' | 'doctor' | 'hospital' | 'admin'
 ) => {
   const options = getUploadOptions(fileType);
   
@@ -131,7 +131,7 @@ export const uploadFile = async (
   fileName: string,
   fileType: string,
   userId: string,
-  userRole: 'patient' | 'doctor' | 'hospital'
+  userRole: 'patient' | 'doctor' | 'hospital' | 'admin'
 ) => {
   const options = getUploadOptions(fileType);
   

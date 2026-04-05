@@ -63,7 +63,7 @@ export async function POST(
     }
 
     // Check if user owns the document
-    if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+    if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
       return NextResponse.json(
         { error: 'Access denied - Only document owners can share files' },
         { status: 403 }
@@ -163,7 +163,7 @@ export async function GET(
     }
 
     // Check permissions
-    if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+    if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
       return NextResponse.json(
         { error: 'Access denied - Only document owners can view sharing information' },
         { status: 403 }
@@ -257,7 +257,7 @@ export async function DELETE(
     }
 
     // Check permissions
-    if (session.user.role !== 'patient' || session.user.id !== patient._id.toString()) {
+    if (session.user.role !== 'admin' && (session.user.role !== 'patient' || session.user.id !== patient._id.toString())) {
       return NextResponse.json(
         { error: 'Access denied - Only document owners can revoke sharing' },
         { status: 403 }
