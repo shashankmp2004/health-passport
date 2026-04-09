@@ -24,18 +24,21 @@ export const authOptions: AuthOptions = {
           return null
         }
 
-        const adminEmail = process.env.ADMIN_EMAIL
-        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
+        const adminEmail = process.env.ADMIN_EMAIL?.trim()
+        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH?.trim()
+        const adminPassword = process.env.ADMIN_PASSWORD?.trim()
 
-        if (!adminEmail || !adminPasswordHash) {
+        if (!adminEmail || (!adminPasswordHash && !adminPassword)) {
           return null
         }
 
-        if (credentials.email !== adminEmail) {
+        if (credentials.email.trim() !== adminEmail) {
           return null
         }
 
-        const isValid = await verifyPassword(credentials.password, adminPasswordHash)
+        const isValid = adminPasswordHash
+          ? await verifyPassword(credentials.password, adminPasswordHash)
+          : credentials.password === adminPassword
         if (!isValid) {
           return null
         }
