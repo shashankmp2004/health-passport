@@ -41,9 +41,6 @@ const DoctorSchema = new Schema({
 })
 
 // Indexes for better performance
-DoctorSchema.index({ doctorId: 1 })
-DoctorSchema.index({ 'personalInfo.email': 1 })
-DoctorSchema.index({ 'personalInfo.licenseNumber': 1 })
 DoctorSchema.index({ 'personalInfo.specialty': 1 })
 
 export default mongoose.models.Doctor || mongoose.model<IDoctor>('Doctor', DoctorSchema)

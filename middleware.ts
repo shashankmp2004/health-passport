@@ -25,8 +25,7 @@ export async function middleware(request: NextRequest) {
     '/api/patients/register',
     '/api/doctors/register',
     '/api/hospitals/register',
-    '/api/auth',
-    '/api/test'
+    '/api/auth'
   ]
 
   // Check if the current path is a public route

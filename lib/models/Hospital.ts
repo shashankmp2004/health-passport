@@ -52,9 +52,6 @@ const HospitalSchema = new Schema({
 })
 
 // Indexes for better performance
-HospitalSchema.index({ hospitalId: 1 })
-HospitalSchema.index({ 'facilityInfo.email': 1 })
-HospitalSchema.index({ 'facilityInfo.licenseNumber': 1 })
 HospitalSchema.index({ 'facilityInfo.type': 1 })
 
 export default mongoose.models.Hospital || mongoose.model<IHospital>('Hospital', HospitalSchema)

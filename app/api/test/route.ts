@@ -4,6 +4,13 @@ import Patient from '@/lib/models/Patient'
 
 export async function GET(request: NextRequest) {
   try {
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json(
+        { error: 'This endpoint is only available in development' },
+        { status: 403 }
+      )
+    }
+
     // Connect to database
     await dbConnect()
 
