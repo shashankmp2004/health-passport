@@ -3,6 +3,7 @@
 import type React from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { HospitalSidebar } from "@/components/hospital-sidebar"
+import { AIChatbot } from "@/components/ai-chatbot"
 
 export default function HospitalLayout({
   children,
@@ -24,6 +25,7 @@ export default function HospitalLayout({
         <div className="flex-1 w-full bg-grid-pattern bg-[length:32px_32px]">
            {children}
         </div>
+        <AIChatbot portalLabel="Provider/Admin Portal" />
       </main>
     </SidebarProvider>
   )

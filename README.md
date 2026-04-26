@@ -237,6 +237,21 @@ health-passport/
 2. Search by Health Passport ID, name, or phone
 3. View patient details
 
+## Mock Data Seeding
+
+- Seed mock users (upsert mode):
+  - `npm run seed:mock`
+- Seed after clearing current `patients`, `doctors`, and `hospitals` collections:
+  - `npm run seed:mock:reset`
+
+Notes:
+- The script uses `MONGODB_URI` from `.env.local` (or `.env`).
+- It creates complete mock data for all required model fields:
+  - Hospitals: `hospitalId`, `facilityInfo`, `adminInfo`, `staff`, `verified`, `password`, `role`
+  - Doctors: `doctorId`, `personalInfo`, `credentials`, `password`, `role`
+  - Patients: `healthPassportId`, `personalInfo`, `medicalHistory`, `medications`, `vitals`, `visits`, `documents`, `qrCode`, `password`
+- Default seeded password for all users: `Password@123`
+
 ## 🚀 Production Deployment
 
 ### Environment Variables
@@ -244,8 +259,24 @@ health-passport/
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/health-passport
 NEXTAUTH_SECRET=your-super-secure-random-secret-key
 NEXTAUTH_URL=https://your-domain.com
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-1.5-flash
 NODE_ENV=production
 ```
+
+## AI Assistant Integration
+
+- Gemini is integrated through a server route at `app/api/ai/chat/route.ts`.
+- Role-aware context is built in `lib/ai/context.ts`:
+  - Patient: own visits, medications, lab summaries, and documents.
+  - Hospital/Doctor: scoped patient-record operations context.
+  - Admin: global operational metrics and counts.
+- Gemini calls are handled in `lib/ai/gemini.ts`.
+- Chat UI is mounted in portal layouts via `components/ai-chatbot.tsx`.
+- Required env vars:
+  - `GEMINI_API_KEY`
+  - `GEMINI_MODEL` (optional; defaults to `gemini-1.5-flash`)
+- The assistant is informational and should not be treated as clinical diagnosis.
 
 ### Security Considerations
 - Use strong, unique secrets for production

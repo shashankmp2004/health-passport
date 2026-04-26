@@ -3,6 +3,7 @@
 import type React from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { PatientSidebar } from "@/components/patient-sidebar"
+import { AIChatbot } from "@/components/ai-chatbot"
 
 export default function PatientLayout({
   children,
@@ -20,6 +21,7 @@ export default function PatientLayout({
         <div className="flex-1 w-full bg-grid-pattern bg-[length:32px_32px]">
            {children}
         </div>
+        <AIChatbot portalLabel="Patient Portal" />
       </main>
     </SidebarProvider>
   )
