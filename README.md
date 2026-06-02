@@ -2,7 +2,7 @@
 
 A comprehensive digital health passport system with blockchain-grade security, QR code integration, and multi-role authentication for patients, doctors, and hospitals.
 
-## 🚀 Features Completed
+##  Features Completed
 
 ### Authentication System
 - ✅ **Patient Registration & Login** - Complete with Health Passport ID generation
@@ -34,7 +34,7 @@ A comprehensive digital health passport system with blockchain-grade security, Q
 - ✅ **QR Code APIs** - Generate and scan QR codes
 - ✅ **Database Models** - Complete MongoDB schemas for all entities
 
-## 🛠 Technology Stack
+##  Technology Stack
 
 - **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, NextAuth.js
@@ -44,7 +44,7 @@ A comprehensive digital health passport system with blockchain-grade security, Q
 - **QR Code**: qrcode.react
 - **Styling**: Tailwind CSS
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 health-passport/
@@ -71,7 +71,7 @@ health-passport/
 └── types/                     # TypeScript type definitions
 ```
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -116,7 +116,7 @@ health-passport/
      - Hospital: `/auth/hospital/login` 
      - Doctor: `/auth/doctor/login`
 
-## 🔐 User Flows
+##  User Flows
 
 ### Patient Journey
 1. **Registration**: `/auth/patient/signup`
@@ -170,7 +170,7 @@ health-passport/
    - Enter email and password
    - Access hospital portal (doctors use hospital system)
 
-## 📱 QR Code System
+##  QR Code System
 
 ### QR Code Generation
 - Each patient gets a unique QR code containing their Health Passport ID
@@ -186,7 +186,7 @@ health-passport/
   - Allergies and conditions
   - Emergency contact information
 
-## 🔒 Security Features
+##  Security Features
 
 - **Role-based Authentication**: Separate login systems for patients, doctors, hospitals
 - **Session Management**: Secure JWT tokens with NextAuth.js
@@ -194,7 +194,7 @@ health-passport/
 - **Access Control**: Users can only access their own data and authorized information
 - **Audit Logging**: Track access to patient data for compliance
 
-## 🎯 API Endpoints
+##  API Endpoints
 
 ### Authentication
 - `POST /api/auth/[...nextauth]` - NextAuth.js authentication handler
@@ -218,7 +218,7 @@ health-passport/
 - `POST /api/qr/scan` - Scan QR code and get patient data
 - `POST /api/qr/verify` - Verify QR code validity
 
-## 🧪 Testing the System
+##  Testing the System
 
 ### Test Patient Registration
 1. Go to `/auth/patient/signup`
@@ -252,7 +252,7 @@ Notes:
   - Patients: `healthPassportId`, `personalInfo`, `medicalHistory`, `medications`, `vitals`, `visits`, `documents`, `qrCode`, `password`
 - Default seeded password for all users: `Password@123`
 
-## 🚀 Production Deployment
+##  Production Deployment
 
 ### Environment Variables
 ```env
@@ -332,23 +332,10 @@ NODE_ENV=production
 }
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 
 
 
-## 🆘 Support
-
-For issues and questions:
-1. Check existing issues in the repository
-2. Create a new issue with detailed description
-3. Include steps to reproduce any bugs
 
 ---
 
